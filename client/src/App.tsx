@@ -21,6 +21,7 @@ import WhatsApp from "./pages/merchant/WhatsApp";
 import AdminDashboard from "./pages/admin/Dashboard";
 import MerchantsManagement from "./pages/admin/Merchants";
 import MerchantDetails from "./pages/admin/MerchantDetails";
+import AdminSettings from "./pages/admin/Settings";
 
 function Router() {
   return (
@@ -92,6 +93,12 @@ function Router() {
       <Route path="/admin/merchants/:id">
         <DashboardLayout>
           <MerchantDetails />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/settings">
+        <DashboardLayout>
+          <AdminSettings />
         </DashboardLayout>
       </Route>
       
