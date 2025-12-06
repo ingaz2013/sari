@@ -13,6 +13,7 @@ import Campaigns from "./pages/merchant/Campaigns";
 import NewCampaign from "./pages/merchant/NewCampaign";
 import Products from "./pages/merchant/Products";
 import UploadProducts from "./pages/merchant/UploadProducts";
+import Conversations from "./pages/merchant/Conversations";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -52,6 +53,12 @@ function Router() {
       <Route path="/merchant/products/upload">
         <DashboardLayout>
           <UploadProducts />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/conversations">
+        <DashboardLayout>
+          <Conversations />
         </DashboardLayout>
       </Route>
       
