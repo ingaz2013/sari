@@ -21,15 +21,35 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { 
+  LayoutDashboard, 
+  LogOut, 
+  PanelLeft, 
+  Users, 
+  MessageSquare, 
+  Package, 
+  Megaphone,
+  Settings,
+  ShieldCheck
+} from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+// Menu items based on user role
+const getMerchantMenuItems = () => [
+  { icon: LayoutDashboard, label: "لوحة التحكم", path: "/merchant/dashboard" },
+  { icon: Megaphone, label: "الحملات", path: "/merchant/campaigns" },
+  { icon: Package, label: "المنتجات", path: "/merchant/products" },
+  { icon: MessageSquare, label: "المحادثات", path: "/merchant/conversations" },
+];
+
+const getAdminMenuItems = () => [
+  { icon: LayoutDashboard, label: "لوحة التحكم", path: "/admin/dashboard" },
+  { icon: Users, label: "التجار", path: "/admin/merchants" },
+  { icon: Megaphone, label: "الحملات", path: "/admin/campaigns" },
+  { icon: Settings, label: "الإعدادات", path: "/admin/settings" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -112,8 +132,11 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
+  
+  // Get menu items based on user role
+  const menuItems = user?.role === 'admin' ? getAdminMenuItems() : getMerchantMenuItems();
+  const activeMenuItem = menuItems.find(item => item.path === location);
 
   useEffect(() => {
     if (isCollapsed) {
@@ -171,7 +194,7 @@ function DashboardLayoutContent({
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                    {user?.role === 'admin' ? 'لوحة المدير' : 'لوحة التاجر'}
                   </span>
                 </div>
               ) : null}
@@ -180,7 +203,7 @@ function DashboardLayoutContent({
 
           <SidebarContent className="gap-0">
             <SidebarMenu className="px-2 py-1">
-              {menuItems.map(item => {
+              {menuItems.map((item) => {
                 const isActive = location === item.path;
                 return (
                   <SidebarMenuItem key={item.path}>
