@@ -12,6 +12,9 @@ import MerchantDashboard from "./pages/merchant/Dashboard";
 import Campaigns from "./pages/merchant/Campaigns";
 import NewCampaign from "./pages/merchant/NewCampaign";
 
+// Admin pages
+import AdminDashboard from "./pages/admin/Dashboard";
+
 function Router() {
   return (
     <Switch>
@@ -33,6 +36,13 @@ function Router() {
       <Route path="/merchant/campaigns/new">
         <DashboardLayout>
           <NewCampaign />
+        </DashboardLayout>
+      </Route>
+      
+      {/* Admin Routes */}
+      <Route path="/admin/dashboard">
+        <DashboardLayout>
+          <AdminDashboard />
         </DashboardLayout>
       </Route>
       
