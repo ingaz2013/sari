@@ -17,6 +17,7 @@ import UploadProducts from "./pages/merchant/UploadProducts";
 import Conversations from "./pages/merchant/Conversations";
 import WhatsApp from "./pages/merchant/WhatsApp";
 import MerchantSettings from "./pages/merchant/Settings";
+import Reports from "./pages/merchant/Reports";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -82,6 +83,12 @@ function Router() {
       <Route path="/merchant/settings">
         <DashboardLayout>
           <MerchantSettings />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/reports">
+        <DashboardLayout>
+          <Reports />
         </DashboardLayout>
       </Route>
       
