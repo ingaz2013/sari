@@ -51,6 +51,17 @@ export const appRouter = router({
         success: true,
       } as const;
     }),
+    
+    // Update user profile
+    updateProfile: protectedProcedure
+      .input(z.object({
+        name: z.string().optional(),
+        email: z.string().email().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await db.updateUser(ctx.user.id, input);
+        return { success: true };
+      }),
   }),
 
   // Merchant Management

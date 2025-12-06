@@ -46,6 +46,7 @@ const getMerchantMenuItems = () => [
   { icon: Package, label: "المنتجات", path: "/merchant/products" },
   { icon: MessageSquare, label: "المحادثات", path: "/merchant/conversations" },
   { icon: Smartphone, label: "ربط الواتساب", path: "/merchant/whatsapp" },
+  { icon: Settings, label: "الإعدادات", path: "/merchant/settings" },
 ];
 
 const getAdminMenuItems = () => [

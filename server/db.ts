@@ -142,6 +142,14 @@ export async function getUserById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function updateUser(id: number | string, data: Partial<InsertUser>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const userId = typeof id === 'string' ? parseInt(id) : id;
+  await db.update(users).set(data).where(eq(users.id, userId));
+}
+
 // ============================================
 // Merchant Management
 // ============================================
