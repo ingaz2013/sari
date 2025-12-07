@@ -953,3 +953,23 @@
 - [x] إضافة بطاقة تحذير للـ instances القريبة من الانتهاء
 - [x] كتابة الاختبارات
 - [x] اختبار النظام الكامل
+
+
+## نظام One-Click WhatsApp Setup
+- [x] إضافة جدول whatsapp_requests في schema.ts
+- [x] إضافة دوال قاعدة البيانات في db.ts (10 دوال)
+- [x] إضافة APIs في routers.ts (8 APIs)
+- [x] إنشاء صفحة /admin/whatsapp-requests
+- [x] عرض جميع الطلبات (pending, approved, rejected, completed)
+- [x] نموذج إدخال بيانات Green API (instanceId, token, apiUrl)
+- [x] زر الموافقة/الرفض
+- [x] إنشاء صفحة /merchant/whatsapp-setup
+- [x] One-Click Setup Button
+- [x] QR Code Modal مع تحديث تلقائي
+- [x] Real-time Connection Detection (polling كل 3 ثواني)
+- [x] Setup Wizard بتصميم احترافي
+- [x] Auto Webhook Configuration
+- [x] إضافة المسارات في App.tsx
+- [x] تحديث DashboardLayout
+- [x] كتابة الاختبارات (5 اختبارات ناجحة)
+- [x] اختبار النظام الكامل

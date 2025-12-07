@@ -1,4 +1,6 @@
-import { eq, and, desc, gte, lte, lt, gt, sql } from "drizzle-orm";
+import {
+  eq, and, desc, gte, lte, lt, gt, sql
+} from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertUser,
@@ -85,8 +87,11 @@ import {
   OccasionCampaign,
   InsertOccasionCampaign,
   whatsappInstances,
+  whatsappRequests,
   WhatsAppInstance,
   InsertWhatsAppInstance,
+  WhatsAppRequest,
+  InsertWhatsAppRequest,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2149,4 +2154,119 @@ export async function getExpiringWhatsAppInstances(): Promise<{
   }
 
   return { expiring7Days, expiring3Days, expiring1Day, expired };
+}
+
+
+// ============================================
+// WhatsApp Requests Functions
+// ============================================
+
+export async function createWhatsAppRequest(data: InsertWhatsAppRequest) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const result = await db.insert(whatsappRequests).values(data);
+  const insertId = Number(result[0].insertId);
+  const [request] = await db.select().from(whatsappRequests).where(eq(whatsappRequests.id, insertId));
+  return request;
+}
+
+export async function getWhatsAppRequestById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const [request] = await db.select().from(whatsappRequests).where(eq(whatsappRequests.id, id));
+  return request;
+}
+
+export async function getWhatsAppRequestsByMerchantId(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  return db.select().from(whatsappRequests)
+    .where(eq(whatsappRequests.merchantId, merchantId))
+    .orderBy(desc(whatsappRequests.createdAt));
+}
+
+export async function getAllWhatsAppRequests() {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  return db.select().from(whatsappRequests)
+    .orderBy(desc(whatsappRequests.createdAt));
+}
+
+export async function getPendingWhatsAppRequests() {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  return db.select().from(whatsappRequests)
+    .where(eq(whatsappRequests.status, 'pending'))
+    .orderBy(desc(whatsappRequests.createdAt));
+}
+
+export async function updateWhatsAppRequest(id: number, data: Partial<InsertWhatsAppRequest>) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.update(whatsappRequests)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(whatsappRequests.id, id));
+  return getWhatsAppRequestById(id);
+}
+
+export async function approveWhatsAppRequest(
+  id: number,
+  instanceId: string,
+  token: string,
+  apiUrl: string,
+  reviewedBy: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.update(whatsappRequests)
+    .set({
+      status: 'approved',
+      instanceId,
+      token,
+      apiUrl,
+      reviewedBy,
+      reviewedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(whatsappRequests.id, id));
+  return getWhatsAppRequestById(id);
+}
+
+export async function rejectWhatsAppRequest(
+  id: number,
+  rejectionReason: string,
+  reviewedBy: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.update(whatsappRequests)
+    .set({
+      status: 'rejected',
+      rejectionReason,
+      reviewedBy,
+      reviewedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(whatsappRequests.id, id));
+  return getWhatsAppRequestById(id);
+}
+
+export async function completeWhatsAppRequest(id: number, phoneNumber: string) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.update(whatsappRequests)
+    .set({
+      status: 'completed',
+      phoneNumber,
+      connectedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(whatsappRequests.id, id));
+  return getWhatsAppRequestById(id);
+}
+
+export async function deleteWhatsAppRequest(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.delete(whatsappRequests).where(eq(whatsappRequests.id, id));
 }

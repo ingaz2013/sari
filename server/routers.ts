@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from '@trpc/server';
+import type { WhatsAppRequest } from '../drizzle/schema';
 import * as db from './db';
 import bcrypt from 'bcryptjs';
 import { sdk } from './_core/sdk';
@@ -2352,6 +2353,240 @@ export const appRouter = router({
           expiring1Day: merchantExpiring1Day,
           expired: merchantExpired,
         };
+      }),
+  }),
+
+  // ============================================
+  // WhatsApp Requests Router
+  // ============================================
+  whatsappRequests: router({
+    // Create new request (merchant)
+    create: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          phoneNumber: z.string().optional(),
+          businessName: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        // Check if there's already a pending request
+        const existingRequests = await db.getWhatsAppRequestsByMerchantId(input.merchantId);
+        const pendingRequest = existingRequests.find((r: WhatsAppRequest) => r.status === 'pending');
+        if (pendingRequest) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'You already have a pending request' });
+        }
+
+        const request = await db.createWhatsAppRequest({
+          merchantId: input.merchantId,
+          phoneNumber: input.phoneNumber,
+          businessName: input.businessName || merchant.businessName,
+          status: 'pending',
+        });
+
+        return request;
+      }),
+
+    // Get all requests (admin only)
+    listAll: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+
+        return db.getAllWhatsAppRequests();
+      }),
+
+    // Get pending requests (admin only)
+    listPending: protectedProcedure
+      .query(async ({ ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+
+        return db.getPendingWhatsAppRequests();
+      }),
+
+    // Get merchant's requests
+    listMine: protectedProcedure
+      .input(z.object({ merchantId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        return db.getWhatsAppRequestsByMerchantId(input.merchantId);
+      }),
+
+    // Approve request and add instance details (admin only)
+    approve: protectedProcedure
+      .input(
+        z.object({
+          requestId: z.number(),
+          instanceId: z.string(),
+          token: z.string(),
+          apiUrl: z.string().url().default('https://api.green-api.com'),
+          adminNotes: z.string().optional(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+
+        const request = await db.approveWhatsAppRequest(
+          input.requestId,
+          input.instanceId,
+          input.token,
+          input.apiUrl,
+          ctx.user.id
+        );
+
+        if (input.adminNotes) {
+          await db.updateWhatsAppRequest(input.requestId, { adminNotes: input.adminNotes });
+        }
+
+        return request;
+      }),
+
+    // Reject request (admin only)
+    reject: protectedProcedure
+      .input(
+        z.object({
+          requestId: z.number(),
+          rejectionReason: z.string(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin access required' });
+        }
+
+        return db.rejectWhatsAppRequest(
+          input.requestId,
+          input.rejectionReason,
+          ctx.user.id
+        );
+      }),
+
+    // Get QR code for approved request (merchant)
+    getQRCode: protectedProcedure
+      .input(z.object({ requestId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const request = await db.getWhatsAppRequestById(input.requestId);
+        if (!request) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Request not found' });
+        }
+
+        const merchant = await db.getMerchantById(request.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        if (request.status !== 'approved') {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Request not approved yet' });
+        }
+
+        if (!request.instanceId || !request.token) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Instance details not set' });
+        }
+
+        // Get QR code from Green API
+        try {
+          const baseUrl = request.apiUrl || 'https://api.green-api.com';
+          const url = `${baseUrl}/waInstance${request.instanceId}/qr/${request.token}`;
+          
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (response.ok && data.type === 'qrCode') {
+            // Update request with QR code
+            await db.updateWhatsAppRequest(request.id, {
+              qrCodeUrl: data.message,
+              qrCodeExpiresAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
+            });
+
+            return {
+              qrCodeUrl: data.message,
+              expiresAt: new Date(Date.now() + 2 * 60 * 1000),
+            };
+          } else {
+            throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to get QR code' });
+          }
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: error instanceof Error ? error.message : 'Unknown error',
+          });
+        }
+      }),
+
+    // Check connection status (merchant)
+    checkConnection: protectedProcedure
+      .input(z.object({ requestId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const request = await db.getWhatsAppRequestById(input.requestId);
+        if (!request) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Request not found' });
+        }
+
+        const merchant = await db.getMerchantById(request.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        if (!request.instanceId || !request.token) {
+          return { connected: false, status: 'pending' };
+        }
+
+        try {
+          const baseUrl = request.apiUrl || 'https://api.green-api.com';
+          const url = `${baseUrl}/waInstance${request.instanceId}/getStateInstance/${request.token}`;
+          
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (response.ok && data.stateInstance === 'authorized') {
+            // Connection successful - create WhatsApp instance
+            if (request.status === 'approved') {
+              await db.createWhatsAppInstance({
+                merchantId: request.merchantId,
+                instanceId: request.instanceId,
+                token: request.token,
+                apiUrl: request.apiUrl || 'https://api.green-api.com',
+                status: 'active',
+                isPrimary: true,
+                connectedAt: new Date(),
+              });
+
+              // Mark request as completed
+              await db.completeWhatsAppRequest(request.id, data.phoneNumber || '');
+            }
+
+            return {
+              connected: true,
+              status: 'authorized',
+              phoneNumber: data.phoneNumber,
+            };
+          } else {
+            return {
+              connected: false,
+              status: data.stateInstance || 'unknown',
+            };
+          }
+        } catch (error) {
+          return {
+            connected: false,
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
       }),
   }),
 });

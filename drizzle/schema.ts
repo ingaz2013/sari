@@ -589,3 +589,38 @@ export const whatsappInstances = mysqlTable('whatsapp_instances', {
 
 export type WhatsAppInstance = typeof whatsappInstances.$inferSelect;
 export type InsertWhatsAppInstance = typeof whatsappInstances.$inferInsert;
+
+
+/**
+ * WhatsApp Connection Requests (طلبات ربط الواتساب)
+ * Stores requests from merchants to connect WhatsApp via One-Click Setup
+ */
+export const whatsappRequests = mysqlTable('whatsapp_requests', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().references(() => merchants.id, { onDelete: 'cascade' }),
+  phoneNumber: varchar('phone_number', { length: 20 }),
+  businessName: varchar('business_name', { length: 255 }),
+  status: mysqlEnum('status', ['pending', 'approved', 'rejected', 'completed']).default('pending').notNull(),
+  
+  // Green API Instance Details (filled by admin)
+  instanceId: varchar('instance_id', { length: 100 }),
+  token: text('token'),
+  apiUrl: varchar('api_url', { length: 255 }).default('https://api.green-api.com'),
+  
+  // QR Code and Connection
+  qrCodeUrl: text('qr_code_url'),
+  qrCodeExpiresAt: timestamp('qr_code_expires_at'),
+  connectedAt: timestamp('connected_at'),
+  
+  // Admin review
+  reviewedBy: int('reviewed_by'), // Admin user ID
+  reviewedAt: timestamp('reviewed_at'),
+  adminNotes: text('admin_notes'),
+  rejectionReason: text('rejection_reason'),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type WhatsAppRequest = typeof whatsappRequests.$inferSelect;
+export type InsertWhatsAppRequest = typeof whatsappRequests.$inferInsert;

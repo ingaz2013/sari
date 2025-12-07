@@ -35,6 +35,7 @@ import AbandonedCartsPage from "./pages/merchant/AbandonedCartsPage";
 import OccasionCampaignsPage from "./pages/merchant/OccasionCampaignsPage";
 import AnalyticsDashboard from "./pages/merchant/AnalyticsDashboard";
 import WhatsAppInstancesPage from "./pages/merchant/WhatsAppInstancesPage";
+import WhatsAppSetupWizard from "./pages/merchant/WhatsAppSetupWizard";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -42,6 +43,7 @@ import MerchantsManagement from "./pages/admin/Merchants";
 import MerchantDetails from "./pages/admin/MerchantDetails";
 import AdminSettings from "./pages/admin/Settings";
 import WhatsAppRequests from "./pages/admin/WhatsAppRequests";
+import WhatsAppRequestsPage from "./pages/admin/WhatsAppRequestsPage";
 import PaymentGateways from "./pages/admin/PaymentGateways";
 import AdminCampaigns from "./pages/admin/Campaigns";
 
@@ -152,6 +154,12 @@ function Router() {
         </DashboardLayout>
       </Route>
       
+      <Route path="/merchant/whatsapp-setup">
+        <DashboardLayout>
+          <WhatsAppSetupWizard />
+        </DashboardLayout>
+      </Route>
+      
       <Route path="/merchant/settings">
         <DashboardLayout>
           <MerchantSettings />
@@ -223,7 +231,7 @@ function Router() {
       
       <Route path="/admin/whatsapp-requests">
         <DashboardLayout>
-          <WhatsAppRequests />
+          <WhatsAppRequestsPage />
         </DashboardLayout>
       </Route>
       
