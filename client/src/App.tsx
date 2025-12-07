@@ -34,6 +34,7 @@ import MerchantDetails from "./pages/admin/MerchantDetails";
 import AdminSettings from "./pages/admin/Settings";
 import WhatsAppRequests from "./pages/admin/WhatsAppRequests";
 import PaymentGateways from "./pages/admin/PaymentGateways";
+import AdminCampaigns from "./pages/admin/Campaigns";
 
 function Router() {
   return (
@@ -129,6 +130,12 @@ function Router() {
       <Route path="/admin/dashboard">
         <DashboardLayout>
           <AdminDashboard />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/campaigns">
+        <DashboardLayout>
+          <AdminCampaigns />
         </DashboardLayout>
       </Route>
       

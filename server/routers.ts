@@ -414,6 +414,11 @@ export const appRouter = router({
       return db.getCampaignsByMerchantId(merchant.id);
     }),
 
+    // Get all campaigns with merchant info (Admin only)
+    listAll: adminProcedure.query(async () => {
+      return await db.getAllCampaignsWithMerchants();
+    }),
+
     // Get single campaign
     getById: protectedProcedure
       .input(z.object({ id: z.number() }))
@@ -581,10 +586,7 @@ export const appRouter = router({
         return { success: true, message: 'Campaign is being sent' };
       }),
 
-    // Get all campaigns (Admin only)
-    listAll: adminProcedure.query(async () => {
-      return db.getAllCampaigns();
-    }),
+
 
     // Get campaign statistics
     getStats: protectedProcedure.query(async ({ ctx }) => {

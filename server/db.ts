@@ -558,6 +558,30 @@ export async function getAllCampaigns(): Promise<Campaign[]> {
   return db.select().from(campaigns).orderBy(desc(campaigns.createdAt));
 }
 
+export async function getAllCampaignsWithMerchants() {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select({
+      id: campaigns.id,
+      name: campaigns.name,
+      message: campaigns.message,
+      status: campaigns.status,
+      scheduledAt: campaigns.scheduledAt,
+      totalRecipients: campaigns.totalRecipients,
+      sentCount: campaigns.sentCount,
+      createdAt: campaigns.createdAt,
+      updatedAt: campaigns.updatedAt,
+      merchantId: campaigns.merchantId,
+      merchantName: merchants.businessName,
+      merchantPhone: merchants.phone,
+    })
+    .from(campaigns)
+    .leftJoin(merchants, eq(campaigns.merchantId, merchants.id))
+    .orderBy(desc(campaigns.createdAt));
+}
+
 export async function updateCampaign(id: number, data: Partial<InsertCampaign>): Promise<void> {
   const db = await getDb();
   if (!db) return;
