@@ -253,5 +253,140 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "rights": "All rights reserved"
+  },
+  "toast": {
+    "products": {
+      "msg1": "Product added successfully",
+      "msg2": "Failed to add product",
+      "msg3": "Product updated successfully",
+      "msg4": "Failed to update product",
+      "msg5": "Product deleted successfully",
+      "msg6": "Failed to delete product",
+      "msg7": "Please enter product name and price",
+      "msg8": "products successfully"
+    },
+    "orders": {
+      "msg1": "Order status updated successfully",
+      "msg2": "Order status updated",
+      "msg3": "Failed to update order status",
+      "msg4": "Order cancelled",
+      "msg5": "Failed to cancel order",
+      "msg6": "Connection request sent successfully",
+      "msg7": "Failed to send request",
+      "msg8": "Request sent successfully! Will be reviewed soon",
+      "msg9": "Request approved successfully",
+      "msg10": "Failed to approve request",
+      "msg11": "Request rejected successfully",
+      "msg12": "Request rejected",
+      "msg13": "Failed to reject request",
+      "msg14": "Request approved successfully",
+      "msg15": "Failed to approve request"
+    },
+    "campaigns": {
+      "msg1": "Campaign created successfully",
+      "msg2": "Failed to create campaign",
+      "msg3": "Campaign deleted successfully",
+      "msg4": "Failed to delete campaign",
+      "msg5": "Campaign sending started successfully",
+      "msg6": "Failed to send campaign",
+      "msg7": "Please enter campaign name",
+      "msg8": "Campaign status updated successfully"
+    },
+    "conversations": {
+      "msg1": "Recording uploaded successfully",
+      "msg2": "Failed to upload recording",
+      "msg3": "Recording cancelled"
+    },
+    "discounts": {
+      "msg1": "Discount code created successfully",
+      "msg2": "Failed to create discount code",
+      "msg3": "Discount code updated",
+      "msg4": "Failed to update discount code",
+      "msg5": "Discount code deleted",
+      "msg6": "Failed to delete discount code",
+      "msg7": "Code updated"
+    },
+    "whatsapp": {
+      "msg1": "WhatsApp connected successfully!"
+    },
+    "settings": {
+      "msg1": "Account information updated successfully",
+      "msg2": "Failed to update account information",
+      "msg3": "Store information updated successfully",
+      "msg4": "Failed to update store information",
+      "msg5": "Store name is required",
+      "msg6": "Please enter store URL and token"
+    },
+    "subscriptions": {
+      "msg1": "You are already subscribed to this plan",
+      "msg2": "Plan added successfully",
+      "msg3": "Failed to add plan",
+      "msg4": "Plan updated successfully",
+      "msg5": "Failed to update plan"
+    },
+    "carts": {
+      "msg1": "Cart status updated successfully"
+    },
+    "instances": {
+      "msg1": "Instance added successfully",
+      "msg2": "Failed to add instance",
+      "msg3": "Instance updated successfully",
+      "msg4": "Failed to update instance",
+      "msg5": "Instance set as primary",
+      "msg6": "Instance deleted successfully",
+      "msg7": "Failed to delete instance",
+      "msg8": "Please enter Instance ID and Token"
+    },
+    "notifications": {
+      "msg1": "Notification enabled",
+      "msg2": "Notification disabled",
+      "msg3": "Failed to update notification",
+      "msg4": "Template saved successfully",
+      "msg5": "Failed to save template"
+    },
+    "analytics": {
+      "msg1": "PDF report exported successfully",
+      "msg2": "Failed to export PDF",
+      "msg3": "Excel report exported successfully",
+      "msg4": "Failed to export Excel"
+    },
+    "upload": {
+      "msg1": "Imported",
+      "msg2": "Failed to upload file",
+      "msg3": "Please select CSV file only",
+      "msg4": "Please select CSV file first"
+    },
+    "merchants": {
+      "msg1": "Merchant status updated successfully",
+      "msg2": "Failed to update merchant status"
+    },
+    "support": {
+      "msg1": "Reminder message sent successfully"
+    },
+    "common": {
+      "msg1": "Failed to update status",
+      "msg2": "Please enter message text",
+      "msg3": "Please fill all required fields",
+      "msg4": "Please enter phone number",
+      "msg5": "Invalid phone number",
+      "msg6": "Name is required",
+      "msg7": "Please select payment method",
+      "msg8": "Failed to set as primary",
+      "msg9": "Connection successful! Status",
+      "msg10": "Connection failed",
+      "msg11": "Failed to test connection",
+      "msg12": "Failed to read file",
+      "msg13": "Please enter rejection reason",
+      "msg14": "Please enter rejection reason",
+      "msg15": "Settings saved successfully",
+      "msg16": "Connection successful!",
+      "msg17": "Connection failed",
+      "msg18": "Disconnected",
+      "msg19": "Failed to disconnect",
+      "msg20": "Synced ✅",
+      "msg21": "Sync failed",
+      "msg22": "Error",
+      "msg23": "Your message has been sent successfully! We will reply soon."
+    }
   }
 }

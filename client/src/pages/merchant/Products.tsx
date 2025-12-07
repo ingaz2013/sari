@@ -54,36 +54,36 @@ export default function Products() {
 
   const createMutation = trpc.products.create.useMutation({
     onSuccess: () => {
-      toast.success('تم إضافة المنتج بنجاح');
+      toast.success(t('toast.products.msg1'));
       utils.products.list.invalidate();
       setIsCreateDialogOpen(false);
       resetForm();
     },
     onError: (error) => {
-      toast.error('فشل إضافة المنتج: ' + error.message);
+      toast.error(t('toast.products.msg2') + ': ' + error.message);
     },
   });
 
   const updateMutation = trpc.products.update.useMutation({
     onSuccess: () => {
-      toast.success('تم تحديث المنتج بنجاح');
+      toast.success(t('toast.products.msg3'));
       utils.products.list.invalidate();
       setIsEditDialogOpen(false);
       setEditingProduct(null);
       resetForm();
     },
     onError: (error) => {
-      toast.error('فشل تحديث المنتج: ' + error.message);
+      toast.error(t('toast.products.msg4') + ': ' + error.message);
     },
   });
 
   const deleteMutation = trpc.products.delete.useMutation({
     onSuccess: () => {
-      toast.success('تم حذف المنتج بنجاح');
+      toast.success(t('toast.products.msg5'));
       utils.products.list.invalidate();
     },
     onError: (error) => {
-      toast.error('فشل حذف المنتج: ' + error.message);
+      toast.error(t('toast.products.msg6') + ': ' + error.message);
     },
   });
 
@@ -99,7 +99,7 @@ export default function Products() {
 
   const handleCreate = () => {
     if (!formData.name || !formData.price) {
-      toast.error('يرجى إدخال اسم المنتج والسعر');
+      toast.error(t('toast.products.msg7'));
       return;
     }
 
