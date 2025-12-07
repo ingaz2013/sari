@@ -10,12 +10,18 @@ import { useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
+import { ConversationsSkeleton } from '@/components/ConversationsSkeleton';
 
 export default function Conversations() {
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: conversations, isLoading } = trpc.conversations.list.useQuery();
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <ConversationsSkeleton />;
+  }
   
   const { data: messages } = trpc.conversations.getMessages.useQuery(
     { conversationId: selectedConversationId! },

@@ -3,15 +3,18 @@ import { trpc } from '@/lib/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Send, Users, TrendingUp } from 'lucide-react';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
+import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 
 export default function MerchantDashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const { data: merchant } = trpc.merchants.getCurrent.useQuery();
+  const { data: merchant, isLoading: merchantLoading } = trpc.merchants.getCurrent.useQuery();
   const { data: onboardingStatus } = trpc.merchants.getOnboardingStatus.useQuery();
   const completeOnboarding = trpc.merchants.completeOnboarding.useMutation();
-  const { data: subscription } = trpc.subscriptions.getCurrent.useQuery();
-  const { data: conversations } = trpc.conversations.list.useQuery();
-  const { data: campaigns } = trpc.campaigns.list.useQuery();
+  const { data: subscription, isLoading: subscriptionLoading } = trpc.subscriptions.getCurrent.useQuery();
+  const { data: conversations, isLoading: conversationsLoading } = trpc.conversations.list.useQuery();
+  const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.list.useQuery();
+
+  const isLoading = merchantLoading || subscriptionLoading || conversationsLoading || campaignsLoading;
 
   // Show onboarding wizard for new merchants
   useEffect(() => {
@@ -63,6 +66,11 @@ export default function MerchantDashboard() {
       bgColor: 'bg-orange-50',
     },
   ];
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <>

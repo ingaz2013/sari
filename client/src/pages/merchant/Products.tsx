@@ -26,11 +26,17 @@ import { toast } from 'sonner';
 import { Package, Plus, Upload, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation } from 'wouter';
+import { ProductsSkeleton } from '@/components/ProductsSkeleton';
 
 export default function Products() {
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
   const { data: products, isLoading } = trpc.products.list.useQuery();
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <ProductsSkeleton />;
+  }
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
