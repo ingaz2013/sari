@@ -31,6 +31,7 @@ import Subscriptions from "./pages/merchant/Subscriptions";
 import Checkout from "./pages/merchant/Checkout";
 import PaymentSuccess from "./pages/merchant/PaymentSuccess";
 import PaymentCancel from "./pages/merchant/PaymentCancel";
+import AbandonedCartsPage from "./pages/merchant/AbandonedCartsPage";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -121,6 +122,12 @@ function Router() {
       <Route path="/merchant/referrals">
         <DashboardLayout>
           <Referrals />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/abandoned-carts">
+        <DashboardLayout>
+          <AbandonedCartsPage />
         </DashboardLayout>
       </Route>
       

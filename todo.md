@@ -795,3 +795,80 @@
 ### المرحلة 5: التسليم
 - [ ] حفظ checkpoint
 - [ ] توثيق الميزة
+
+
+## نظام استعادة السلة المهجورة
+
+### المرحلة 1: قاعدة البيانات
+- [ ] التحقق من جدول abandoned_carts الموجود
+- [ ] إضافة دوال في db.ts
+  - [ ] createAbandonedCart
+  - [ ] getAbandonedCartsByMerchant
+  - [ ] getAbandonedCartsByCustomer
+  - [ ] updateAbandonedCart
+  - [ ] markAsReminded
+  - [ ] markAsRecovered
+  - [ ] deleteAbandonedCart
+
+### المرحلة 2: نظام التتبع
+- [ ] إنشاء ملف server/automation/abandoned-cart.ts
+- [ ] دالة trackAbandonedCart (تسجيل سلة مهجورة)
+- [ ] دالة generateReminderMessage (رسالة تذكير)
+- [ ] دالة generateRecoveryDiscount (كود خصم 10%)
+- [ ] دالة sendCartReminder (إرسال التذكير)
+- [ ] دالة checkAbandonedCarts (فحص السلال)
+- [ ] دالة getCartRecoveryStats (إحصائيات)
+
+### المرحلة 3: Cron Job
+- [ ] إنشاء ملف server/jobs/abandoned-cart.ts
+- [ ] Cron Job يعمل كل 6 ساعات
+- [ ] فحص السلال الأقدم من 24 ساعة
+- [ ] إرسال تذكير واحد فقط لكل سلة
+
+### المرحلة 4: تحديث Webhook
+- [ ] تحديث Green API Webhook
+- [ ] تتبع المحادثات التي تتضمن اختيار منتجات
+- [ ] تحديث lastActivityAt عند كل رسالة
+- [ ] إنشاء abandoned_cart عند توقف المحادثة
+
+### المرحلة 5: الاختبار
+- [ ] كتابة اختبارات Vitest
+- [ ] اختبار تتبع السلال
+- [ ] اختبار إرسال التذكير
+- [ ] اختبار كود الخصم
+
+### المرحلة 6: التسليم
+- [ ] حفظ checkpoint
+- [ ] توثيق الميزة
+
+
+## نظام استعادة السلة المهجورة (Abandoned Cart Recovery)
+- [x] إنشاء ملف server/automation/abandoned-cart-recovery.ts
+- [x] دالة trackAbandonedCart لتتبع السلال المهجورة
+- [x] دالة generateRecoveryDiscount لإنشاء كود خصم 10%
+- [x] دالة generateReminderMessage لتوليد رسالة التذكير
+- [x] دالة sendCartReminder لإرسال التذكير عبر واتساب
+- [x] دالة checkAbandonedCarts للفحص الدوري (Cron Job)
+- [x] دالة getCartRecoveryStats للإحصائيات
+- [x] دالة isProductSelectionMessage لاكتشاف رسائل اختيار المنتجات
+- [x] إنشاء Cron Job في server/jobs/abandoned-cart.ts (يعمل كل 6 ساعات)
+- [x] تحديث Green API Webhook لتتبع السلال المهجورة تلقائياً
+- [x] إضافة 4 APIs في routers.ts (list, getStats, markRecovered, sendReminder)
+- [x] إنشاء صفحة /merchant/abandoned-carts
+- [x] عرض إحصائيات شاملة (إجمالي، مرسلة، مستعادة، معدل الاستعادة، القيمة المستعادة)
+- [x] جدول السلال المهجورة مع تفاصيل كاملة
+- [x] إمكانية إرسال تذكير يدوي
+- [x] إمكانية تحديد السلة كمستعادة
+- [x] إضافة المسار في App.tsx
+- [x] إضافة رابط في DashboardLayout
+- [x] كتابة الاختبارات (13 اختبار)
+- [x] اختبار النظام الكامل (100% نجاح)
+
+الميزات:
+✅ اكتشاف تلقائي للسلال المهجورة من المحادثات
+✅ Cron Job يعمل كل 6 ساعات للفحص
+✅ إرسال تذكير بعد 24 ساعة من آخر نشاط
+✅ كود خصم 10% تلقائي مع كل تذكير
+✅ عدم إرسال أكثر من تذكير واحد لنفس السلة
+✅ واجهة إدارة احترافية للتاجر
+✅ إحصائيات شاملة ومعدل الاستعادة

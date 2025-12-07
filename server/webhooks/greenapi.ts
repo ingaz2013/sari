@@ -8,6 +8,7 @@ import {
   generateOrderConfirmationMessage,
   generateGiftOrderConfirmationMessage 
 } from '../automation/order-from-chat';
+import { trackAbandonedCart, isProductSelectionMessage } from '../automation/abandoned-cart-recovery';
 
 interface WebhookResult {
   success: boolean;
@@ -177,6 +178,53 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
           console.log(`[Green API Webhook] AI response sent successfully to ${customerPhone}`);
         } else {
           console.error(`[Green API Webhook] Failed to send AI response: ${sendResult.error}`);
+        }
+      }
+      
+      // تتبع السلة المهجورة إذا كانت الرسالة تحتوي على اختيار منتجات
+      if (isProductSelectionMessage(messageText)) {
+        try {
+          // تحليل الرسالة لاستخراج المنتجات
+          const parsedOrder = await parseOrderMessage(messageText, conversation.merchantId);
+          
+          if (parsedOrder && parsedOrder.products.length > 0) {
+            // حساب الإجمالي
+            const products = await db.getProductsByMerchantId(conversation.merchantId);
+            let totalAmount = 0;
+            const items = [];
+            
+            for (const item of parsedOrder.products) {
+              const product = products.find(p => 
+                p.name.toLowerCase().includes(item.name.toLowerCase()) ||
+                item.name.toLowerCase().includes(p.name.toLowerCase())
+              );
+              
+              if (product) {
+                items.push({
+                  productId: product.id,
+                  productName: product.name,
+                  quantity: item.quantity,
+                  price: product.price
+                });
+                totalAmount += product.price * item.quantity;
+              }
+            }
+            
+            if (items.length > 0) {
+              // تتبع السلة المهجورة
+              await trackAbandonedCart(
+                conversation.merchantId,
+                customerPhone,
+                conversation.customerName,
+                items,
+                totalAmount
+              );
+              
+              console.log(`[Green API Webhook] Abandoned cart tracked for ${customerPhone}`);
+            }
+          }
+        } catch (error) {
+          console.error('[Green API Webhook] Error tracking abandoned cart:', error);
         }
       }
     }

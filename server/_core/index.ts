@@ -10,6 +10,7 @@ import { serveStatic, setupVite } from "./vite";
 import webhookRoutes from "../webhooks/routes";
 import { initializeSallaCronJobs } from "../jobs/salla-sync";
 import { startOrderTrackingJob } from "../jobs/order-tracking";
+import { startAbandonedCartJob } from "../jobs/abandoned-cart";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -70,6 +71,9 @@ async function startServer() {
     
     // Initialize Order Tracking cron job
     startOrderTrackingJob();
+    
+    // Initialize Abandoned Cart Recovery cron job
+    startAbandonedCartJob();
   });
 }
 

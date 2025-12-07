@@ -37,7 +37,8 @@ import {
   Store,
   ShoppingCart,
   Ticket,
-  UserPlus
+  UserPlus,
+  ShoppingBag
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -54,6 +55,7 @@ const getMerchantMenuItems = () => [
   { icon: MessageSquare, label: "المحادثات", path: "/merchant/conversations" },
   { icon: Ticket, label: "كودات الخصم", path: "/merchant/discounts" },
   { icon: UserPlus, label: "نظام الإحالة", path: "/merchant/referrals" },
+  { icon: ShoppingBag, label: "السلال المهجورة", path: "/merchant/abandoned-carts" },
   { icon: BarChart3, label: "التقارير", path: "/merchant/reports" },
   { icon: CreditCard, label: "الاشتراكات", path: "/merchant/subscriptions" },
   { icon: Smartphone, label: "ربط الواتساب", path: "/merchant/whatsapp" },
