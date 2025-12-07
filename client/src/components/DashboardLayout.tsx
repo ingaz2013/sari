@@ -58,7 +58,7 @@ const getMerchantMenuItems = () => [
   { icon: UserPlus, label: "نظام الإحالة", path: "/merchant/referrals" },
   { icon: ShoppingBag, label: "السلال المهجورة", path: "/merchant/abandoned-carts" },
   { icon: PartyPopper, label: "حملات المناسبات", path: "/merchant/occasion-campaigns" },
-  { icon: BarChart3, label: "التقارير", path: "/merchant/reports" },
+  { icon: BarChart3, label: "التحليلات المتقدمة", path: "/merchant/analytics" },
   { icon: CreditCard, label: "الاشتراكات", path: "/merchant/subscriptions" },
   { icon: Smartphone, label: "ربط الواتساب", path: "/merchant/whatsapp" },
   { icon: Store, label: "ربط متجر Salla", path: "/merchant/salla" },

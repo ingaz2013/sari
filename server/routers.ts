@@ -1910,6 +1910,195 @@ export const appRouter = router({
         return campaign;
       }),
   }),
+
+  // Advanced Analytics
+  analytics: router({
+    // Dashboard KPIs
+    getDashboardKPIs: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getDashboardKPIs } = await import('./analytics/analytics');
+        return await getDashboardKPIs(input.merchantId, {
+          startDate: new Date(input.startDate),
+          endDate: new Date(input.endDate),
+        });
+      }),
+
+    // Revenue Trends
+    getRevenueTrends: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+          groupBy: z.enum(['day', 'week', 'month']).optional(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getRevenueTrends } = await import('./analytics/analytics');
+        return await getRevenueTrends(
+          input.merchantId,
+          {
+            startDate: new Date(input.startDate),
+            endDate: new Date(input.endDate),
+          },
+          input.groupBy
+        );
+      }),
+
+    // Top Products
+    getTopProducts: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+          limit: z.number().optional(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getTopProducts } = await import('./analytics/analytics');
+        return await getTopProducts(
+          input.merchantId,
+          {
+            startDate: new Date(input.startDate),
+            endDate: new Date(input.endDate),
+          },
+          input.limit
+        );
+      }),
+
+    // Campaign Analytics
+    getCampaignAnalytics: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getCampaignAnalytics } = await import('./analytics/analytics');
+        return await getCampaignAnalytics(input.merchantId, {
+          startDate: new Date(input.startDate),
+          endDate: new Date(input.endDate),
+        });
+      }),
+
+    // Customer Segments
+    getCustomerSegments: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getCustomerSegments } = await import('./analytics/analytics');
+        return await getCustomerSegments(input.merchantId, {
+          startDate: new Date(input.startDate),
+          endDate: new Date(input.endDate),
+        });
+      }),
+
+    // Hourly Analytics
+    getHourlyAnalytics: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getHourlyAnalytics } = await import('./analytics/analytics');
+        return await getHourlyAnalytics(input.merchantId, {
+          startDate: new Date(input.startDate),
+          endDate: new Date(input.endDate),
+        });
+      }),
+
+    // Weekday Analytics
+    getWeekdayAnalytics: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getWeekdayAnalytics } = await import('./analytics/analytics');
+        return await getWeekdayAnalytics(input.merchantId, {
+          startDate: new Date(input.startDate),
+          endDate: new Date(input.endDate),
+        });
+      }),
+
+    // Discount Code Analytics
+    getDiscountCodeAnalytics: protectedProcedure
+      .input(
+        z.object({
+          merchantId: z.number(),
+          startDate: z.string(),
+          endDate: z.string(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { getDiscountCodeAnalytics } = await import('./analytics/analytics');
+        return await getDiscountCodeAnalytics(input.merchantId, {
+          startDate: new Date(input.startDate),
+          endDate: new Date(input.endDate),
+        });
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
