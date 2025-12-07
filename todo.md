@@ -1386,4 +1386,28 @@
   - [x] قسم الرؤى والتوصيات الذكية
 - [x] إضافة الصفحة إلى App.tsx (/merchant/overview-analytics)
 - [x] اختبار الصفحة (تعمل بدون أخطاء)
-- [ ] حفظ checkpoint
+- [x] حفظ checkpoint (afc434c2)
+
+## المهام الجديدة - إكمال نظام التقييمات والإحالات
+
+### المرحلة 1: Cron Job لطلب التقييمات
+- [x] إنشاء ملف server/jobs/review-request.ts
+- [x] إضافة دالة checkAndSendReviewRequests
+- [x] ربط Cron Job مع server/_core/index.ts
+- [x] اختبار Cron Job
+
+### المرحلة 2: APIs للواجهة الأمامية
+- [x] إضافة reviews router في routers.ts (list, getStats, getById)
+- [x] discounts router موجود مسبقاً (list, create, update, delete, getStats)
+- [x] referrals router موجود مسبقاً (list, getStats, getTopReferrers)
+- [x] اختبار جميع APIs
+
+### المرحلة 3: الاختبار الشامل
+- [x] اختبار Cron Job للتقييمات (12 اختبار ناجح)
+- [x] اختبار APIs التقييمات (7 اختبارات ناجحة)
+- [x] APIs كودات الخصم موجودة ومختبرة مسبقاً
+- [x] APIs الإحالات موجودة ومختبرة مسبقاً
+
+### المرحلة 4: حفظ وتسليم
+- [x] حفظ checkpoint نهائي
+- [x] تحديث todo.md
