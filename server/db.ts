@@ -166,6 +166,15 @@ export async function updateUserLastSignedIn(id: number): Promise<void> {
   await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, id));
 }
 
+export async function createUser(data: InsertUser) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+
+  const result = await db.insert(users).values(data);
+  const insertId = Number(result[0].insertId);
+  return await getUserById(insertId);
+}
+
 export async function updateUser(id: number | string, data: Partial<InsertUser>): Promise<void> {
   const db = await getDb();
   if (!db) return;

@@ -90,6 +90,70 @@ export const appRouter = router({
         };
       }),
     
+    // Sign up with email and password
+    signup: publicProcedure
+      .input(z.object({
+        name: z.string().min(2),
+        email: z.string().email(),
+        password: z.string().min(6),
+        businessName: z.string().min(2),
+        phone: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Check if email already exists
+        const existingUser = await db.getUserByEmail(input.email);
+        if (existingUser) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Email already registered' });
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(input.password, 10);
+        
+        // Generate unique openId for the user
+        const openId = `local_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        
+        // Create user
+        const user = await db.createUser({
+          openId,
+          name: input.name,
+          email: input.email,
+          password: hashedPassword,
+          loginMethod: 'email',
+          role: 'user',
+        });
+        
+        if (!user) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Failed to create user' });
+        }
+        
+        // Create merchant profile automatically
+        await db.createMerchant({
+          userId: user.id,
+          businessName: input.businessName,
+          phone: input.phone || null,
+          status: 'pending',
+        });
+        
+        // Create session token
+        const sessionToken = await sdk.createSessionToken(user.openId, {
+          name: user.name || '',
+          expiresInMs: ONE_YEAR_MS,
+        });
+        
+        const cookieOptions = getSessionCookieOptions(ctx.req);
+        ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+        
+        return {
+          success: true,
+          user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+          },
+        };
+      }),
+    
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

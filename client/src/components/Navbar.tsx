@@ -46,7 +46,7 @@ export default function Navbar() {
               <Button variant="ghost">تسجيل الدخول</Button>
             </a>
           </Link>
-          <Link href="/login">
+          <Link href="/signup">
             <a>
               <Button className="bg-blue-600 hover:bg-blue-700">
                 ابدأ الآن مجاناً
@@ -87,7 +87,7 @@ export default function Navbar() {
                   </Button>
                 </a>
               </Link>
-              <Link href="/login">
+              <Link href="/signup">
                 <a className="block" onClick={() => setIsMenuOpen(false)}>
                   <Button className="w-full bg-blue-600 hover:bg-blue-700">
                     ابدأ الآن مجاناً
