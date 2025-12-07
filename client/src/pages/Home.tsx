@@ -18,6 +18,11 @@ import {
   Sparkles,
   Mic,
   ShoppingCart,
+  ShoppingBag,
+  FileText,
+  Package,
+  Gift,
+  Bell,
 } from 'lucide-react';
 
 export default function Home() {
@@ -36,6 +41,36 @@ export default function Home() {
       icon: ShoppingCart,
       title: 'طلبات تلقائية',
       description: 'تحويل المحادثات إلى طلبات مكتملة مع رابط الدفع تلقائياً',
+    },
+    {
+      icon: ShoppingBag,
+      title: 'السلال المهجورة',
+      description: 'تذكير تلقائي للعملاء الذين لم يكملوا طلباتهم لزيادة نسبة التحويل',
+    },
+    {
+      icon: FileText,
+      title: 'الفواتير بالواتساب',
+      description: 'إرسال فواتير احترافية مباشرة عبر الواتساب مع رابط الدفع',
+    },
+    {
+      icon: Package,
+      title: 'تتبع الطلبات',
+      description: 'تحديثات تلقائية للعملاء عن حالة طلباتهم من التأكيد حتى التوصيل',
+    },
+    {
+      icon: Gift,
+      title: 'الهدايا والتهنئة',
+      description: 'رسائل تلقائية للعملاء في المناسبات والأعياد مع عروض خاصة',
+    },
+    {
+      icon: Bell,
+      title: 'إشعارات ذكية',
+      description: 'تنبيهات فورية للتاجر عند وصول طلبات جديدة أو استفسارات مهمة',
+    },
+    {
+      icon: BarChart3,
+      title: 'تقارير وتحليلات',
+      description: 'تقارير تفصيلية عن المبيعات والمحادثات لتحسين أداء متجرك',
     },
     {
       icon: TrendingUp,
