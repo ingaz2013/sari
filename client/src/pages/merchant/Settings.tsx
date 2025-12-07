@@ -213,9 +213,9 @@ export default function MerchantSettings() {
           </div>
 
           {autoReplyEnabled && (
-            <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">ميزات الرد الآلي:</h4>
-              <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+            <div className="bg-primary/10 dark:bg-blue-950 p-4 rounded-lg">
+              <h4 className="font-semibold text-primary dark:text-blue-100 mb-2">ميزات الرد الآلي:</h4>
+              <ul className="text-sm text-primary dark:text-blue-200 space-y-1">
                 <li>• الرد على استفسارات العملاء باللهجة السعودية</li>
                 <li>• البحث في منتجاتك واقتراح المنتجات المناسبة</li>
                 <li>• توضيح الأسعار والمواصفات</li>

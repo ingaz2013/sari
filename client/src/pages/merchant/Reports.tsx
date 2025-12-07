@@ -227,7 +227,7 @@ export default function Reports() {
               </div>
               <div className="h-2 bg-muted rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-blue-500 transition-all" 
+                  className="h-full bg-primary/100 transition-all" 
                   style={{ width: `${stats?.readRate || 0}%` }}
                 />
               </div>

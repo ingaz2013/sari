@@ -183,13 +183,13 @@ export default function WhatsAppSetupWizard() {
 
       {/* Approved Request */}
       {approvedRequest && !completedRequest && (
-        <Card className="border-blue-200 bg-blue-50">
+        <Card className="border-primary/30 bg-primary/10">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-blue-600" />
-              <CardTitle className="text-blue-900">رقمك جاهز للربط!</CardTitle>
+              <CheckCircle2 className="h-5 w-5 text-primary" />
+              <CardTitle className="text-primary">رقمك جاهز للربط!</CardTitle>
             </div>
-            <CardDescription className="text-blue-700">
+            <CardDescription className="text-primary">
               تمت الموافقة على طلبك. اضغط الزر أدناه لمسح QR Code وإتمام الربط
             </CardDescription>
           </CardHeader>
@@ -315,7 +315,7 @@ export default function WhatsAppSetupWizard() {
                 )}
                 
                 {connectionStatus === 'checking' && (
-                  <div className="flex items-center gap-2 text-blue-600">
+                  <div className="flex items-center gap-2 text-primary">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <span>في انتظار المسح...</span>
                   </div>

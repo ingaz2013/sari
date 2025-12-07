@@ -642,25 +642,25 @@ export default function AnalyticsDashboard() {
           </Card>
 
           {/* Insights */}
-          <Card className="border-blue-200 bg-blue-50/50">
+          <Card className="border-primary/30 bg-primary/10/50">
             <CardHeader>
-              <CardTitle className="text-blue-900">💡 رؤى وتوصيات</CardTitle>
+              <CardTitle className="text-primary">💡 رؤى وتوصيات</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-blue-900">
+            <CardContent className="space-y-2 text-primary">
               <div className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-primary font-bold">•</span>
                 <p className="text-sm">
                   <strong>أفضل وقت للحملات:</strong> أرسل حملاتك في الساعات التي تشهد أعلى نشاط للعملاء
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-primary font-bold">•</span>
                 <p className="text-sm">
                   <strong>استهدف العملاء VIP:</strong> ركز على العملاء الأوفياء بعروض خاصة لزيادة الإيرادات
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <span className="text-blue-600 font-bold">•</span>
+                <span className="text-primary font-bold">•</span>
                 <p className="text-sm">
                   <strong>حسّن المخزون:</strong> تأكد من توفر المنتجات الأكثر مبيعاً لتجنب خسارة المبيعات
                 </p>

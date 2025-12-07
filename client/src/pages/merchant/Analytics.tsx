@@ -255,7 +255,7 @@ export default function Analytics() {
                 </div>
                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 transition-all"
+                    className="h-full bg-primary/100 transition-all"
                     style={{ width: `${voicePercentage}%` }}
                   />
                 </div>
@@ -307,7 +307,7 @@ export default function Analytics() {
                   return (
                     <div key={hour.hour} className="flex-1 flex flex-col items-center gap-1">
                       <div
-                        className="w-full bg-blue-500 rounded-t transition-all hover:bg-blue-600"
+                        className="w-full bg-primary/100 rounded-t transition-all hover:bg-primary"
                         style={{ height: `${height}%`, minHeight: height > 0 ? '4px' : '0' }}
                         title={`${hour.hour}:00 - ${hour.count} رسالة`}
                       />

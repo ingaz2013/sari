@@ -204,11 +204,11 @@ export default function OrderNotificationsSettings() {
       </div>
 
       {/* Help Section */}
-      <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800">
+      <Card className="bg-primary/10 dark:bg-blue-950 border-primary/30 dark:border-blue-800">
         <CardHeader>
-          <CardTitle className="text-blue-900 dark:text-blue-100">💡 نصائح</CardTitle>
+          <CardTitle className="text-primary dark:text-blue-100">💡 نصائح</CardTitle>
         </CardHeader>
-        <CardContent className="text-blue-800 dark:text-blue-200 space-y-2">
+        <CardContent className="text-primary dark:text-blue-200 space-y-2">
           <p>• استخدم المتغيرات لتخصيص الرسائل لكل عميل</p>
           <p>• تأكد من تفعيل الإشعارات المهمة مثل "تأكيد الطلب" و"تم الشحن"</p>
           <p>• اجعل الرسائل قصيرة وواضحة</p>

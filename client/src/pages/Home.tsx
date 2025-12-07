@@ -113,13 +113,13 @@ export default function Home() {
         <div className="container relative py-20 md:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 dark:bg-blue-900/30 text-primary dark:text-blue-300 text-sm font-medium">
                 <Sparkles className="w-4 h-4" />
                 <span>مدعوم بالذكاء الاصطناعي</span>
               </div>
               
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-                <span className="text-blue-600">
+                <span className="text-primary">
                   ساري
                 </span>
                 <br />
@@ -135,7 +135,7 @@ export default function Home() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/login">
                   <a>
-                    <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-lg h-14 px-8">
+                    <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg h-14 px-8">
                       ابدأ الآن مجاناً
                       <ArrowRight className="mr-2 w-5 h-5" />
                     </Button>
@@ -154,7 +154,7 @@ export default function Home() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-8">
                 {stats.map((stat) => (
                   <div key={stat.label} className="text-center">
-                    <div className="text-2xl md:text-3xl font-bold text-blue-600">{stat.value}</div>
+                    <div className="text-2xl md:text-3xl font-bold text-primary">{stat.value}</div>
                     <div className="text-sm text-muted-foreground">{stat.label}</div>
                   </div>
                 ))}
@@ -163,7 +163,7 @@ export default function Home() {
 
             <div className="relative">
               <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border bg-card">
-                <div className="bg-blue-600 p-4 flex items-center gap-3">
+                <div className="bg-primary p-4 flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                     <Bot className="w-7 h-7 text-white" />
                   </div>
@@ -174,7 +174,7 @@ export default function Home() {
                 </div>
                 <div className="p-6 space-y-4">
                   <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                       <Bot className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 bg-muted p-4 rounded-2xl rounded-tl-none">
@@ -182,12 +182,12 @@ export default function Home() {
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <div className="bg-blue-600 text-white p-4 rounded-2xl rounded-tr-none max-w-[80%]">
+                    <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none max-w-[80%]">
                       <p className="text-sm">عندكم جوالات آيفون؟</p>
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                       <Bot className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 bg-muted p-4 rounded-2xl rounded-tl-none">
@@ -217,9 +217,9 @@ export default function Home() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {features.map((feature) => (
-              <Card key={feature.title} className="border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+              <Card key={feature.title} className="border-2 hover:border-primary/30 dark:hover:border-blue-800 transition-colors">
                 <CardContent className="p-6 space-y-4">
-                  <div className="w-12 h-12 rounded-lg bg-blue-600 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
                     <feature.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold">{feature.title}</h3>
@@ -248,11 +248,11 @@ export default function Home() {
               <div key={step.number} className="relative">
                 <div className="text-center space-y-4">
                   <div className="relative inline-flex">
-                    <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-2xl font-bold text-white">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
                       {step.number}
                     </div>
                     {index < steps.length - 1 && (
-                      <div className="hidden lg:block absolute top-1/2 right-full w-full h-0.5 bg-blue-600 -translate-y-1/2" style={{ width: 'calc(100% + 2rem)' }} />
+                      <div className="hidden lg:block absolute top-1/2 right-full w-full h-0.5 bg-primary -translate-y-1/2" style={{ width: 'calc(100% + 2rem)' }} />
                     )}
                   </div>
                   <h3 className="text-xl font-semibold">{step.title}</h3>
@@ -298,7 +298,7 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-primary text-white">
         <div className="container text-center space-y-8">
           <h2 className="text-3xl md:text-5xl font-bold">
             جاهز لزيادة مبيعاتك؟

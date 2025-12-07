@@ -83,7 +83,7 @@ export default function MerchantDetails() {
       case 'completed':
         return <Badge className="bg-green-100 text-green-700">مكتمل</Badge>;
       case 'sending':
-        return <Badge className="bg-blue-100 text-blue-700">جاري الإرسال</Badge>;
+        return <Badge className="bg-primary/20 text-primary">جاري الإرسال</Badge>;
       case 'draft':
         return <Badge className="bg-gray-100 text-gray-700">مسودة</Badge>;
       case 'scheduled':
@@ -242,13 +242,13 @@ export default function MerchantDetails() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
-            <div className="p-4 bg-blue-50 rounded-lg">
+            <div className="p-4 bg-primary/10 rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">إجمالي الحملات</p>
-                  <p className="text-2xl font-bold text-blue-700">{campaigns.length}</p>
+                  <p className="text-2xl font-bold text-primary">{campaigns.length}</p>
                 </div>
-                <MessageSquare className="w-8 h-8 text-blue-600" />
+                <MessageSquare className="w-8 h-8 text-primary" />
               </div>
             </div>
 

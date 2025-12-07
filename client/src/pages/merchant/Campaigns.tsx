@@ -113,7 +113,7 @@ export default function Campaigns() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-primary">
               {campaigns?.filter(c => c.status === 'sending' || c.status === 'scheduled').length || 0}
             </div>
           </CardContent>

@@ -265,7 +265,7 @@ export default function OccasionCampaignsPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-start gap-3">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-2 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-2 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
@@ -277,7 +277,7 @@ export default function OccasionCampaignsPage() {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-2 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-2 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
@@ -289,7 +289,7 @@ export default function OccasionCampaignsPage() {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-2 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-2 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
@@ -301,7 +301,7 @@ export default function OccasionCampaignsPage() {
           </div>
 
           <div className="flex items-start gap-3">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-2 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-2 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <div>
@@ -315,31 +315,31 @@ export default function OccasionCampaignsPage() {
       </Card>
 
       {/* Tips Section */}
-      <Card className="border-blue-200 bg-blue-50/50">
+      <Card className="border-primary/30 bg-primary/10/50">
         <CardHeader>
-          <CardTitle className="text-blue-900">💡 نصائح لزيادة المبيعات</CardTitle>
+          <CardTitle className="text-primary">💡 نصائح لزيادة المبيعات</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2 text-blue-900">
+        <CardContent className="space-y-2 text-primary">
           <div className="flex items-start gap-2">
-            <span className="text-blue-600 font-bold">•</span>
+            <span className="text-primary font-bold">•</span>
             <p className="text-sm">
               <strong>استعد مبكراً:</strong> تأكد من تحديث منتجاتك وأسعارك قبل المناسبات بأسبوع
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-blue-600 font-bold">•</span>
+            <span className="text-primary font-bold">•</span>
             <p className="text-sm">
               <strong>خصومات جذابة:</strong> نسبة الخصم الموصى بها: 20% لرمضان، 25% للعيد، 23% لليوم الوطني
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-blue-600 font-bold">•</span>
+            <span className="text-primary font-bold">•</span>
             <p className="text-sm">
               <strong>تابع الأداء:</strong> راقب عدد المستلمين واستخدام كودات الخصم لتحسين الحملات المستقبلية
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <span className="text-blue-600 font-bold">•</span>
+            <span className="text-primary font-bold">•</span>
             <p className="text-sm">
               <strong>رد سريع:</strong> كن مستعداً للرد على استفسارات العملاء بسرعة خلال المناسبات
             </p>

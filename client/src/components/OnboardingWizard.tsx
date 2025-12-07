@@ -134,8 +134,8 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
         <CardHeader>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <CurrentIcon className="w-6 h-6 text-blue-600" />
+              <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                <CurrentIcon className="w-6 h-6 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-2xl">{steps[currentStep].title}</CardTitle>
@@ -170,7 +170,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
           {currentStep === 0 && (
             <div className="space-y-6 py-6">
               <div className="text-center space-y-4">
-                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary to-primary flex items-center justify-center">
                   <Sparkles className="w-10 h-10 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold">أهلاً بك في ساري!</h3>
@@ -181,18 +181,18 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-4 rounded-lg bg-blue-50">
-                  <MessageSquare className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <div className="text-center p-4 rounded-lg bg-primary/10">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h4 className="font-semibold mb-1">ردود تلقائية</h4>
                   <p className="text-sm text-gray-600">رد فوري على جميع رسائل العملاء</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-blue-50">
-                  <Store className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <div className="text-center p-4 rounded-lg bg-primary/10">
+                  <Store className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h4 className="font-semibold mb-1">إدارة المنتجات</h4>
                   <p className="text-sm text-gray-600">نظام متكامل لإدارة منتجاتك</p>
                 </div>
-                <div className="text-center p-4 rounded-lg bg-blue-50">
-                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-blue-600" />
+                <div className="text-center p-4 rounded-lg bg-primary/10">
+                  <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-primary" />
                   <h4 className="font-semibold mb-1">استقبال الطلبات</h4>
                   <p className="text-sm text-gray-600">طلبات تلقائية من واتساب مباشرة</p>
                 </div>
@@ -315,12 +315,12 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 </p>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+              <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-blue-900">ما تحتاجه:</h4>
+                  <h4 className="font-semibold text-primary">ما تحتاجه:</h4>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button type="button" className="text-blue-600 hover:text-blue-800">
+                      <button type="button" className="text-primary hover:text-primary">
                         <HelpCircle className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
@@ -338,7 +338,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                     </TooltipContent>
                   </Tooltip>
                 </div>
-                <ul className="space-y-1 text-sm text-blue-800">
+                <ul className="space-y-1 text-sm text-primary">
                   <li className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>رقم جوال سعودي جديد (غير مستخدم في واتساب)</span>
@@ -382,12 +382,12 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-6 space-y-4">
+              <div className="bg-gradient-to-br from-blue-50 to-purple-50 border border-primary/30 rounded-lg p-6 space-y-4">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-semibold text-blue-900">الخطوات التالية:</h4>
+                  <h4 className="font-semibold text-primary">الخطوات التالية:</h4>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button type="button" className="text-blue-600 hover:text-blue-800">
+                      <button type="button" className="text-primary hover:text-primary">
                         <HelpCircle className="w-4 h-4" />
                       </button>
                     </TooltipTrigger>
@@ -407,7 +407,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm flex-shrink-0">
                       1
                     </div>
                     <div>
@@ -416,7 +416,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm flex-shrink-0">
                       2
                     </div>
                     <div>
@@ -425,7 +425,7 @@ export function OnboardingWizard({ onComplete, onSkip }: OnboardingWizardProps) 
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm flex-shrink-0">
+                    <div className="w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-sm flex-shrink-0">
                       3
                     </div>
                     <div>

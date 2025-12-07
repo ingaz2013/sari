@@ -49,8 +49,8 @@ export default function MerchantDashboard() {
       growth: comparisonStats?.growth.orders || 0,
       icon: Package,
       description: 'آخر 30 يوم',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'إجمالي الإيرادات',
@@ -241,7 +241,7 @@ export default function MerchantDashboard() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-blue-600">
+                        <p className="text-sm font-medium text-primary">
                           {product.averagePrice} ريال
                         </p>
                         <p className="text-xs text-muted-foreground">متوسط السعر</p>

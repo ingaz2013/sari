@@ -228,7 +228,7 @@ export default function AbandonedCartsPage() {
         </CardHeader>
         <CardContent className="space-y-2">
           <div className="flex items-start gap-2">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-1 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-1 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <p className="text-sm">
@@ -236,7 +236,7 @@ export default function AbandonedCartsPage() {
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-1 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-1 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <p className="text-sm">
@@ -244,7 +244,7 @@ export default function AbandonedCartsPage() {
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-1 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-1 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <p className="text-sm">
@@ -252,7 +252,7 @@ export default function AbandonedCartsPage() {
             </p>
           </div>
           <div className="flex items-start gap-2">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-1 mt-0.5">
+            <div className="bg-primary/20 text-primary rounded-full p-1 mt-0.5">
               <CheckCircle2 className="h-4 w-4" />
             </div>
             <p className="text-sm">

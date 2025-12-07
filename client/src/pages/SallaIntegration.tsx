@@ -291,7 +291,7 @@ export default function SallaIntegration() {
                       <XCircle className="h-5 w-5 text-red-600" />
                     )}
                     {log.status === 'in_progress' && (
-                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
                     )}
                     <div>
                       <div className="font-medium">
@@ -314,7 +314,7 @@ export default function SallaIntegration() {
                       <span className="text-red-600">فشل</span>
                     )}
                     {log.status === 'in_progress' && (
-                      <span className="text-blue-600">جاري...</span>
+                      <span className="text-primary">جاري...</span>
                     )}
                   </div>
                 </div>

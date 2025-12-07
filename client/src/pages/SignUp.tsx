@@ -71,7 +71,7 @@ export default function SignUp() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
               <Store className="w-6 h-6 text-white" />
             </div>
           </div>
@@ -200,7 +200,7 @@ export default function SignUp() {
           <CardFooter className="flex flex-col space-y-4">
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700"
+              className="w-full bg-primary hover:bg-primary/90"
               disabled={signupMutation.isPending}
             >
               {signupMutation.isPending ? (
@@ -215,7 +215,7 @@ export default function SignUp() {
 
             <div className="text-center text-sm text-muted-foreground">
               لديك حساب بالفعل؟{' '}
-              <Link href="/login" className="text-blue-600 hover:underline">
+              <Link href="/login" className="text-primary hover:underline">
                 تسجيل الدخول
               </Link>
             </div>

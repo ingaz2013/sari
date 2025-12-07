@@ -46,11 +46,11 @@ export default function PaymentCancel() {
             </Button>
           </div>
 
-          <div className="bg-blue-50 dark:bg-blue-950 p-4 rounded-lg text-right">
-            <p className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">
+          <div className="bg-primary/10 dark:bg-blue-950 p-4 rounded-lg text-right">
+            <p className="text-sm font-medium text-primary dark:text-blue-200 mb-2">
               هل تحتاج مساعدة؟
             </p>
-            <p className="text-xs text-blue-600 dark:text-blue-300">
+            <p className="text-xs text-primary dark:text-blue-300">
               يمكنك التواصل مع فريق الدعم الفني للمساعدة في إتمام عملية الاشتراك
             </p>
           </div>

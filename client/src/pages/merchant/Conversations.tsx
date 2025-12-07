@@ -77,10 +77,10 @@ export default function Conversations() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">المحادثات المكتملة</CardTitle>
-            <MessageSquare className="h-4 w-4 text-blue-600" />
+            <MessageSquare className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-2xl font-bold text-primary">
               {conversations?.filter(c => c.status === 'closed').length || 0}
             </div>
             <p className="text-xs text-muted-foreground">تم إغلاقها</p>

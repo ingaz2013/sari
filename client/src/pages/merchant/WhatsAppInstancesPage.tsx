@@ -256,7 +256,7 @@ export default function WhatsAppInstancesPage() {
                 </div>
               )}
               {expiringData.expiring7Days.length > 0 && (
-                <div className="flex items-center gap-2 text-blue-700">
+                <div className="flex items-center gap-2 text-primary">
                   <Clock className="w-4 h-4" />
                   <span className="font-semibold">{expiringData.expiring7Days.length}</span>
                   <span>instance ينتهي خلال 7 أيام</span>
@@ -333,7 +333,7 @@ export default function WhatsAppInstancesPage() {
                         <div className="flex items-center gap-2">
                           <h3 className="font-semibold text-lg">{instance.instanceId}</h3>
                           {instance.isPrimary && (
-                            <Badge className="bg-blue-500">
+                            <Badge className="bg-primary/100">
                               <Star className="w-3 h-3 ml-1 fill-current" />
                               Primary
                             </Badge>

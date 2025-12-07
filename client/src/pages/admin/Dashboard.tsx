@@ -12,8 +12,8 @@ export default function AdminDashboard() {
       value: merchants?.length || 0,
       icon: Store,
       description: 'عدد التجار المسجلين',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
     },
     {
       title: 'التجار النشطون',
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
                     </div>
                     <span className={`px-2 py-1 rounded-full text-xs ${
                       campaign.status === 'completed' ? 'bg-green-100 text-green-700' :
-                      campaign.status === 'sending' ? 'bg-blue-100 text-blue-700' :
+                      campaign.status === 'sending' ? 'bg-primary/20 text-primary' :
                       campaign.status === 'draft' ? 'bg-gray-100 text-gray-700' :
                       'bg-yellow-100 text-yellow-700'
                     }`}>

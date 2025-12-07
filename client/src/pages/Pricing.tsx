@@ -92,7 +92,7 @@ export default function Pricing() {
         <div className="container relative py-20 md:py-32">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold">
-                <span className="text-blue-600">
+                <span className="text-primary">
                 خطط تسعير واضحة
               </span>
             </h1>
@@ -112,13 +112,13 @@ export default function Pricing() {
                 key={plan.nameEn}
                 className={`relative border-2 ${
                   plan.popular
-                    ? 'border-blue-600 shadow-xl scale-105'
-                    : 'border-border hover:border-blue-200 dark:hover:border-blue-800'
+                    ? 'border-primary shadow-xl scale-105'
+                    : 'border-border hover:border-primary/30 dark:hover:border-blue-800'
                 } transition-all`}
               >
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <div className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
+                    <div className="bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
                       <Sparkles className="w-4 h-4" />
                       الأكثر شعبية
                     </div>
@@ -155,7 +155,7 @@ export default function Pricing() {
                       <Button
                         className={`w-full ${
                           plan.popular
-                            ? 'bg-blue-600 hover:bg-blue-700'
+                            ? 'bg-primary hover:bg-primary/90'
                             : ''
                         }`}
                         variant={plan.popular ? 'default' : 'outline'}
@@ -205,7 +205,7 @@ export default function Pricing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-primary text-white">
         <div className="container text-center space-y-8">
           <h2 className="text-3xl md:text-5xl font-bold">
             جاهز للبدء؟

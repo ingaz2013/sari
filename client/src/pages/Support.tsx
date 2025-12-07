@@ -122,7 +122,7 @@ export default function Support() {
         <div className="container relative py-20 md:py-32">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold">
-                <span className="text-blue-600">
+                <span className="text-primary">
                 كيف يمكننا مساعدتك؟
               </span>
             </h1>
@@ -147,9 +147,9 @@ export default function Support() {
 
           <div className="grid md:grid-cols-3 gap-6 mb-16">
             {supportChannels.map((channel) => (
-              <Card key={channel.title} className="border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+              <Card key={channel.title} className="border-2 hover:border-primary/30 dark:hover:border-blue-800 transition-colors">
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center mx-auto">
+                  <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mx-auto">
                     <channel.icon className="w-7 h-7 text-white" />
                   </div>
                   <div>
@@ -170,7 +170,7 @@ export default function Support() {
           <Card className="max-w-2xl mx-auto">
             <CardContent className="p-6">
               <div className="flex items-center gap-3 mb-4">
-                <Clock className="w-6 h-6 text-blue-600" />
+                <Clock className="w-6 h-6 text-primary" />
                 <h3 className="text-xl font-semibold">ساعات العمل</h3>
               </div>
               <div className="space-y-2">
@@ -249,7 +249,7 @@ export default function Support() {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
+                  <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90">
                     إرسال الرسالة
                     <Send className="mr-2 w-4 h-4" />
                   </Button>
@@ -274,9 +274,9 @@ export default function Support() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {resources.map((resource) => (
-              <Card key={resource.title} className="border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
+              <Card key={resource.title} className="border-2 hover:border-primary/30 dark:hover:border-blue-800 transition-colors">
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center mx-auto">
+                  <div className="w-14 h-14 rounded-xl bg-primary flex items-center justify-center mx-auto">
                     <resource.icon className="w-7 h-7 text-white" />
                   </div>
                   <div>

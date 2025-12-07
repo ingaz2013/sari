@@ -107,7 +107,7 @@ export default function Login() {
 
           <div className="mt-4 text-center text-sm text-muted-foreground">
             لا تملك حساباً؟{' '}
-            <Link href="/signup" className="text-blue-600 hover:underline font-medium">
+            <Link href="/signup" className="text-primary hover:underline font-medium">
               سجل الآن
             </Link>
           </div>
