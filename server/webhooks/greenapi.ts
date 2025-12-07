@@ -1,6 +1,7 @@
 import * as db from '../db';
 import { parseWebhookMessage, sendTextMessage } from '../whatsapp';
 import { processIncomingMessage } from '../ai';
+import { transcribeVoiceMessage, isVoiceMessage, getVoiceFileUrl } from '../voice-transcription';
 import { 
   isOrderRequest, 
   parseOrderMessage, 
@@ -23,16 +24,67 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
     // تحليل الرسالة الواردة
     const incomingMessage = parseWebhookMessage(webhookData);
     
-    if (!incomingMessage || incomingMessage.type !== 'text') {
-      console.log('[Green API Webhook] Skipping non-text message');
+    if (!incomingMessage) {
+      console.log('[Green API Webhook] Could not parse incoming message');
       return {
         success: true,
-        message: 'Non-text message skipped'
+        message: 'Invalid message format'
       };
     }
 
     const customerPhone = incomingMessage.from;
-    const messageText = incomingMessage.message || '';
+    let messageText = incomingMessage.message || '';
+    let messageType: 'text' | 'voice' | 'image' | 'video' | 'file' = 'text';
+
+    // فحص إذا كانت رسالة صوتية
+    if (isVoiceMessage(webhookData)) {
+      console.log(`[Green API Webhook] Voice message detected from ${customerPhone}`);
+      messageType = 'voice';
+      
+      const voiceFileUrl = getVoiceFileUrl(webhookData);
+      
+      if (!voiceFileUrl) {
+        console.error('[Green API Webhook] Could not extract voice file URL');
+        return {
+          success: false,
+          message: 'Voice file URL not found'
+        };
+      }
+      
+      try {
+        // تحويل الرسالة الصوتية إلى نص
+        const transcription = await transcribeVoiceMessage(voiceFileUrl, 'ar');
+        messageText = transcription.text;
+        
+        console.log(`[Green API Webhook] Voice transcribed: ${messageText.substring(0, 100)}...`);
+        
+        // إرسال تأكيد للعميل بأننا فهمنا الرسالة
+        await sendTextMessage(
+          customerPhone,
+          `✅ فهمت رسالتك الصوتية: "${messageText}"\n\nخليني أعالج طلبك...`
+        );
+        
+      } catch (error: any) {
+        console.error('[Green API Webhook] Voice transcription failed:', error.message);
+        
+        // إرسال رسالة خطأ للعميل
+        await sendTextMessage(
+          customerPhone,
+          `❌ عذراً، ما قدرت أفهم الرسالة الصوتية. ممكن تكتب طلبك بالنص؟`
+        );
+        
+        return {
+          success: false,
+          message: `Voice transcription failed: ${error.message}`
+        };
+      }
+    } else if (incomingMessage.type !== 'text') {
+      console.log('[Green API Webhook] Skipping non-text/non-voice message');
+      return {
+        success: true,
+        message: 'Non-text/non-voice message skipped'
+      };
+    }
 
     console.log(`[Green API Webhook] Processing message from ${customerPhone}: ${messageText}`);
 
@@ -72,7 +124,7 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
       conversationId: conversation.id,
       direction: 'incoming',
       content: messageText,
-      messageType: 'text',
+      messageType: messageType,
       isProcessed: false,
     });
 
