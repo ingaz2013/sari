@@ -1215,3 +1215,12 @@
 - [x] ضبط الهوامش والحواف للـ RTL
 - [x] اختبار التبديل بين اللغات
 - [x] حفظ checkpoint
+
+## إكمال ترجمة صفحات لوحة التحكم
+- [x] تحديث ar.json و en.json بمفاتيح sidebar (merchant + admin)
+- [x] ترجمة DashboardLayout (جميع menu items + header + logout)
+- [x] إضافة useTranslation لـ 5 صفحات (Dashboard, Products, Orders, Conversations, Campaigns)
+- [x] إنشاء translate-pages.py script للترجمة الآلية
+- [x] اختبار عدم وجود أخطاء TypeScript
+- [x] فحص الموقع والتأكد من عمل الترجمة
+- [x] حفظ checkpoint

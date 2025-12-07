@@ -7,6 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { MessageSquare, User, Bot, Clock, Search } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
@@ -15,6 +16,7 @@ import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { toast } from 'sonner';
 
 export default function Conversations() {
+  const { t } = useTranslation();
   const [selectedConversationId, setSelectedConversationId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
 

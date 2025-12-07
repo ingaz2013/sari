@@ -188,6 +188,36 @@
     "save": "Save Changes",
     "cancel": "Cancel"
   },
+  "sidebar": {
+    "merchant": {
+      "dashboard": "Dashboard",
+      "campaigns": "Campaigns",
+      "products": "Products",
+      "chatOrders": "WhatsApp Orders",
+      "conversations": "Conversations",
+      "discounts": "Discount Codes",
+      "referrals": "Referral System",
+      "abandonedCarts": "Abandoned Carts",
+      "occasionCampaigns": "Occasion Campaigns",
+      "analytics": "Advanced Analytics",
+      "subscriptions": "Subscriptions",
+      "whatsapp": "Connect WhatsApp",
+      "whatsappInstances": "Manage WhatsApp Instances",
+      "orderNotifications": "Order Notifications",
+      "salla": "Connect Salla Store",
+      "settings": "Settings"
+    },
+    "admin": {
+      "dashboard": "Dashboard",
+      "merchants": "Merchants",
+      "campaigns": "Campaigns",
+      "whatsappRequests": "WhatsApp Requests",
+      "paymentGateways": "Payment Gateways",
+      "settings": "Settings"
+    },
+    "merchantPanel": "Merchant Panel",
+    "adminPanel": "Admin Panel"
+  },
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",

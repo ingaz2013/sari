@@ -25,10 +25,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Package, Plus, Upload, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation } from 'wouter';
 import { ProductsSkeleton } from '@/components/ProductsSkeleton';
 
 export default function Products() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
   const { data: products, isLoading } = trpc.products.list.useQuery();

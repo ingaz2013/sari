@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { trpc } from '@/lib/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MessageSquare, Send, Users, TrendingUp, ArrowUp, ArrowDown, Package } from 'lucide-react';
@@ -7,6 +8,7 @@ import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default function MerchantDashboard() {
+  const { t } = useTranslation();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const { data: merchant, isLoading: merchantLoading } = trpc.merchants.getCurrent.useQuery();
   const { data: onboardingStatus } = trpc.merchants.getOnboardingStatus.useQuery();

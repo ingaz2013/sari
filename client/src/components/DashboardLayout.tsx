@@ -47,34 +47,35 @@ import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
+import { useTranslation } from 'react-i18next';
 
 // Menu items based on user role
-const getMerchantMenuItems = () => [
-  { icon: LayoutDashboard, label: "لوحة التحكم", path: "/merchant/dashboard" },
-  { icon: Megaphone, label: "الحملات", path: "/merchant/campaigns" },
-  { icon: Package, label: "المنتجات", path: "/merchant/products" },
-  { icon: ShoppingCart, label: "طلبات الواتساب", path: "/merchant/chat-orders" },
-  { icon: MessageSquare, label: "المحادثات", path: "/merchant/conversations" },
-  { icon: Ticket, label: "كودات الخصم", path: "/merchant/discounts" },
-  { icon: UserPlus, label: "نظام الإحالة", path: "/merchant/referrals" },
-  { icon: ShoppingBag, label: "السلال المهجورة", path: "/merchant/abandoned-carts" },
-  { icon: PartyPopper, label: "حملات المناسبات", path: "/merchant/occasion-campaigns" },
-  { icon: BarChart3, label: "التحليلات المتقدمة", path: "/merchant/analytics" },
-  { icon: CreditCard, label: "الاشتراكات", path: "/merchant/subscriptions" },
-  { icon: Smartphone, label: "ربط الواتساب", path: "/merchant/whatsapp" },
-  { icon: Smartphone, label: "إدارة WhatsApp Instances", path: "/merchant/whatsapp-instances" },
-  { icon: Bell, label: "إشعارات الطلبات", path: "/merchant/order-notifications" },
-  { icon: Store, label: "ربط متجر Salla", path: "/merchant/salla" },
-  { icon: Settings, label: "الإعدادات", path: "/merchant/settings" },
+const getMerchantMenuItems = (t: any) => [
+  { icon: LayoutDashboard, label: t('sidebar.merchant.dashboard'), path: "/merchant/dashboard" },
+  { icon: Megaphone, label: t('sidebar.merchant.campaigns'), path: "/merchant/campaigns" },
+  { icon: Package, label: t('sidebar.merchant.products'), path: "/merchant/products" },
+  { icon: ShoppingCart, label: t('sidebar.merchant.chatOrders'), path: "/merchant/chat-orders" },
+  { icon: MessageSquare, label: t('sidebar.merchant.conversations'), path: "/merchant/conversations" },
+  { icon: Ticket, label: t('sidebar.merchant.discounts'), path: "/merchant/discounts" },
+  { icon: UserPlus, label: t('sidebar.merchant.referrals'), path: "/merchant/referrals" },
+  { icon: ShoppingBag, label: t('sidebar.merchant.abandonedCarts'), path: "/merchant/abandoned-carts" },
+  { icon: PartyPopper, label: t('sidebar.merchant.occasionCampaigns'), path: "/merchant/occasion-campaigns" },
+  { icon: BarChart3, label: t('sidebar.merchant.analytics'), path: "/merchant/analytics" },
+  { icon: CreditCard, label: t('sidebar.merchant.subscriptions'), path: "/merchant/subscriptions" },
+  { icon: Smartphone, label: t('sidebar.merchant.whatsapp'), path: "/merchant/whatsapp" },
+  { icon: Smartphone, label: t('sidebar.merchant.whatsappInstances'), path: "/merchant/whatsapp-instances" },
+  { icon: Bell, label: t('sidebar.merchant.orderNotifications'), path: "/merchant/order-notifications" },
+  { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla" },
+  { icon: Settings, label: t('sidebar.merchant.settings'), path: "/merchant/settings" },
 ];
 
-const getAdminMenuItems = () => [
-  { icon: LayoutDashboard, label: "لوحة التحكم", path: "/admin/dashboard" },
-  { icon: Users, label: "التجار", path: "/admin/merchants" },
-  { icon: Megaphone, label: "الحملات", path: "/admin/campaigns" },
-  { icon: Smartphone, label: "طلبات الواتساب", path: "/admin/whatsapp-requests" },
-  { icon: CreditCard, label: "بوابات الدفع", path: "/admin/payment-gateways" },
-  { icon: Settings, label: "الإعدادات", path: "/admin/settings" },
+const getAdminMenuItems = (t: any) => [
+  { icon: LayoutDashboard, label: t('sidebar.admin.dashboard'), path: "/admin/dashboard" },
+  { icon: Users, label: t('sidebar.admin.merchants'), path: "/admin/merchants" },
+  { icon: Megaphone, label: t('sidebar.admin.campaigns'), path: "/admin/campaigns" },
+  { icon: Smartphone, label: t('sidebar.admin.whatsappRequests'), path: "/admin/whatsapp-requests" },
+  { icon: CreditCard, label: t('sidebar.admin.paymentGateways'), path: "/admin/payment-gateways" },
+  { icon: Settings, label: t('sidebar.admin.settings'), path: "/admin/settings" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -87,6 +88,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY);
     return saved ? parseInt(saved, 10) : DEFAULT_WIDTH;
@@ -151,6 +153,7 @@ function DashboardLayoutContent({
   children,
   setSidebarWidth,
 }: DashboardLayoutContentProps) {
+  const { t } = useTranslation();
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar } = useSidebar();
@@ -160,7 +163,7 @@ function DashboardLayoutContent({
   const isMobile = useIsMobile();
   
   // Get menu items based on user role
-  const menuItems = user?.role === 'admin' ? getAdminMenuItems() : getMerchantMenuItems();
+  const menuItems = user?.role === 'admin' ? getAdminMenuItems(t) : getMerchantMenuItems(t);
   const activeMenuItem = menuItems.find(item => item.path === location);
 
   useEffect(() => {
@@ -219,7 +222,7 @@ function DashboardLayoutContent({
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="font-semibold tracking-tight truncate">
-                    {user?.role === 'admin' ? 'لوحة المدير' : 'لوحة التاجر'}
+                    {user?.role === 'admin' ? t('sidebar.adminPanel') : t('sidebar.merchantPanel')}
                   </span>
                 </div>
               ) : null}
@@ -274,7 +277,7 @@ function DashboardLayoutContent({
                   className="cursor-pointer text-destructive focus:text-destructive"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sign out</span>
+                  <span>{t('common.logout')}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

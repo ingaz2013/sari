@@ -188,6 +188,36 @@
     "save": "حفظ التغييرات",
     "cancel": "إلغاء"
   },
+  "sidebar": {
+    "merchant": {
+      "dashboard": "لوحة التحكم",
+      "campaigns": "الحملات",
+      "products": "المنتجات",
+      "chatOrders": "طلبات الواتساب",
+      "conversations": "المحادثات",
+      "discounts": "كودات الخصم",
+      "referrals": "نظام الإحالة",
+      "abandonedCarts": "السلال المهجورة",
+      "occasionCampaigns": "حملات المناسبات",
+      "analytics": "التحليلات المتقدمة",
+      "subscriptions": "الاشتراكات",
+      "whatsapp": "ربط الواتساب",
+      "whatsappInstances": "إدارة WhatsApp Instances",
+      "orderNotifications": "إشعارات الطلبات",
+      "salla": "ربط متجر Salla",
+      "settings": "الإعدادات"
+    },
+    "admin": {
+      "dashboard": "لوحة التحكم",
+      "merchants": "التجار",
+      "campaigns": "الحملات",
+      "whatsappRequests": "طلبات الواتساب",
+      "paymentGateways": "بوابات الدفع",
+      "settings": "الإعدادات"
+    },
+    "merchantPanel": "لوحة التاجر",
+    "adminPanel": "لوحة الأدمن"
+  },
   "common": {
     "loading": "جاري التحميل...",
     "error": "حدث خطأ",

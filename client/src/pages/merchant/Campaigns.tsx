@@ -1,4 +1,5 @@
 import { trpc } from '@/lib/trpc';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -15,6 +16,7 @@ import { useLocation } from 'wouter';
 import { toast } from 'sonner';
 
 export default function Campaigns() {
+  const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const { data: campaigns, isLoading, refetch } = trpc.campaigns.list.useQuery();
   const deleteMutation = trpc.campaigns.delete.useMutation({
