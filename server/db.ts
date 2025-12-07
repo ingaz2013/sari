@@ -84,6 +84,9 @@ import {
   occasionCampaigns,
   OccasionCampaign,
   InsertOccasionCampaign,
+  whatsappInstances,
+  WhatsAppInstance,
+  InsertWhatsAppInstance,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1928,4 +1931,155 @@ export async function getOccasionCampaignsStats(merchantId: number) {
     sentCampaigns: sentCampaigns.length,
     totalRecipients,
   };
+}
+
+
+// ==================== WhatsApp Instances ====================
+
+/**
+ * Create a new WhatsApp instance
+ */
+export async function createWhatsAppInstance(data: InsertWhatsAppInstance): Promise<WhatsAppInstance | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [instance] = await db.insert(whatsappInstances).values(data);
+  return getWhatsAppInstanceById(Number(instance.insertId));
+}
+
+/**
+ * Get WhatsApp instance by ID
+ */
+export async function getWhatsAppInstanceById(id: number): Promise<WhatsAppInstance | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [instance] = await db.select().from(whatsappInstances).where(eq(whatsappInstances.id, id));
+  return instance;
+}
+
+/**
+ * Get all WhatsApp instances for a merchant
+ */
+export async function getWhatsAppInstancesByMerchantId(merchantId: number): Promise<WhatsAppInstance[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(whatsappInstances)
+    .where(eq(whatsappInstances.merchantId, merchantId))
+    .orderBy(desc(whatsappInstances.isPrimary), desc(whatsappInstances.createdAt));
+}
+
+/**
+ * Get primary WhatsApp instance for a merchant
+ */
+export async function getPrimaryWhatsAppInstance(merchantId: number): Promise<WhatsAppInstance | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [instance] = await db.select().from(whatsappInstances)
+    .where(and(
+      eq(whatsappInstances.merchantId, merchantId),
+      eq(whatsappInstances.isPrimary, true),
+      eq(whatsappInstances.status, 'active')
+    ));
+  
+  return instance;
+}
+
+/**
+ * Get WhatsApp instance by instance ID
+ */
+export async function getWhatsAppInstanceByInstanceId(instanceId: string): Promise<WhatsAppInstance | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [instance] = await db.select().from(whatsappInstances)
+    .where(eq(whatsappInstances.instanceId, instanceId));
+  
+  return instance;
+}
+
+/**
+ * Update WhatsApp instance
+ */
+export async function updateWhatsAppInstance(id: number, data: Partial<InsertWhatsAppInstance>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(whatsappInstances)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(whatsappInstances.id, id));
+}
+
+/**
+ * Set WhatsApp instance as primary
+ * This will unset all other instances for the merchant
+ */
+export async function setWhatsAppInstanceAsPrimary(id: number, merchantId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  // First, unset all primary instances for this merchant
+  await db.update(whatsappInstances)
+    .set({ isPrimary: false, updatedAt: new Date() })
+    .where(eq(whatsappInstances.merchantId, merchantId));
+
+  // Then set the specified instance as primary
+  await db.update(whatsappInstances)
+    .set({ isPrimary: true, updatedAt: new Date() })
+    .where(eq(whatsappInstances.id, id));
+}
+
+/**
+ * Delete WhatsApp instance
+ */
+export async function deleteWhatsAppInstance(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.delete(whatsappInstances).where(eq(whatsappInstances.id, id));
+}
+
+/**
+ * Get active WhatsApp instances count for a merchant
+ */
+export async function getActiveWhatsAppInstancesCount(merchantId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const instances = await db.select().from(whatsappInstances)
+    .where(and(
+      eq(whatsappInstances.merchantId, merchantId),
+      eq(whatsappInstances.status, 'active')
+    ));
+
+  return instances.length;
+}
+
+/**
+ * Get expired WhatsApp instances
+ */
+export async function getExpiredWhatsAppInstances(): Promise<WhatsAppInstance[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const now = new Date();
+  return db.select().from(whatsappInstances)
+    .where(and(
+      eq(whatsappInstances.status, 'active'),
+      lt(whatsappInstances.expiresAt, now)
+    ));
+}
+
+/**
+ * Mark WhatsApp instance as expired
+ */
+export async function markWhatsAppInstanceExpired(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(whatsappInstances)
+    .set({ status: 'expired', updatedAt: new Date() })
+    .where(eq(whatsappInstances.id, id));
 }

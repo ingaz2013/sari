@@ -34,6 +34,7 @@ import PaymentCancel from "./pages/merchant/PaymentCancel";
 import AbandonedCartsPage from "./pages/merchant/AbandonedCartsPage";
 import OccasionCampaignsPage from "./pages/merchant/OccasionCampaignsPage";
 import AnalyticsDashboard from "./pages/merchant/AnalyticsDashboard";
+import WhatsAppInstancesPage from "./pages/merchant/WhatsAppInstancesPage";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -142,6 +143,12 @@ function Router() {
       <Route path="/merchant/analytics">
         <DashboardLayout>
           <AnalyticsDashboard />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/whatsapp-instances">
+        <DashboardLayout>
+          <WhatsAppInstancesPage />
         </DashboardLayout>
       </Route>
       

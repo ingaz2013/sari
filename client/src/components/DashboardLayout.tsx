@@ -61,6 +61,7 @@ const getMerchantMenuItems = () => [
   { icon: BarChart3, label: "التحليلات المتقدمة", path: "/merchant/analytics" },
   { icon: CreditCard, label: "الاشتراكات", path: "/merchant/subscriptions" },
   { icon: Smartphone, label: "ربط الواتساب", path: "/merchant/whatsapp" },
+  { icon: Smartphone, label: "إدارة WhatsApp Instances", path: "/merchant/whatsapp-instances" },
   { icon: Store, label: "ربط متجر Salla", path: "/merchant/salla" },
   { icon: Settings, label: "الإعدادات", path: "/merchant/settings" },
 ];

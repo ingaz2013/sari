@@ -563,3 +563,29 @@ export const occasionCampaigns = mysqlTable("occasion_campaigns", {
 
 export type OccasionCampaign = typeof occasionCampaigns.$inferSelect;
 export type InsertOccasionCampaign = typeof occasionCampaigns.$inferInsert;
+
+
+/**
+ * WhatsApp Instances (إدارة instances الواتساب)
+ * Supports multiple WhatsApp instances per merchant
+ */
+export const whatsappInstances = mysqlTable('whatsapp_instances', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().references(() => merchants.id, { onDelete: 'cascade' }),
+  instanceId: varchar('instance_id', { length: 255 }).notNull(),
+  token: text('token').notNull(),
+  apiUrl: varchar('api_url', { length: 255 }).default('https://api.green-api.com'),
+  phoneNumber: varchar('phone_number', { length: 20 }),
+  webhookUrl: text('webhook_url'),
+  status: mysqlEnum('status', ['active', 'inactive', 'pending', 'expired']).default('pending').notNull(),
+  isPrimary: boolean('is_primary').default(false).notNull(),
+  lastSyncAt: timestamp('last_sync_at'),
+  connectedAt: timestamp('connected_at'),
+  expiresAt: timestamp('expires_at'),
+  metadata: text('metadata'), // JSON string for additional data
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type WhatsAppInstance = typeof whatsappInstances.$inferSelect;
+export type InsertWhatsAppInstance = typeof whatsappInstances.$inferInsert;

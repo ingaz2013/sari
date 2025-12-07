@@ -918,3 +918,24 @@
 - [x] تحديث DashboardLayout
 - [x] كتابة الاختبارات
 - [x] اختبار النظام الكامل
+
+
+## نظام إدارة WhatsApp Instances
+- [x] إنشاء جدول whatsapp_instances فيschema.ts
+- [x] إضافة دوال قاعدة البيانات في db.ts (create, get, update, delete, setPrimary)
+- [x] إنشاء APIs في routers.ts (list, create, update, delete, setPrimary, testConnection)
+- [x] إنشاء صفحة /merchant/whatsapp-instances
+- [x] عرض جميع instances مع حالتها
+- [x] إضافة instance جديد
+- [x] تعديل instance موجود
+- [x] حذف instance
+- [x] تعيين instance كـ Primary
+- [x] اختبار اتصال instance
+- [x] عرض معلومات الاتصال (رقم الهاتف، حالة، تاريخ الانتهاء)
+- [x] تحديث webhook handler ليدعم multiple instances
+- [x] إنشاء migration script لنقل البيانات من merchants
+- [x] تحديث دوال WhatsApp لاستخدام الـ instance الصحيح
+- [x] إضافة المسار في App.tsx
+- [x] تحديث DashboardLayout
+- [x] كتابة الاختبارات
+- [x] اختبار النظام الكامل
