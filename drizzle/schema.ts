@@ -423,20 +423,34 @@ export type InsertDiscountCode = typeof discountCodes.$inferInsert;
 export const referralCodes = mysqlTable("referral_codes", {
   id: int("id").autoincrement().primaryKey(),
   merchantId: int("merchantId").notNull(),
-  customerId: int("customerId").notNull(), // Customer who owns this referral code
-  code: varchar("code", { length: 50 }).notNull().unique(), // e.g., AHMED123
-  discountValue: int("discountValue").notNull(), // Discount for referred friend
-  rewardValue: int("rewardValue").notNull(), // Reward for referrer
-  maxReferrals: int("maxReferrals").default(5).notNull(), // Max 5 friends
-  referralCount: int("referralCount").default(0).notNull(), // How many used
-  totalRewards: int("totalRewards").default(0).notNull(), // Total rewards earned
+  code: varchar("code", { length: 50 }).notNull().unique(), // e.g., REF96781234
+  referrerPhone: varchar("referrerPhone", { length: 20 }).notNull(), // Phone of the person who refers
+  referrerName: varchar("referrerName", { length: 255 }).notNull(),
+  referralCount: int("referralCount").default(0).notNull(), // How many successful referrals
+  rewardGiven: boolean("rewardGiven").default(false).notNull(), // Has the 15% reward been given?
   isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+/**
+ * Referrals (الإحالات الفردية)
+ */
+export const referrals = mysqlTable("referrals", {
+  id: int("id").autoincrement().primaryKey(),
+  referralCodeId: int("referralCodeId").notNull(), // FK to referral_codes
+  referredPhone: varchar("referredPhone", { length: 20 }).notNull(), // Phone of referred friend
+  referredName: varchar("referredName", { length: 255 }).notNull(),
+  orderCompleted: boolean("orderCompleted").default(false).notNull(), // Has the friend completed an order?
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
 export type ReferralCode = typeof referralCodes.$inferSelect;
 export type InsertReferralCode = typeof referralCodes.$inferInsert;
+
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = typeof referrals.$inferInsert;
 
 /**
  * Abandoned Carts (السلات المهجورة)

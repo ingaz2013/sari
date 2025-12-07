@@ -66,6 +66,9 @@ import {
   referralCodes,
   ReferralCode,
   InsertReferralCode,
+  referrals,
+  Referral,
+  InsertReferral,
   abandonedCarts,
   AbandonedCart,
   InsertAbandonedCart,
@@ -1440,32 +1443,45 @@ export async function getReferralCodeByCode(code: string): Promise<ReferralCode 
   return result[0];
 }
 
-export async function getReferralCodeByCustomerId(merchantId: number, customerId: number): Promise<ReferralCode | undefined> {
+export async function getReferralCodeByPhone(merchantId: number, phone: string): Promise<ReferralCode | undefined> {
   const db = await getDb();
   if (!db) return undefined;
 
   const result = await db.select().from(referralCodes).where(
     and(
       eq(referralCodes.merchantId, merchantId),
-      eq(referralCodes.customerId, customerId)
+      eq(referralCodes.referrerPhone, phone)
     )
   ).limit(1);
   
   return result[0];
 }
 
-export async function incrementReferralCount(code: string, rewardValue: number): Promise<void> {
+export async function incrementReferralCount(id: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const referralCode = await getReferralCodeById(id);
+  if (!referralCode) return 0;
+
+  const newCount = referralCode.referralCount + 1;
+
+  await db.update(referralCodes).set({
+    referralCount: newCount,
+    updatedAt: new Date()
+  }).where(eq(referralCodes.id, id));
+  
+  return newCount;
+}
+
+export async function markReferralRewardGiven(id: number): Promise<void> {
   const db = await getDb();
   if (!db) return;
 
-  const referralCode = await getReferralCodeByCode(code);
-  if (!referralCode) return;
-
   await db.update(referralCodes).set({
-    referralCount: referralCode.referralCount + 1,
-    totalRewards: referralCode.totalRewards + rewardValue,
+    rewardGiven: true,
     updatedAt: new Date()
-  }).where(eq(referralCodes.id, referralCode.id));
+  }).where(eq(referralCodes.id, id));
 }
 
 // ============================================
@@ -1739,4 +1755,58 @@ export async function getLatestOrderTrackingLog(orderId: number) {
     .orderBy(desc(orderTrackingLogs.createdAt))
     .limit(1);
   return logs[0] || null;
+}
+
+
+// ============================================
+// Referrals Functions
+// ============================================
+
+export async function createReferral(data: InsertReferral): Promise<Referral | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.insert(referrals).values(data);
+  const id = Number(result[0].insertId);
+  
+  const newReferral = await db.select().from(referrals).where(eq(referrals.id, id)).limit(1);
+  return newReferral[0];
+}
+
+export async function getReferralByPhone(referralCodeId: number, phone: string): Promise<Referral | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(referrals).where(
+    and(
+      eq(referrals.referralCodeId, referralCodeId),
+      eq(referrals.referredPhone, phone)
+    )
+  ).limit(1);
+  
+  return result[0];
+}
+
+export async function getReferralsByReferredPhone(phone: string): Promise<Referral[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(referrals).where(eq(referrals.referredPhone, phone));
+}
+
+export async function updateReferralStatus(id: number, completed: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(referrals).set({
+    orderCompleted: completed,
+    updatedAt: new Date()
+  }).where(eq(referrals.id, id));
+}
+
+export async function getReferralsByCodeId(referralCodeId: number): Promise<Referral[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(referrals).where(eq(referrals.referralCodeId, referralCodeId));
 }

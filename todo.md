@@ -672,3 +672,54 @@
 - [x] كتابة اختبارات Vitest (22 اختبار - 100% نجاح)
 - [ ] إنشاء دليل ORDER_TRACKING.md
 - [x] اختبار النظام بالكامل
+
+
+## نظام كودات الخصم والإحالة
+
+### المرحلة 1: نظام كودات الخصم الأساسي
+- [x] إنشاء ملف server/automation/discount-system.ts
+- [x] دالة generateDiscountCode (توليد كود عشوائي)
+- [x] دالة createDiscountCode (إنشاء كود في قاعدة البيانات)
+- [x] دالة validateDiscountCode (التحقق من صلاحية الكود)
+- [x] دالة applyDiscountCode (تطبيق الخصم على الطلب)
+- [x] دالة createPostPurchaseDiscount (كود خصم بعد الشراء)
+- [x] دالة calculateFinalPrice (حساب السعر النهائي)
+- [x] دالة extractDiscountCodeFromMessage (استخراج الكود من الرسالة)
+- [x] دالة generateDiscountMessage (رسالة واتساب)
+- [ ] إضافة APIs في routers.ts
+
+### المرحلة 2: نظام الإحالة والمكافآت
+- [x] تحديث schema لجدول referral_codes
+- [x] إضافة جدول referrals جديد
+- [x] تطبيق Migration (pnpm db:push)
+- [x] تحديث دوال referral_codes في db.ts
+- [x] إضافة دوال referrals في db.ts (5 دوال)
+- [x] إنشاء ملف server/automation/referral-system.ts
+- [x] دالة generateReferralCode (كود إحالة فريد)
+- [x] دالة createReferralCodeForCustomer (إنشاء كود)
+- [x] دالة trackReferral (تتبع الإحالات)
+- [x] دالة completeReferral (إتمام إحالة)
+- [x] دالة rewardReferrer (مكافأة 15%)
+- [x] دالة generateReferralRewardMessage (رسالة المكافأة)
+- [x] دالة generateReferralInviteMessage (رسالة الدعوة)
+- [x] دالة generateReferralProgressMessage (رسالة تشجيعية)
+- [x] دالة extractReferralCodeFromMessage (استخراج الكود)
+- [ ] إضافة APIs في routers.ts
+
+### المرحلة 3: دمج مع الطلب من الواتساب
+- [ ] تحديث order-from-chat.ts لدعم كودات الخصم
+- [ ] اكتشاف تلقائي لكود الخصم في رسالة العميل
+- [ ] تطبيق الخصم قبل إنشاء الطلب في Salla
+- [ ] رسائل تأكيد مع تفاصيل الخصم
+- [ ] تحديث Green API Webhook
+
+### المرحلة 4: واجهات التاجر
+- [ ] صفحة /merchant/discounts (إدارة كودات الخصم)
+- [ ] صفحة /merchant/referrals (عرض الإحالات)
+- [ ] إحصائيات الأداء
+- [ ] إضافة روابط في DashboardLayout
+
+### المرحلة 5: الاختبارات والتوثيق
+- [ ] كتابة اختبارات Vitest
+- [ ] إنشاء دليل DISCOUNT_REFERRAL_GUIDE.md
+- [ ] اختبار النظام الكامل
