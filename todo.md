@@ -414,3 +414,9 @@
 - [x] إضافة رابط Sign Up في صفحة Login
 - [x] إضافة رابط Sign Up في Navbar (زر "ابدأ الآن مجاناً")
 - [x] اختبار التسجيل بنجاح (تم إنشاء حساب khaled@test.sa وتوجيهه للوحة التاجر)
+
+
+## إصلاح خطأ nested anchor tags
+- [x] إزالة <a> المتداخلة داخل <Link> في Navbar
+- [x] استبدال <a> بـ <span> أو <div> مع cursor-pointer
+- [x] اختبار الإصلاح بنجاح (لا توجد أخطاء nested anchor)

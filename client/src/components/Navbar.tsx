@@ -18,23 +18,23 @@ export default function Navbar() {
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
         <Link href="/">
-          <a className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity">
+          <div className="flex items-center gap-2 font-bold text-xl hover:opacity-80 transition-opacity cursor-pointer">
             <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
               <Bot className="w-6 h-6 text-white" />
             </div>
             <span className="text-blue-600">
               ساري
             </span>
-          </a>
+          </div>
         </Link>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
-              <a className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <span className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
                 {link.label}
-              </a>
+              </span>
             </Link>
           ))}
         </div>
@@ -42,16 +42,12 @@ export default function Navbar() {
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
           <Link href="/login">
-            <a>
-              <Button variant="ghost">تسجيل الدخول</Button>
-            </a>
+            <Button variant="ghost">تسجيل الدخول</Button>
           </Link>
           <Link href="/signup">
-            <a>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                ابدأ الآن مجاناً
-              </Button>
-            </a>
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              ابدأ الآن مجاناً
+            </Button>
           </Link>
         </div>
 
@@ -71,29 +67,29 @@ export default function Navbar() {
           <div className="container py-4 space-y-3">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
-                <a
-                  className="block py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                <span
+                  className="block py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
-                </a>
+                </span>
               </Link>
             ))}
             <div className="pt-3 space-y-2">
-              <Link href="/login">
-                <a className="block" onClick={() => setIsMenuOpen(false)}>
+              <div onClick={() => setIsMenuOpen(false)}>
+                <Link href="/login">
                   <Button variant="outline" className="w-full">
                     تسجيل الدخول
                   </Button>
-                </a>
-              </Link>
-              <Link href="/signup">
-                <a className="block" onClick={() => setIsMenuOpen(false)}>
+                </Link>
+              </div>
+              <div onClick={() => setIsMenuOpen(false)}>
+                <Link href="/signup">
                   <Button className="w-full bg-blue-600 hover:bg-blue-700">
                     ابدأ الآن مجاناً
                   </Button>
-                </a>
-              </Link>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
