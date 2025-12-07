@@ -3032,6 +3032,81 @@ export const appRouter = router({
         };
       }),
   }),
+
+  // Dashboard Analytics
+  dashboard: router({
+    // اتجاه الطلبات
+    getOrdersTrend: protectedProcedure
+      .input(z.object({
+        days: z.number().optional().default(30),
+      }))
+      .query(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'لم يتم العثور على المتجر' });
+        }
+
+        const { getOrdersTrend } = await import('./dashboard-analytics');
+        return await getOrdersTrend(merchant.id, input.days);
+      }),
+
+    // اتجاه الإيرادات
+    getRevenueTrend: protectedProcedure
+      .input(z.object({
+        days: z.number().optional().default(30),
+      }))
+      .query(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'لم يتم العثور على المتجر' });
+        }
+
+        const { getRevenueTrend } = await import('./dashboard-analytics');
+        return await getRevenueTrend(merchant.id, input.days);
+      }),
+
+    // المقارنة مع الفترة السابقة
+    getComparisonStats: protectedProcedure
+      .input(z.object({
+        days: z.number().optional().default(30),
+      }))
+      .query(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'لم يتم العثور على المتجر' });
+        }
+
+        const { getComparisonStats } = await import('./dashboard-analytics');
+        return await getComparisonStats(merchant.id, input.days);
+      }),
+
+    // أفضل المنتجات
+    getTopProducts: protectedProcedure
+      .input(z.object({
+        limit: z.number().optional().default(5),
+      }))
+      .query(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'لم يتم العثور على المتجر' });
+        }
+
+        const { getTopProducts } = await import('./dashboard-analytics');
+        return await getTopProducts(merchant.id, input.limit);
+      }),
+
+    // إحصائيات Dashboard الرئيسية
+    getStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'لم يتم العثور على المتجر' });
+        }
+
+        const { getDashboardStats } = await import('./dashboard-analytics');
+        return await getDashboardStats(merchant.id);
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
