@@ -16,24 +16,26 @@ import {
   Users,
   BarChart3,
   Sparkles,
+  Mic,
+  ShoppingCart,
 } from 'lucide-react';
 
 export default function Home() {
   const features = [
+    {
+      icon: Mic,
+      title: 'طلب بالرسالة الصوتية',
+      description: 'عملاؤك يطلبون بصوتهم فقط: المنتج، العدد، والعنوان - وساري يتولى الباقي',
+    },
     {
       icon: Bot,
       title: 'رد آلي ذكي',
       description: 'يرد "ساري" على استفسارات عملائك باللهجة السعودية على مدار الساعة',
     },
     {
-      icon: MessageSquare,
-      title: 'محادثات غير محدودة',
-      description: 'تعامل مع آلاف المحادثات في نفس الوقت دون أي تأخير',
-    },
-    {
-      icon: Zap,
-      title: 'استجابة فورية',
-      description: 'رد فوري على العملاء في أقل من ثانية واحدة',
+      icon: ShoppingCart,
+      title: 'طلبات تلقائية',
+      description: 'تحويل المحادثات إلى طلبات مكتملة مع رابط الدفع تلقائياً',
     },
     {
       icon: TrendingUp,
@@ -129,7 +131,7 @@ export default function Home() {
               </h1>
               
               <p className="text-xl text-muted-foreground">
-                أتمت خدمة عملائك وزد مبيعاتك باستخدام الذكاء الاصطناعي. ساري يرد على عملائك باللهجة السعودية على مدار الساعة.
+                أدر مبيعاتك بالمحادثات الصوتية: فقط سجل بصوتك طلبك والعنوان والمنتج والعدد واترك الباقي على ساري. يفهم اللهجة السعودية ويحول الصوت لطلب كامل تلقائياً.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -293,6 +295,130 @@ export default function Home() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Voice Order Feature Section */}
+      <section className="py-20 bg-gradient-to-br from-primary/10 to-blue-50 dark:from-primary/5 dark:to-background">
+        <div className="container">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="order-2 lg:order-1">
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border bg-card p-8">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
+                      <Mic className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <div className="font-semibold text-lg">رسالة صوتية من العميل</div>
+                      <div className="text-sm text-muted-foreground">مثال على طلب بالصوت</div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-muted p-6 rounded-xl space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Mic className="w-6 h-6 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="h-2 bg-primary/30 rounded-full overflow-hidden">
+                          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '70%' }} />
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-2">0:08</p>
+                      </div>
+                    </div>
+                    <div className="bg-background/50 p-4 rounded-lg border-r-4 border-primary">
+                      <p className="text-sm font-medium">النص المحول:</p>
+                      <p className="text-sm mt-2">"السلام عليكم، أبي آيفون 15 برو ماكس حبتين، وسلموها على شارع التحلية في الرياض"</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 bg-primary/5 p-4 rounded-lg">
+                    <Bot className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm mb-2">ساري يعالج الطلب تلقائياً:</p>
+                      <ul className="space-y-2 text-sm">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                          <span>المنتج: آيفون 15 برو ماكس</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                          <span>الكمية: 2</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                          <span>العنوان: شارع التحلية، الرياض</span>
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-primary" />
+                          <span>رابط الدفع: تم إنشاؤه تلقائياً</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="order-1 lg:order-2 space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-sm font-medium">
+                <Sparkles className="w-4 h-4" />
+                <span>ميزة جديدة</span>
+              </div>
+              
+              <h2 className="text-3xl md:text-5xl font-bold leading-tight">
+                طلب كامل برسالة
+                <br />
+                <span className="text-primary">صوتية واحدة</span>
+              </h2>
+              
+              <p className="text-xl text-muted-foreground leading-relaxed">
+                عملاؤك يقدرون يطلبون برسالة صوتية وحدة فقط! ساري يحول الصوت إلى نص، يفهم الطلب، يتأكد من التفاصيل، وينشئ رابط الدفع تلقائياً.
+              </p>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Mic className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">تحويل صوتي ذكي</h3>
+                    <p className="text-muted-foreground">يفهم اللهجة السعودية ويحول الصوت لنص بدقة عالية</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <ShoppingCart className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">إنشاء طلب تلقائي</h3>
+                    <p className="text-muted-foreground">يستخرج المنتج، الكمية، والعنوان من الرسالة</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1">تأكيد ودفع</h3>
+                    <p className="text-muted-foreground">يرسل تفاصيل الطلب ورابط الدفع فوراً</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <Link href="/login">
+                  <a>
+                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg h-14 px-8">
+                      جرب الميزة الآن
+                      <ArrowRight className="mr-2 w-5 h-5" />
+                    </Button>
+                  </a>
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </section>
