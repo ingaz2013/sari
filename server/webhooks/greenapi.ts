@@ -1,6 +1,13 @@
 import * as db from '../db';
 import { parseWebhookMessage, sendTextMessage } from '../whatsapp';
 import { processIncomingMessage } from '../ai';
+import { 
+  isOrderRequest, 
+  parseOrderMessage, 
+  createOrderFromChat,
+  generateOrderConfirmationMessage,
+  generateGiftOrderConfirmationMessage 
+} from '../automation/order-from-chat';
 
 interface WebhookResult {
   success: boolean;
@@ -73,22 +80,101 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
       lastMessageAt: new Date(),
     });
 
-    // توليد رد تلقائي باستخدام AI
-    const aiResponse = await processIncomingMessage(
-      conversation.merchantId,
-      conversation.id,
-      customerPhone,
-      messageText
-    );
-
-    if (aiResponse) {
-      // إرسال الرد عبر WhatsApp
-      const sendResult = await sendTextMessage(customerPhone, aiResponse);
+    // فحص إذا كانت الرسالة طلب شراء
+    const isOrder = await isOrderRequest(messageText);
+    
+    if (isOrder) {
+      console.log(`[Green API Webhook] Order request detected from ${customerPhone}`);
       
-      if (sendResult.success) {
-        console.log(`[Green API Webhook] AI response sent successfully to ${customerPhone}`);
-      } else {
-        console.error(`[Green API Webhook] Failed to send AI response: ${sendResult.error}`);
+      try {
+        // تحليل الطلب
+        const parsedOrder = await parseOrderMessage(messageText, conversation.merchantId);
+        
+        if (parsedOrder && parsedOrder.products.length > 0) {
+          // إنشاء الطلب
+          const orderResult = await createOrderFromChat(
+            conversation.merchantId,
+            customerPhone,
+            conversation.customerName || customerPhone,
+            parsedOrder
+          );
+          
+          if (orderResult) {
+            // الحصول على تفاصيل الطلب
+            const order = await db.getOrderById(orderResult.orderId);
+            if (order) {
+              const items = JSON.parse(order.items);
+              
+              // توليد رسالة التأكيد
+              const confirmationMessage = order.isGift
+                ? generateGiftOrderConfirmationMessage(
+                    order.orderNumber || '',
+                    order.giftRecipientName || '',
+                    items,
+                    order.totalAmount,
+                    orderResult.paymentUrl || ''
+                  )
+                : generateOrderConfirmationMessage(
+                    order.orderNumber || '',
+                    items,
+                    order.totalAmount,
+                    orderResult.paymentUrl || ''
+                  );
+              
+              // إرسال رسالة التأكيد
+              const sendResult = await sendTextMessage(customerPhone, confirmationMessage);
+              
+              if (sendResult.success) {
+                console.log(`[Green API Webhook] Order confirmation sent to ${customerPhone}`);
+                
+                // حفظ رسالة التأكيد
+                await db.createMessage({
+                  conversationId: conversation.id,
+                  direction: 'outgoing',
+                  content: confirmationMessage,
+                  messageType: 'text',
+                  isProcessed: true,
+                });
+              }
+              
+              return {
+                success: true,
+                message: 'Order created and confirmation sent'
+              };
+            }
+          } else {
+            // فشل إنشاء الطلب
+            const errorMessage = 'عذراً، لم نتمكن من إنشاء طلبك. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.';
+            await sendTextMessage(customerPhone, errorMessage);
+          }
+        } else {
+          // لم نتمكن من فهم الطلب
+          const clarificationMessage = 'أهلاً بك! 👋\n\nلم أتمكن من فهم طلبك بشكل كامل. هل يمكنك توضيح:\n\n1️⃣ المنتجات المطلوبة\n2️⃣ الكمية\n3️⃣ العنوان (إن أمكن)\n\nمثال: "أبي جوال آيفون عدد 2 وسماعة بلوتوث عدد 1"';
+          await sendTextMessage(customerPhone, clarificationMessage);
+        }
+      } catch (error) {
+        console.error('[Green API Webhook] Error processing order:', error);
+        const errorMessage = 'عذراً، حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى.';
+        await sendTextMessage(customerPhone, errorMessage);
+      }
+    } else {
+      // رسالة عادية - معالجة بالذكاء الاصطناعي
+      const aiResponse = await processIncomingMessage(
+        conversation.merchantId,
+        conversation.id,
+        customerPhone,
+        messageText
+      );
+
+      if (aiResponse) {
+        // إرسال الرد عبر WhatsApp
+        const sendResult = await sendTextMessage(customerPhone, aiResponse);
+        
+        if (sendResult.success) {
+          console.log(`[Green API Webhook] AI response sent successfully to ${customerPhone}`);
+        } else {
+          console.error(`[Green API Webhook] Failed to send AI response: ${sendResult.error}`);
+        }
       }
     }
 

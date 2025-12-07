@@ -561,9 +561,12 @@
 - [x] دالة generateOrderConfirmationMessage
 - [x] دالة generateGiftOrderConfirmationMessage
 - [x] دالة isOrderRequest (اكتشاف طلبات الشراء)
-- [ ] إضافة APIs في routers.ts
-- [ ] تحديث Green API Webhook لمعالجة الطلبات
-- [ ] إنشاء صفحة /merchant/chat-orders لعرض الطلبات من الواتساب
+- [x] إضافة APIs في routers.ts (createFromChat, getById, listByMerchant, updateStatus)
+- [x] تحديث Green API Webhook لمعالجة الطلبات تلقائياً
+- [x] إنشاء صفحة /merchant/chat-orders لعرض الطلبات من الواتساب
+- [x] إضافة رابط في DashboardLayout
+- [x] إضافة route في App.tsx
+- [x] كتابة الاختبارات (21 اختبار - 100% نجاح)
 
 ### المرحلة 3: كودات الخصم والإحالة
 - [ ] إنشاء ملف server/automation/discount-codes.ts

@@ -34,7 +34,8 @@ import {
   Smartphone,
   BarChart3,
   CreditCard,
-  Store
+  Store,
+  ShoppingCart
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -47,6 +48,7 @@ const getMerchantMenuItems = () => [
   { icon: LayoutDashboard, label: "لوحة التحكم", path: "/merchant/dashboard" },
   { icon: Megaphone, label: "الحملات", path: "/merchant/campaigns" },
   { icon: Package, label: "المنتجات", path: "/merchant/products" },
+  { icon: ShoppingCart, label: "طلبات الواتساب", path: "/merchant/chat-orders" },
   { icon: MessageSquare, label: "المحادثات", path: "/merchant/conversations" },
   { icon: BarChart3, label: "التقارير", path: "/merchant/reports" },
   { icon: CreditCard, label: "الاشتراكات", path: "/merchant/subscriptions" },

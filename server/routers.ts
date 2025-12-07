@@ -1403,6 +1403,137 @@ export const appRouter = router({
         return await db.getSyncLogsByMerchantId(input.merchantId, 20);
       }),
   }),
+
+  // Orders from WhatsApp Chat
+  orders: router({
+    // Create order from chat
+    createFromChat: protectedProcedure
+      .input(z.object({
+        merchantId: z.number(),
+        customerPhone: z.string(),
+        customerName: z.string(),
+        message: z.string(), // Customer's message
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const { parseOrderMessage, createOrderFromChat, generateOrderConfirmationMessage, generateGiftOrderConfirmationMessage } = await import('./automation/order-from-chat');
+
+        // Parse order from message
+        const parsedOrder = await parseOrderMessage(input.message, input.merchantId);
+        if (!parsedOrder || parsedOrder.products.length === 0) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: 'لم نتمكن من فهم الطلب. يرجى توضيح المنتجات المطلوبة.' 
+          });
+        }
+
+        // Create order
+        const result = await createOrderFromChat(
+          input.merchantId,
+          input.customerPhone,
+          input.customerName,
+          parsedOrder
+        );
+
+        if (!result) {
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: 'فشل إنشاء الطلب' 
+          });
+        }
+
+        // Get order details for confirmation message
+        const order = await db.getOrderById(result.orderId);
+        if (!order) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+
+        const items = JSON.parse(order.items);
+        
+        // Generate confirmation message
+        const confirmationMessage = order.isGift
+          ? generateGiftOrderConfirmationMessage(
+              order.orderNumber || '',
+              order.giftRecipientName || '',
+              items,
+              order.totalAmount,
+              result.paymentUrl || ''
+            )
+          : generateOrderConfirmationMessage(
+              order.orderNumber || '',
+              items,
+              order.totalAmount,
+              result.paymentUrl || ''
+            );
+
+        return {
+          success: true,
+          orderId: result.orderId,
+          orderNumber: result.orderNumber,
+          paymentUrl: result.paymentUrl,
+          confirmationMessage
+        };
+      }),
+
+    // Get order by ID
+    getById: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const order = await db.getOrderById(input.orderId);
+        if (!order) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'الطلب غير موجود' });
+        }
+
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(order.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        return order;
+      }),
+
+    // List orders for merchant
+    listByMerchant: protectedProcedure
+      .input(z.object({ merchantId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        return await db.getOrdersByMerchantId(input.merchantId);
+      }),
+
+    // Update order status
+    updateStatus: protectedProcedure
+      .input(z.object({
+        orderId: z.number(),
+        status: z.enum(['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled']),
+        trackingNumber: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const order = await db.getOrderById(input.orderId);
+        if (!order) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(order.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        await db.updateOrderStatus(input.orderId, input.status, input.trackingNumber);
+        return { success: true, message: 'تم تحديث حالة الطلب' };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
