@@ -1532,7 +1532,24 @@ export const appRouter = router({
         }
 
         await db.updateOrderStatus(input.orderId, input.status, input.trackingNumber);
-        return { success: true, message: 'تم تحديث حالة الطلب' };
+        
+        // Send notification to customer
+        const { sendOrderNotification } = await import('./notifications/order-notifications');
+        await sendOrderNotification(
+          input.orderId,
+          order.merchantId,
+          order.customerPhone,
+          input.status,
+          {
+            customerName: order.customerName || 'عزيزي العميل',
+            storeName: merchant.businessName,
+            orderNumber: order.orderNumber || `ORD-${order.id}`,
+            total: order.totalAmount,
+            trackingNumber: input.trackingNumber,
+          }
+        );
+        
+        return { success: true, message: 'تم تحديث حالة الطلب وإرسال الإشعار' };
       }),
   }),
 
@@ -2587,6 +2604,75 @@ export const appRouter = router({
             error: error instanceof Error ? error.message : 'Unknown error',
           };
         }
+      }),
+  }),
+
+  // Order Notifications Router
+  orderNotifications: router({
+    // Get notification templates (merchant)
+    getTemplates: protectedProcedure
+      .query(async ({ ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        return db.getNotificationTemplatesByMerchantId(merchant.id);
+      }),
+
+    // Update notification template (merchant)
+    updateTemplate: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        template: z.string().optional(),
+        enabled: z.boolean().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        // Verify template belongs to merchant
+        const template = await db.getNotificationTemplateById(input.id);
+        if (!template || template.merchantId !== merchant.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        return db.updateNotificationTemplate(input.id, {
+          template: input.template,
+          enabled: input.enabled,
+        });
+      }),
+
+    // Get notification history (merchant)
+    getHistory: protectedProcedure
+      .input(z.object({ limit: z.number().optional() }))
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        return db.getOrderNotificationsByMerchantId(merchant.id, input.limit);
+      }),
+
+    // Get notifications for specific order (merchant)
+    getByOrderId: protectedProcedure
+      .input(z.object({ orderId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        // Verify order belongs to merchant
+        const order = await db.getOrderById(input.orderId);
+        if (!order || order.merchantId !== merchant.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        return db.getOrderNotificationsByOrderId(input.orderId);
       }),
   }),
 });

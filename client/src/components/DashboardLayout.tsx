@@ -39,7 +39,8 @@ import {
   Ticket,
   UserPlus,
   ShoppingBag,
-  PartyPopper
+  PartyPopper,
+  Bell
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -62,6 +63,7 @@ const getMerchantMenuItems = () => [
   { icon: CreditCard, label: "الاشتراكات", path: "/merchant/subscriptions" },
   { icon: Smartphone, label: "ربط الواتساب", path: "/merchant/whatsapp" },
   { icon: Smartphone, label: "إدارة WhatsApp Instances", path: "/merchant/whatsapp-instances" },
+  { icon: Bell, label: "إشعارات الطلبات", path: "/merchant/order-notifications" },
   { icon: Store, label: "ربط متجر Salla", path: "/merchant/salla" },
   { icon: Settings, label: "الإعدادات", path: "/merchant/settings" },
 ];

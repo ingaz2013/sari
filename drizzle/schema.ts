@@ -624,3 +624,35 @@ export const whatsappRequests = mysqlTable('whatsapp_requests', {
 
 export type WhatsAppRequest = typeof whatsappRequests.$inferSelect;
 export type InsertWhatsAppRequest = typeof whatsappRequests.$inferInsert;
+
+
+// Order Notifications Table
+export const orderNotifications = mysqlTable('order_notifications', {
+  id: int('id').primaryKey().autoincrement(),
+  orderId: int('order_id').notNull().references(() => orders.id, { onDelete: 'cascade' }),
+  merchantId: int('merchant_id').notNull().references(() => merchants.id, { onDelete: 'cascade' }),
+  customerPhone: varchar('customer_phone', { length: 20 }).notNull(),
+  status: varchar('status', { length: 50 }).notNull(), // pending, confirmed, shipped, delivered, cancelled
+  message: text('message').notNull(),
+  sent: boolean('sent').default(false),
+  sentAt: timestamp('sent_at'),
+  error: text('error'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export type OrderNotification = typeof orderNotifications.$inferSelect;
+export type InsertOrderNotification = typeof orderNotifications.$inferInsert;
+
+// Notification Templates Table
+export const notificationTemplates = mysqlTable('notification_templates', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().references(() => merchants.id, { onDelete: 'cascade' }),
+  status: varchar('status', { length: 50 }).notNull(), // pending, confirmed, shipped, delivered, cancelled
+  template: text('template').notNull(),
+  enabled: boolean('enabled').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
+export type InsertNotificationTemplate = typeof notificationTemplates.$inferInsert;

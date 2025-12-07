@@ -973,3 +973,23 @@
 - [x] تحديث DashboardLayout
 - [x] كتابة الاختبارات (5 اختبارات ناجحة)
 - [x] اختبار النظام الكامل
+
+
+## نظام إشعارات واتساب للطلبات (Order Notifications)
+- [x] إضافة جدول order_notifications في schema.ts
+- [x] إضافة جدول notification_templates في schema.ts
+- [x] إضافة دوال قاعدة البيانات في db.ts (10 دوال)
+- [x] إنشاء قوالب رسائل افتراضية (pending, confirmed, shipped, delivered, cancelled)
+- [x] إنشاء ملف server/notifications/order-notifications.ts
+- [x] دالة sendOrderNotification لإرسال إشعار واتساب
+- [x] دالة getNotificationTemplate للحصول على القالب المناسب
+- [x] تحديث updateOrderStatus لإرسال إشعارات تلقائية
+- [x] إضافة APIs في routers.ts (4 APIs)
+- [x] إنشاء صفحة /merchant/notification-settings
+- [x] تفعيل/تعطيل الإشعارات لكل حالة
+- [x] تخصيص قوالب الرسائل
+- [x] عرض سجل الإشعارات المرسلة
+- [x] إضافة المسار في App.tsx
+- [x] تحديث DashboardLayout
+- [x] كتابة الاختبارات (9 اختبارات ناجحة)
+- [x] اختبار النظام الكامل

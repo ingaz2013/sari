@@ -87,11 +87,17 @@ import {
   OccasionCampaign,
   InsertOccasionCampaign,
   whatsappInstances,
-  whatsappRequests,
   WhatsAppInstance,
   InsertWhatsAppInstance,
+  whatsappRequests,
   WhatsAppRequest,
   InsertWhatsAppRequest,
+  orderNotifications,
+  OrderNotification,
+  InsertOrderNotification,
+  notificationTemplates,
+  NotificationTemplate,
+  InsertNotificationTemplate,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2269,4 +2275,93 @@ export async function deleteWhatsAppRequest(id: number) {
   const db = await getDb();
   if (!db) throw new Error('Database not initialized');
   await db.delete(whatsappRequests).where(eq(whatsappRequests.id, id));
+}
+
+
+// ============================================
+// Order Notifications Functions
+// ============================================
+
+export async function createOrderNotification(data: InsertOrderNotification) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const result = await db.insert(orderNotifications).values(data);
+  const id = Number(result[0].insertId);
+  return getOrderNotificationById(id);
+}
+
+export async function getOrderNotificationById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const result = await db.select().from(orderNotifications).where(eq(orderNotifications.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function getOrderNotificationsByOrderId(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  return db.select().from(orderNotifications).where(eq(orderNotifications.orderId, orderId)).orderBy(desc(orderNotifications.createdAt));
+}
+
+export async function getOrderNotificationsByMerchantId(merchantId: number, limit = 50) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  return db.select().from(orderNotifications).where(eq(orderNotifications.merchantId, merchantId)).orderBy(desc(orderNotifications.createdAt)).limit(limit);
+}
+
+export async function updateOrderNotification(id: number, data: Partial<InsertOrderNotification>) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.update(orderNotifications).set(data).where(eq(orderNotifications.id, id));
+  return getOrderNotificationById(id);
+}
+
+// ============================================
+// Notification Templates Functions
+// ============================================
+
+export async function createNotificationTemplate(data: InsertNotificationTemplate) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const result = await db.insert(notificationTemplates).values(data);
+  const id = Number(result[0].insertId);
+  return getNotificationTemplateById(id);
+}
+
+export async function getNotificationTemplateById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const result = await db.select().from(notificationTemplates).where(eq(notificationTemplates.id, id)).limit(1);
+  return result[0] || null;
+}
+
+export async function getNotificationTemplateByStatus(merchantId: number, status: string) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  const result = await db.select().from(notificationTemplates)
+    .where(and(
+      eq(notificationTemplates.merchantId, merchantId),
+      eq(notificationTemplates.status, status)
+    ))
+    .limit(1);
+  return result[0] || null;
+}
+
+export async function getNotificationTemplatesByMerchantId(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  return db.select().from(notificationTemplates).where(eq(notificationTemplates.merchantId, merchantId));
+}
+
+export async function updateNotificationTemplate(id: number, data: Partial<InsertNotificationTemplate>) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.update(notificationTemplates).set({ ...data, updatedAt: new Date() }).where(eq(notificationTemplates.id, id));
+  return getNotificationTemplateById(id);
+}
+
+export async function deleteNotificationTemplate(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not initialized');
+  await db.delete(notificationTemplates).where(eq(notificationTemplates.id, id));
 }
