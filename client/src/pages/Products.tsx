@@ -100,7 +100,7 @@ export default function Products() {
         <div className="container relative py-20 md:py-32">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-blue-600">
                 منتجات ساري
               </span>
             </h1>
@@ -118,7 +118,7 @@ export default function Products() {
             {products.map((product) => (
               <Card key={product.title} className="border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-all hover:shadow-lg">
                 <CardContent className="p-6 space-y-6">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center">
                     <product.icon className="w-7 h-7 text-white" />
                   </div>
                   
@@ -143,7 +143,7 @@ export default function Products() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <section className="py-20 bg-blue-600 text-white">
         <div className="container text-center space-y-8">
           <h2 className="text-3xl md:text-5xl font-bold">
             جرب ساري مجاناً الآن

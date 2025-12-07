@@ -380,3 +380,12 @@
 - [x] إنشاء صفحة التسعير (/pricing) مع 3 باقات وFAQ
 - [x] إنشاء صفحة الدعم (/support) مع نموذج تواصل
 - [x] تحديث App.tsx مع المسارات الجديدة
+
+
+## تغيير الألوان إلى الأزرق الأصلي
+- [x] تحديث Navbar (إزالة gradient)
+- [x] تحديث Footer
+- [x] تحديث Home page
+- [x] تحديث Products page
+- [x] تحديث Pricing page
+- [x] تحديث Support page

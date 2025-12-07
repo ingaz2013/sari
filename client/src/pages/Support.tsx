@@ -122,7 +122,7 @@ export default function Support() {
         <div className="container relative py-20 md:py-32">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold">
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="text-blue-600">
                 كيف يمكننا مساعدتك؟
               </span>
             </h1>
@@ -149,7 +149,7 @@ export default function Support() {
             {supportChannels.map((channel) => (
               <Card key={channel.title} className="border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center mx-auto">
+                  <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center mx-auto">
                     <channel.icon className="w-7 h-7 text-white" />
                   </div>
                   <div>
@@ -249,7 +249,7 @@ export default function Support() {
                     />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  <Button type="submit" size="lg" className="w-full bg-blue-600 hover:bg-blue-700">
                     إرسال الرسالة
                     <Send className="mr-2 w-4 h-4" />
                   </Button>
@@ -276,7 +276,7 @@ export default function Support() {
             {resources.map((resource) => (
               <Card key={resource.title} className="border-2 hover:border-blue-200 dark:hover:border-blue-800 transition-colors">
                 <CardContent className="p-6 text-center space-y-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center mx-auto">
+                  <div className="w-14 h-14 rounded-xl bg-blue-600 flex items-center justify-center mx-auto">
                     <resource.icon className="w-7 h-7 text-white" />
                   </div>
                   <div>
