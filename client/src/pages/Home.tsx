@@ -304,60 +304,20 @@ export default function Home() {
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border bg-card p-8">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center">
-                      <Mic className="w-8 h-8 text-white" />
-                    </div>
-                    <div>
-                      <div className="font-semibold text-lg">رسالة صوتية من العميل</div>
-                      <div className="text-sm text-muted-foreground">مثال على طلب بالصوت</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-muted p-6 rounded-xl space-y-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                        <Mic className="w-6 h-6 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="h-2 bg-primary/30 rounded-full overflow-hidden">
-                          <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: '70%' }} />
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-2">0:08</p>
-                      </div>
-                    </div>
-                    <div className="bg-background/50 p-4 rounded-lg border-r-4 border-primary">
-                      <p className="text-sm font-medium">النص المحول:</p>
-                      <p className="text-sm mt-2">"السلام عليكم، أبي آيفون 15 برو ماكس حبتين، وسلموها على شارع التحلية في الرياض"</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 bg-primary/5 p-4 rounded-lg">
-                    <Bot className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
-                    <div className="flex-1">
-                      <p className="font-semibold text-sm mb-2">ساري يعالج الطلب تلقائياً:</p>
-                      <ul className="space-y-2 text-sm">
-                        <li className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
-                          <span>المنتج: آيفون 15 برو ماكس</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
-                          <span>الكمية: 2</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
-                          <span>العنوان: شارع التحلية، الرياض</span>
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-primary" />
-                          <span>رابط الدفع: تم إنشاؤه تلقائياً</span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl border bg-card">
+                <video 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline
+                  className="w-full h-auto"
+                  poster="/video-scene-1.png"
+                >
+                  <source src="/sari-voice-order-demo.mp4" type="video/mp4" />
+                  متصفحك لا يدعم تشغيل الفيديو
+                </video>
+                <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-sm rounded-lg p-3">
+                  <p className="text-white text-sm font-medium">فيديو توضيحي: كيف يعمل الطلب بالرسالة الصوتية</p>
                 </div>
               </div>
             </div>
