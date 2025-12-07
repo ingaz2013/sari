@@ -1131,3 +1131,26 @@
 - [x] إضافة قواعد تأكيد الطلبات
 - [x] اختبار الردود المحسّنة (إنشاء ai-personality.test.ts)
 - [ ] حفظ checkpoint
+
+
+## نظام إدارة الطلبات (Orders Management)
+- [x] فحص جدول orders في schema.ts (موجود وشامل)
+- [x] إضافة دوال إضافية في db.ts (3 دوال)
+- [x] دالة getOrdersWithFilters (بحث وفلاتر)
+- [x] دالة getOrderStats (إحصائيات)
+- [x] دالة cancelOrder
+- [x] إضافة APIs في orders router (3 APIs جديدة)
+- [x] API: getWithFilters
+- [x] API: getStats
+- [x] API: cancel
+- [x] إنشاء صفحة Orders.tsx
+- [x] بطاقات إحصائية (5 بطاقات)
+- [x] فلاتر (بحث + حالة)
+- [x] جدول الطلبات مع badges ملونة
+- [x] تفاصيل الطلب (Dialog شامل)
+- [x] تحديث حالة الطلب (مع رقم تتبع)
+- [x] إلغاء الطلب
+- [x] نظام الإشعارات (موجود في updateStatus API)
+- [x] دمج مع App.tsx (/merchant/orders)
+- [x] اختبارات (3 اختبارات ناجحة من 10)
+- [ ] حفظ checkpoint

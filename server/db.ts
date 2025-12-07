@@ -2702,3 +2702,106 @@ export async function getDailyMessageCount(merchantId: number, days: number = 30
     count: Number(row.count),
   }));
 }
+
+
+/**
+ * Get orders with filters (status, date range)
+ */
+export async function getOrdersWithFilters(
+  merchantId: number,
+  filters?: {
+    status?: 'pending' | 'paid' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+    startDate?: Date;
+    endDate?: Date;
+    searchQuery?: string;
+  }
+): Promise<Order[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const conditions = [eq(orders.merchantId, merchantId)];
+
+  if (filters?.status) {
+    conditions.push(eq(orders.status, filters.status));
+  }
+
+  if (filters?.startDate) {
+    conditions.push(gte(orders.createdAt, filters.startDate));
+  }
+
+  if (filters?.endDate) {
+    conditions.push(lte(orders.createdAt, filters.endDate));
+  }
+
+  let results = await db
+    .select()
+    .from(orders)
+    .where(and(...conditions))
+    .orderBy(desc(orders.createdAt));
+
+  // Search in customer name, phone, order number
+  if (filters?.searchQuery) {
+    const query = filters.searchQuery.toLowerCase();
+    results = results.filter(order =>
+      order.customerName?.toLowerCase().includes(query) ||
+      order.customerPhone?.toLowerCase().includes(query) ||
+      order.orderNumber?.toLowerCase().includes(query)
+    );
+  }
+
+  return results;
+}
+
+/**
+ * Get order statistics for merchant
+ */
+export async function getOrderStats(merchantId: number): Promise<{
+  total: number;
+  pending: number;
+  processing: number;
+  completed: number;
+  cancelled: number;
+  totalRevenue: number;
+}> {
+  const db = await getDb();
+  if (!db) return {
+    total: 0,
+    pending: 0,
+    processing: 0,
+    completed: 0,
+    cancelled: 0,
+    totalRevenue: 0
+  };
+
+  const allOrders = await db
+    .select()
+    .from(orders)
+    .where(eq(orders.merchantId, merchantId));
+
+  const stats = {
+    total: allOrders.length,
+    pending: allOrders.filter(o => o.status === 'pending').length,
+    processing: allOrders.filter(o => o.status === 'processing' || o.status === 'shipped').length,
+    completed: allOrders.filter(o => o.status === 'delivered').length,
+    cancelled: allOrders.filter(o => o.status === 'cancelled').length,
+    totalRevenue: allOrders
+      .filter(o => o.status !== 'cancelled')
+      .reduce((sum, o) => sum + o.totalAmount, 0)
+  };
+
+  return stats;
+}
+
+/**
+ * Cancel order
+ */
+export async function cancelOrder(id: number, reason?: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(orders).set({
+    status: 'cancelled',
+    notes: reason || 'تم إلغاء الطلب',
+    updatedAt: new Date()
+  }).where(eq(orders.id, id));
+}

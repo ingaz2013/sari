@@ -1543,6 +1543,67 @@ export const appRouter = router({
         return await db.getOrdersByMerchantId(input.merchantId);
       }),
 
+    // Get orders with filters
+    getWithFilters: protectedProcedure
+      .input(z.object({
+        merchantId: z.number(),
+        status: z.enum(['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled']).optional(),
+        startDate: z.string().optional(),
+        endDate: z.string().optional(),
+        searchQuery: z.string().optional(),
+      }))
+      .query(async ({ input, ctx }) => {
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        const filters: any = {};
+        if (input.status) filters.status = input.status;
+        if (input.startDate) filters.startDate = new Date(input.startDate);
+        if (input.endDate) filters.endDate = new Date(input.endDate);
+        if (input.searchQuery) filters.searchQuery = input.searchQuery;
+
+        return await db.getOrdersWithFilters(input.merchantId, filters);
+      }),
+
+    // Get order statistics
+    getStats: protectedProcedure
+      .input(z.object({ merchantId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(input.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        return await db.getOrderStats(input.merchantId);
+      }),
+
+    // Cancel order
+    cancel: protectedProcedure
+      .input(z.object({
+        orderId: z.number(),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const order = await db.getOrderById(input.orderId);
+        if (!order) {
+          throw new TRPCError({ code: 'NOT_FOUND' });
+        }
+
+        // Verify user owns this merchant
+        const merchant = await db.getMerchantById(order.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        await db.cancelOrder(input.orderId, input.reason);
+        
+        return { success: true, message: 'تم إلغاء الطلب' };
+      }),
+
     // Update order status
     updateStatus: protectedProcedure
       .input(z.object({

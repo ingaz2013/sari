@@ -35,6 +35,7 @@ import AbandonedCartsPage from "./pages/merchant/AbandonedCartsPage";
 import OccasionCampaignsPage from "./pages/merchant/OccasionCampaignsPage";
 import AnalyticsDashboard from "./pages/merchant/AnalyticsDashboard";
 import Analytics from "./pages/merchant/Analytics";
+import Orders from "./pages/merchant/Orders";
 import WhatsAppInstancesPage from "./pages/merchant/WhatsAppInstancesPage";
 import WhatsAppSetupWizard from "./pages/merchant/WhatsAppSetupWizard";
 import OrderNotificationsSettings from "./pages/merchant/OrderNotificationsSettings";
@@ -153,6 +154,12 @@ function Router() {
       <Route path="/merchant/message-analytics">
         <DashboardLayout>
           <Analytics />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/orders">
+        <DashboardLayout>
+          <Orders />
         </DashboardLayout>
       </Route>
       
