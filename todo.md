@@ -1168,3 +1168,8 @@
   - [x] جدول أفضل المنتجات
 - [x] الاختبارات (12/13 نجح)
 - [x] حفظ checkpoint
+
+## تغيير اللوجو
+- [x] نسخ اللوجو الجديد (Asset2.png) إلى /client/public/sari-logo.png
+- [x] تحديث Navbar.tsx لعرض اللوجو الجديد
+- [x] حفظ checkpoint
