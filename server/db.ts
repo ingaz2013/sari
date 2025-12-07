@@ -81,6 +81,9 @@ import {
   orderTrackingLogs,
   OrderTrackingLog,
   InsertOrderTrackingLog,
+  occasionCampaigns,
+  OccasionCampaign,
+  InsertOccasionCampaign,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -1809,4 +1812,120 @@ export async function getReferralsByCodeId(referralCodeId: number): Promise<Refe
   if (!db) return [];
 
   return db.select().from(referrals).where(eq(referrals.referralCodeId, referralCodeId));
+}
+
+// ============================================
+// Occasion Campaigns Functions
+// ============================================
+
+/**
+ * Create a new occasion campaign
+ */
+export async function createOccasionCampaign(data: InsertOccasionCampaign): Promise<OccasionCampaign | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [campaign] = await db.insert(occasionCampaigns).values(data);
+  return getOccasionCampaignById(campaign.insertId);
+}
+
+/**
+ * Get occasion campaign by ID
+ */
+export async function getOccasionCampaignById(id: number): Promise<OccasionCampaign | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [campaign] = await db.select().from(occasionCampaigns).where(eq(occasionCampaigns.id, id));
+  return campaign;
+}
+
+/**
+ * Get all occasion campaigns for a merchant
+ */
+export async function getOccasionCampaignsByMerchantId(merchantId: number): Promise<OccasionCampaign[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(occasionCampaigns).where(eq(occasionCampaigns.merchantId, merchantId)).orderBy(desc(occasionCampaigns.createdAt));
+}
+
+/**
+ * Get occasion campaign by merchant, type, and year
+ */
+export async function getOccasionCampaignByTypeAndYear(
+  merchantId: number,
+  occasionType: string,
+  year: number
+): Promise<OccasionCampaign | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const [campaign] = await db
+    .select()
+    .from(occasionCampaigns)
+    .where(
+      and(
+        eq(occasionCampaigns.merchantId, merchantId),
+        eq(occasionCampaigns.occasionType, occasionType as any),
+        eq(occasionCampaigns.year, year)
+      )
+    );
+  return campaign;
+}
+
+/**
+ * Update occasion campaign
+ */
+export async function updateOccasionCampaign(id: number, data: Partial<InsertOccasionCampaign>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(occasionCampaigns).set(data).where(eq(occasionCampaigns.id, id));
+}
+
+/**
+ * Mark occasion campaign as sent
+ */
+export async function markOccasionCampaignSent(id: number, recipientCount: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db
+    .update(occasionCampaigns)
+    .set({
+      status: 'sent',
+      sentAt: new Date(),
+      recipientCount,
+    })
+    .where(eq(occasionCampaigns.id, id));
+}
+
+/**
+ * Get enabled occasion campaigns for all merchants
+ */
+export async function getEnabledOccasionCampaigns(): Promise<OccasionCampaign[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(occasionCampaigns).where(eq(occasionCampaigns.enabled, true));
+}
+
+/**
+ * Get occasion campaigns statistics for a merchant
+ */
+export async function getOccasionCampaignsStats(merchantId: number) {
+  const db = await getDb();
+  if (!db) return { totalCampaigns: 0, sentCampaigns: 0, totalRecipients: 0 };
+
+  const campaigns = await getOccasionCampaignsByMerchantId(merchantId);
+
+  const sentCampaigns = campaigns.filter((c) => c.status === 'sent');
+  const totalRecipients = sentCampaigns.reduce((sum, c) => sum + c.recipientCount, 0);
+
+  return {
+    totalCampaigns: campaigns.length,
+    sentCampaigns: sentCampaigns.length,
+    totalRecipients,
+  };
 }

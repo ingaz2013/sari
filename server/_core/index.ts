@@ -11,6 +11,8 @@ import webhookRoutes from "../webhooks/routes";
 import { initializeSallaCronJobs } from "../jobs/salla-sync";
 import { startOrderTrackingJob } from "../jobs/order-tracking";
 import { startAbandonedCartJob } from "../jobs/abandoned-cart";
+import { runOccasionCampaignsCron } from "../jobs/occasion-campaigns";
+import cron from "node-cron";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -74,6 +76,12 @@ async function startServer() {
     
     // Initialize Abandoned Cart Recovery cron job
     startAbandonedCartJob();
+    
+    // Initialize Occasion Campaigns cron job (runs daily at 9:00 AM)
+    cron.schedule('0 9 * * *', async () => {
+      console.log('[Cron] Running occasion campaigns check...');
+      await runOccasionCampaignsCron();
+    });
   });
 }
 

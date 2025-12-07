@@ -872,3 +872,25 @@
 ✅ عدم إرسال أكثر من تذكير واحد لنفس السلة
 ✅ واجهة إدارة احترافية للتاجر
 ✅ إحصائيات شاملة ومعدل الاستعادة
+
+
+## حملات المناسبات التلقائية (Occasion Campaigns)
+- [x] إضافة جدول occasion_campaigns في schema.ts
+- [x] إضافة دوال قاعدة البيانات في db.ts
+- [x] إنشاء ملف server/automation/occasion-campaigns.ts
+- [x] دالة detectCurrentOccasion لكشف المناسبة الحالية
+- [x] دالة generateOccasionDiscount لإنشاء كود خصم خاص
+- [x] دالة generateOccasionMessage لتوليد رسالة احترافية
+- [x] دالة sendOccasionCampaign لإرسال الحملة
+- [x] دالة checkAndSendOccasionCampaigns للفحص اليومي
+- [x] قوالب رسائل لرمضان والعيد واليوم الوطني
+- [x] إنشاء Cron Job في server/jobs/occasion-campaigns.ts (يعمل يومياً)
+- [x] إضافة APIs في routers.ts (list, toggle, getStats)
+- [x] إنشاء صفحة /merchant/occasion-campaigns
+- [x] عرض المناسبات القادمة
+- [x] إمكانية تفعيل/تعطيل الحملات
+- [x] إحصائيات الحملات السابقة
+- [x] إضافة المسار في App.tsx
+- [x] إضافة رابط في DashboardLayout
+- [x] كتابة الاختبارات
+- [x] اختبار النظام الكامل

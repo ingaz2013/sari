@@ -533,3 +533,33 @@ export const orderTrackingLogs = mysqlTable("order_tracking_logs", {
 
 export type OrderTrackingLog = typeof orderTrackingLogs.$inferSelect;
 export type InsertOrderTrackingLog = typeof orderTrackingLogs.$inferInsert;
+
+/**
+ * Occasion Campaigns (حملات المناسبات)
+ * Automatic campaigns for special occasions (Ramadan, Eid, National Day, etc.)
+ */
+export const occasionCampaigns = mysqlTable("occasion_campaigns", {
+  id: int("id").autoincrement().primaryKey(),
+  merchantId: int("merchantId").notNull(),
+  occasionType: mysqlEnum("occasionType", [
+    "ramadan",           // رمضان
+    "eid_fitr",          // عيد الفطر
+    "eid_adha",          // عيد الأضحى
+    "national_day",      // اليوم الوطني
+    "new_year",          // رأس السنة الميلادية
+    "hijri_new_year",    // رأس السنة الهجرية
+  ]).notNull(),
+  year: int("year").notNull(), // Year when campaign was sent
+  enabled: boolean("enabled").default(true).notNull(), // Merchant can enable/disable
+  discountCode: varchar("discountCode", { length: 50 }), // Generated discount code
+  discountPercentage: int("discountPercentage").default(15).notNull(), // Default 15%
+  messageTemplate: text("messageTemplate"), // Custom message template (optional)
+  sentAt: timestamp("sentAt"), // When campaign was sent
+  recipientCount: int("recipientCount").default(0).notNull(), // Number of recipients
+  status: mysqlEnum("status", ["pending", "sent", "failed"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type OccasionCampaign = typeof occasionCampaigns.$inferSelect;
+export type InsertOccasionCampaign = typeof occasionCampaigns.$inferInsert;
