@@ -311,3 +311,17 @@
 - [ ] إضافة Webhooks لاستقبال إشعارات الدفع (اختياري)
 - [ ] كتابة الاختبارات
 - [ ] اختبار النظام الكامل
+
+
+## Webhooks للدفع (Payment Webhooks)
+- [x] إصلاح خطأ الدوال المكررة في db.ts
+- [x] إنشاء endpoint لـ Tap Webhook (/api/webhooks/tap)
+- [x] إنشاء endpoint لـ PayPal Webhook (/api/webhooks/paypal)
+- [x] إضافة نظام التحقق من Signature لـ Tap (HMAC SHA256)
+- [x] إضافة نظام التحقق من Signature لـ PayPal
+- [x] معالجة حدث payment.success (تحديث الاشتراك إلى active)
+- [x] معالجة حدث payment.failed (إرسال إشعار)
+- [x] معالجة حدث payment.refunded (إلغاء الاشتراك)
+- [x] إرسال إشعارات للمدير عند كل حدث
+- [ ] كتابة الاختبارات (اختياري)
+- [x] اختبار النظام الكامل
