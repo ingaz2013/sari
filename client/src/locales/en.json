@@ -1,0 +1,227 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "marketing": "Marketing",
+    "support": "Support",
+    "login": "Login",
+    "tryFree": "Try Free Now"
+  },
+  "home": {
+    "hero": {
+      "badge": "AI-Powered",
+      "title": "Sari",
+      "subtitle": "AI Sales Assistant on WhatsApp",
+      "description": "Automate your customer service and boost your sales using AI. Sari responds to your customers in Saudi dialect 24/7.",
+      "cta": "Try Free Now",
+      "watchPrices": "View Pricing"
+    },
+    "chat": {
+      "title": "Sari",
+      "subtitle": "AI Sales Assistant",
+      "placeholder": "Hello! I'm Sari, your smart assistant. How can I help you today?",
+      "askPlaceholder": "Do you have iPhones?"
+    },
+    "features": {
+      "title": "Why Sari?",
+      "subtitle": "Everything you need to manage your WhatsApp sales",
+      "ai": {
+        "title": "Advanced AI",
+        "description": "Understands customer inquiries and responds naturally in Saudi dialect"
+      },
+      "products": {
+        "title": "Product Management",
+        "description": "Add your products and Sari will showcase them to customers automatically"
+      },
+      "orders": {
+        "title": "Order Tracking",
+        "description": "Complete order management with automatic customer notifications"
+      },
+      "analytics": {
+        "title": "Smart Analytics",
+        "description": "Detailed reports on sales and conversations"
+      },
+      "campaigns": {
+        "title": "Marketing Campaigns",
+        "description": "Send bulk messages and special offers to your customers"
+      },
+      "support": {
+        "title": "24/7 Support",
+        "description": "Support team always available to help you"
+      }
+    },
+    "pricing": {
+      "title": "Pricing Plans",
+      "subtitle": "Choose the right plan for your business",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "save": "Save 20%",
+      "starter": {
+        "name": "Starter",
+        "price": "Free",
+        "description": "Perfect for trying out",
+        "features": [
+          "100 conversations/month",
+          "Unlimited products",
+          "Basic support",
+          "Simple analytics"
+        ],
+        "cta": "Start Free"
+      },
+      "professional": {
+        "name": "Professional",
+        "price": "299",
+        "period": "SAR/month",
+        "description": "For medium businesses",
+        "features": [
+          "1000 conversations/month",
+          "Unlimited products",
+          "Marketing campaigns",
+          "Advanced analytics",
+          "Priority support"
+        ],
+        "cta": "Get Started",
+        "popular": "Most Popular"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "price": "Contact Us",
+        "description": "For large companies",
+        "features": [
+          "Unlimited conversations",
+          "Unlimited products",
+          "Advanced campaigns",
+          "Custom analytics",
+          "Dedicated account manager"
+        ],
+        "cta": "Contact Us"
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "description": "Join hundreds of merchants using Sari to boost their sales",
+      "button": "Try Free Now"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome",
+    "overview": "Overview",
+    "stats": {
+      "totalOrders": "Total Orders",
+      "totalRevenue": "Total Revenue",
+      "activeConversations": "Active Conversations",
+      "products": "Products"
+    },
+    "charts": {
+      "ordersTitle": "Orders Trend (Last 30 Days)",
+      "revenueTitle": "Revenue Trend (Last 30 Days)",
+      "topProducts": "Top Selling Products"
+    },
+    "comparison": {
+      "vs30Days": "vs. Previous 30 Days"
+    }
+  },
+  "products": {
+    "title": "Products",
+    "addNew": "Add Product",
+    "search": "Search products...",
+    "name": "Product Name",
+    "category": "Category",
+    "price": "Price",
+    "stock": "Stock",
+    "status": "Status",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "active": "Active",
+    "inactive": "Inactive",
+    "inStock": "In Stock",
+    "outOfStock": "Out of Stock"
+  },
+  "orders": {
+    "title": "Orders",
+    "orderNumber": "Order Number",
+    "customer": "Customer",
+    "items": "Items",
+    "total": "Total",
+    "status": "Status",
+    "date": "Date",
+    "actions": "Actions",
+    "pending": "Pending",
+    "paid": "Paid",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "conversations": {
+    "title": "Conversations",
+    "search": "Search conversations...",
+    "newMessage": "New Message",
+    "typeMessage": "Type your message...",
+    "send": "Send",
+    "online": "Online",
+    "offline": "Offline",
+    "typing": "Typing..."
+  },
+  "campaigns": {
+    "title": "Marketing Campaigns",
+    "createNew": "Create Campaign",
+    "name": "Campaign Name",
+    "status": "Status",
+    "sent": "Sent",
+    "delivered": "Delivered",
+    "date": "Date",
+    "actions": "Actions",
+    "draft": "Draft",
+    "scheduled": "Scheduled",
+    "active": "Active",
+    "completed": "Completed"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "business": "Business Info",
+    "notifications": "Notifications",
+    "billing": "Billing",
+    "save": "Save Changes",
+    "cancel": "Cancel"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "logout": "Logout"
+  },
+  "footer": {
+    "description": "AI Sales Assistant on WhatsApp",
+    "product": "Product",
+    "features": "Features",
+    "pricing": "Pricing",
+    "docs": "Documentation",
+    "company": "Company",
+    "about": "About Us",
+    "blog": "Blog",
+    "careers": "Careers",
+    "contact": "Contact Us",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "rights": "All rights reserved"
+  }
+}

@@ -1,8 +1,10 @@
 import { Link } from 'wouter';
 import { Bot, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { t } = useTranslation();
 
   return (
     <footer className="border-t bg-muted/30">
@@ -19,7 +21,7 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              مساعد المبيعات الذكي على الواتساب. نساعد التجار في أتمتة خدمة العملاء وزيادة المبيعات باستخدام الذكاء الاصطناعي.
+              {t('footer.description')}
             </p>
             <div className="flex gap-3">
               <a
@@ -63,33 +65,33 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4">روابط سريعة</h3>
+            <h3 className="font-semibold mb-4">{t('footer.product')}</h3>
             <ul className="space-y-3">
               <li>
                 <Link href="/">
                   <a className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    الرئيسية
+                    {t('nav.home')}
                   </a>
                 </Link>
               </li>
               <li>
                 <Link href="/products">
                   <a className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    المنتجات
+                    {t('footer.features')}
                   </a>
                 </Link>
               </li>
               <li>
                 <Link href="/pricing">
                   <a className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    التسعير
+                    {t('footer.pricing')}
                   </a>
                 </Link>
               </li>
               <li>
                 <Link href="/support">
                   <a className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    الدعم
+                    {t('nav.support')}
                   </a>
                 </Link>
               </li>
@@ -98,16 +100,16 @@ export default function Footer() {
 
           {/* Legal */}
           <div>
-            <h3 className="font-semibold mb-4">قانوني</h3>
+            <h3 className="font-semibold mb-4">{t('footer.legal')}</h3>
             <ul className="space-y-3">
               <li>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  سياسة الخصوصية
+                  {t('footer.privacy')}
                 </a>
               </li>
               <li>
                 <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                  شروط الاستخدام
+                  {t('footer.terms')}
                 </a>
               </li>
               <li>
@@ -125,7 +127,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-semibold mb-4">تواصل معنا</h3>
+            <h3 className="font-semibold mb-4">{t('footer.contact')}</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-sm text-muted-foreground">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -149,7 +151,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>© {currentYear} ساري. جميع الحقوق محفوظة.</p>
+          <p>© {currentYear} {t('footer.rights')}</p>
         </div>
       </div>
     </footer>

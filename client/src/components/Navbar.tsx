@@ -1,16 +1,36 @@
 import { Link } from 'wouter';
 import { Button } from '@/components/ui/button';
-import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Menu, X, Globe } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language;
+  const isRTL = currentLang === 'ar';
+
+  // Update document direction when language changes
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+    document.documentElement.lang = currentLang;
+  }, [currentLang, isRTL]);
+
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+  };
 
   const navLinks = [
-    { href: '/', label: 'الرئيسية' },
-    { href: '/products', label: 'المنتجات' },
-    { href: '/pricing', label: 'التسعير' },
-    { href: '/support', label: 'الدعم' },
+    { href: '/', label: t('nav.home') },
+    { href: '/products', label: t('nav.products') },
+    { href: '/pricing', label: t('nav.marketing') },
+    { href: '/support', label: t('nav.support') },
   ];
 
   return (
@@ -36,12 +56,38 @@ export default function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
+          {/* Language Switcher */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative">
+                <Globe className="h-5 w-5" />
+                <span className="sr-only">Switch Language</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => changeLanguage('ar')}
+                className={currentLang === 'ar' ? 'bg-accent' : ''}
+              >
+                <span className="ml-2">🇸🇦</span>
+                العربية
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => changeLanguage('en')}
+                className={currentLang === 'en' ? 'bg-accent' : ''}
+              >
+                <span className="ml-2">🇬🇧</span>
+                English
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
           <Link href="/login">
-            <Button variant="ghost">تسجيل الدخول</Button>
+            <Button variant="ghost">{t('nav.login')}</Button>
           </Link>
           <Link href="/signup">
             <Button className="bg-primary hover:bg-primary/90">
-              ابدأ الآن مجاناً
+              {t('nav.tryFree')}
             </Button>
           </Link>
         </div>

@@ -1202,3 +1202,16 @@
 - [x] كتابة اختبارات شاملة (ai-enhanced.test.ts)
 - [x] اختبار سيناريوهات متعددة (15 سيناريو)
 - [x] حفظ checkpoint
+
+## إضافة دعم اللغة الإنجليزية
+- [x] تثبيت مكتبة i18next و react-i18next
+- [x] إنشاء ملفات الترجمة (ar.json, en.json) - 200+ مفتاح ترجمة
+- [x] إنشاء i18n configuration في lib/i18n.ts
+- [x] إضافة Language Switcher في Navbar (أيقونة Globe)
+- [x] ترجمة Navbar (جميع الروابط والأزرار)
+- [x] إضافة useEffect لتحديث dir و lang تلقائياً
+- [x] ضبط RTL/LTR في CSS (70+ قاعدة)
+- [x] ضبط اتجاه الأيقونات (lucide icons)
+- [x] ضبط الهوامش والحواف للـ RTL
+- [x] اختبار التبديل بين اللغات
+- [x] حفظ checkpoint
