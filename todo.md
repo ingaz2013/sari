@@ -1064,3 +1064,16 @@
 - [x] دمج VoiceRecorder في صفحة Conversations
 - [x] اختبار التسجيل والرفع (9 اختبارات ناجحة)
 - [ ] حفظ checkpoint
+
+
+## ربط Voice Transcription مع AI Response
+- [x] تحليل webhook handler الحالي (server/webhookHandler.ts)
+- [x] فحص معالجة الرسائل الصوتية في handleWhatsAppWebhook
+- [x] إضافة معالجة الرسائل الصوتية في webhookHandler
+- [x] تحويل الصوت إلى نص باستخدام transcribeAudio
+- [x] ربط النص المحول مع processIncomingMessage
+- [x] إرسال رد ساري عبر sendTextMessage
+- [x] حفظ الرسالة الصوتية في قاعدة البيانات (voiceUrl)
+- [x] تحديث الرسالة بالنص المحول (content)
+- [x] اختبار التدفق الكامل (8 اختبارات ناجحة)
+- [ ] حفظ checkpoint

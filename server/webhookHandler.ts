@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
-import { parseWebhookMessage, IncomingMessage } from './whatsapp';
+import { parseWebhookMessage, IncomingMessage, sendTextMessage } from './whatsapp';
 import * as db from './db';
+import { transcribeAudio } from './_core/voiceTranscription';
+import { processIncomingMessage } from './ai';
 
 /**
  * Webhook Handler for Green API
@@ -63,7 +65,7 @@ export async function handleWhatsAppWebhook(req: Request, res: Response) {
                        incomingMessage.type === 'video' || incomingMessage.type === 'document' ? 'image' : 
                        incomingMessage.type;
     
-    await db.createMessage({
+    const savedMessage = await db.createMessage({
       conversationId: conversation!.id,
       direction: 'incoming',
       messageType: messageType as 'text' | 'voice' | 'image',
@@ -73,12 +75,59 @@ export async function handleWhatsAppWebhook(req: Request, res: Response) {
       isProcessed: false,
     });
 
-    // TODO: Trigger AI response here
-    // This is where you would:
-    // 1. Get the merchant's products and settings
-    // 2. Call OpenAI with the message and context
-    // 3. Send the AI response back via WhatsApp
-    // 4. Save the AI response to the database
+    // Process the message and generate AI response
+    let messageText = incomingMessage.message || '';
+    
+    // If it's a voice message, transcribe it first
+    if (incomingMessage.type === 'audio' && incomingMessage.fileUrl) {
+      try {
+        console.log('[Webhook] Transcribing voice message...');
+        const transcription = await transcribeAudio({
+          audioUrl: incomingMessage.fileUrl,
+          language: 'ar',
+        });
+        
+        if ('text' in transcription && transcription.text) {
+          messageText = transcription.text;
+          console.log('[Webhook] Transcription successful:', messageText);
+          
+          // Update the message with transcribed text
+          if (savedMessage) {
+            await db.updateMessage(savedMessage.id, {
+              content: messageText,
+              isProcessed: true,
+            });
+          }
+        } else {
+          console.error('[Webhook] Transcription failed:', transcription);
+          messageText = 'رسالة صوتية (فشل التحويل إلى نص)';
+        }
+      } catch (error) {
+        console.error('[Webhook] Error transcribing voice message:', error);
+        messageText = 'رسالة صوتية (حدث خطأ في التحويل)';
+      }
+    }
+    
+    // Generate AI response if we have text
+    if (messageText && messageText.trim()) {
+      const aiResponse = await processIncomingMessage(
+        connection.merchantId,
+        conversation!.id,
+        incomingMessage.from,
+        messageText
+      );
+      
+      // Send the AI response back via WhatsApp
+      if (aiResponse) {
+        const sendResult = await sendTextMessage(incomingMessage.from, aiResponse);
+        
+        if (!sendResult.success) {
+          console.error('[Webhook] Failed to send AI response:', sendResult.error);
+        } else {
+          console.log('[Webhook] AI response sent successfully');
+        }
+      }
+    }
 
     // For now, just acknowledge receipt
     res.status(200).json({ 
