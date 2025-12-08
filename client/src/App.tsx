@@ -29,6 +29,7 @@ import Referrals from "./pages/Referrals";
 import MerchantSettings from "./pages/merchant/Settings";
 import Reports from "./pages/merchant/Reports";
 import Subscriptions from "./pages/merchant/Subscriptions";
+import Usage from "./pages/merchant/Usage";
 import Checkout from "./pages/merchant/Checkout";
 import PaymentSuccess from "./pages/merchant/PaymentSuccess";
 import PaymentCancel from "./pages/merchant/PaymentCancel";
@@ -224,6 +225,12 @@ function Router() {
       <Route path="/merchant/subscriptions">
         <DashboardLayout>
           <Subscriptions />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/usage">
+        <DashboardLayout>
+          <Usage />
         </DashboardLayout>
       </Route>
 

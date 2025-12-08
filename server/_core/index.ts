@@ -97,6 +97,13 @@ async function startServer() {
       const { checkInstanceExpiry } = await import('../jobs/instance-expiry-check');
       await checkInstanceExpiry();
     });
+    
+    // Monthly Usage Reset (runs on the 1st of each month at 00:00)
+    cron.schedule('0 0 1 * *', async () => {
+      console.log('[Cron] Running monthly usage reset...');
+      const { resetMonthlyUsage } = await import('../usage-tracking');
+      await resetMonthlyUsage();
+    });
   });
 }
 

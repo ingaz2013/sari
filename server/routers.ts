@@ -1028,6 +1028,23 @@ export const appRouter = router({
 
       return db.getActiveSubscriptionByMerchantId(merchant.id);
     }),
+    
+    // Get usage statistics
+    getUsage: protectedProcedure.query(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      }
+      
+      const { getUsageStats } = await import('./usage-tracking');
+      const stats = await getUsageStats(merchant.id);
+      
+      if (!stats) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'No active subscription found' });
+      }
+      
+      return stats;
+    }),
 
     // Create subscription
     create: protectedProcedure

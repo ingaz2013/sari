@@ -7,6 +7,12 @@ import * as db from '../db';
 import { sendTextMessage } from '../whatsapp';
 import { chatWithSari } from '../ai/sari-personality';
 import { processVoiceMessage, hasReachedVoiceLimit, incrementVoiceMessageUsage } from '../ai/voice-handler';
+import {
+  hasReachedConversationLimit,
+  hasReachedMessageLimit,
+  incrementConversationUsage,
+  incrementMessageUsage,
+} from '../usage-tracking';
 
 interface WebhookResult {
   success: boolean;
@@ -110,6 +116,12 @@ async function getOrCreateConversation(params: {
     return existing.id;
   }
   
+  // Check conversation limit before creating new conversation
+  const reachedLimit = await hasReachedConversationLimit(params.merchantId);
+  if (reachedLimit) {
+    throw new Error('CONVERSATION_LIMIT_REACHED');
+  }
+  
   // Create new conversation
   const conversation = await db.createConversation({
     merchantId: params.merchantId,
@@ -122,6 +134,9 @@ async function getOrCreateConversation(params: {
   if (!conversation) {
     throw new Error('Failed to create conversation');
   }
+  
+  // Increment conversation usage
+  await incrementConversationUsage(params.merchantId);
   
   return conversation.id;
 }
@@ -138,6 +153,12 @@ async function processTextMessage(params: {
 }): Promise<string> {
   try {
     console.log('[Webhook] Processing text message:', params.messageText);
+    
+    // Check message limit
+    const reachedLimit = await hasReachedMessageLimit(params.merchantId);
+    if (reachedLimit) {
+      throw new Error('MESSAGE_LIMIT_REACHED');
+    }
     
     // Save incoming message
     await db.createMessage({
@@ -171,6 +192,10 @@ async function processTextMessage(params: {
       isProcessed: true,
       aiResponse: response,
     });
+    
+    // Increment message usage (incoming + outgoing = 2 messages)
+    await incrementMessageUsage(params.merchantId);
+    await incrementMessageUsage(params.merchantId);
     
     return response;
   } catch (error: any) {
@@ -357,6 +382,58 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
     };
   } catch (error: any) {
     console.error('[Webhook] Error handling webhook:', error);
+    
+    // Handle limit errors - try to notify customer if possible
+    const customerPhone = webhookData?.senderData?.chatId ? extractPhoneNumber(webhookData.senderData.chatId) : null;
+    
+    if (error.message === 'CONVERSATION_LIMIT_REACHED' && customerPhone) {
+      try {
+        await sendTextMessage(
+          customerPhone,
+          'عذراً، لقد وصلنا للحد الأقصى من المحادثات الشهرية. سنعود للتواصل معك قريباً! 🙏'
+        );
+      } catch (sendError) {
+        console.error('[Webhook] Failed to send limit notification:', sendError);
+      }
+      
+      return {
+        success: false,
+        message: 'Conversation limit reached'
+      };
+    }
+    
+    if (error.message === 'MESSAGE_LIMIT_REACHED' && customerPhone) {
+      try {
+        await sendTextMessage(
+          customerPhone,
+          'عذراً، لقد وصلنا للحد الأقصى من الرسائل الشهرية. شكراً لتواصلك! 🙏'
+        );
+      } catch (sendError) {
+        console.error('[Webhook] Failed to send limit notification:', sendError);
+      }
+      
+      return {
+        success: false,
+        message: 'Message limit reached'
+      };
+    }
+    
+    if (error.message === 'VOICE_LIMIT_REACHED' && customerPhone) {
+      try {
+        await sendTextMessage(
+          customerPhone,
+          'عذراً، لقد وصلنا للحد الأقصى من الرسائل الصوتية الشهرية. يمكنك إرسال رسالة نصية بدلاً من ذلك. 🙏'
+        );
+      } catch (sendError) {
+        console.error('[Webhook] Failed to send limit notification:', sendError);
+      }
+      
+      return {
+        success: false,
+        message: 'Voice message limit reached'
+      };
+    }
+    
     return {
       success: false,
       message: error.message || 'Unknown error'
