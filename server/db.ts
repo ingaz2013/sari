@@ -132,6 +132,9 @@ import {
   passwordResetTokens,
   PasswordResetToken,
   InsertPasswordResetToken,
+  passwordResetAttempts,
+  PasswordResetAttempt,
+  InsertPasswordResetAttempt,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -4347,4 +4350,98 @@ export async function deleteExpiredPasswordResetTokens(): Promise<void> {
   if (!db) return;
 
   await db.delete(passwordResetTokens).where(lt(passwordResetTokens.expiresAt, new Date()));
+}
+
+/**
+ * ========================================
+ * Password Reset Rate Limiting Functions
+ * ========================================
+ */
+
+/**
+ * تسجيل محاولة إعادة تعيين كلمة المرور
+ */
+export async function trackResetAttempt(data: {
+  email: string;
+  ipAddress?: string;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(passwordResetAttempts).values({
+    email: data.email,
+    ipAddress: data.ipAddress,
+  });
+}
+
+/**
+ * الحصول على محاولات إعادة التعيين لبريد إلكتروني معين خلال فترة زمنية
+ * @param email البريد الإلكتروني
+ * @param minutesAgo عدد الدقائق الماضية (افتراضي: 10 دقائق)
+ */
+export async function getResetAttempts(
+  email: string,
+  minutesAgo: number = 10
+): Promise<PasswordResetAttempt[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const cutoffTime = new Date(Date.now() - minutesAgo * 60 * 1000);
+
+  const attempts = await db
+    .select()
+    .from(passwordResetAttempts)
+    .where(
+      and(
+        eq(passwordResetAttempts.email, email),
+        gte(passwordResetAttempts.attemptedAt, cutoffTime)
+      )
+    )
+    .orderBy(desc(passwordResetAttempts.attemptedAt));
+
+  return attempts;
+}
+
+/**
+ * التحقق من إمكانية طلب إعادة تعيين كلمة المرور
+ * @returns { allowed: boolean, remainingTime?: number, attemptsCount: number }
+ */
+export async function canRequestReset(email: string): Promise<{
+  allowed: boolean;
+  remainingTime?: number; // بالثواني
+  attemptsCount: number;
+}> {
+  const attempts = await getResetAttempts(email, 10); // آخر 10 دقائق
+  const attemptsCount = attempts.length;
+
+  // إذا كان عدد المحاولات أقل من 3، مسموح
+  if (attemptsCount < 3) {
+    return { allowed: true, attemptsCount };
+  }
+
+  // إذا وصل إلى 3 محاولات، احسب الوقت المتبقي
+  const oldestAttempt = attempts[attempts.length - 1];
+  const attemptTime = new Date(oldestAttempt.attemptedAt).getTime();
+  const now = Date.now();
+  const tenMinutesInMs = 10 * 60 * 1000;
+  const elapsedTime = now - attemptTime;
+  const remainingTime = Math.ceil((tenMinutesInMs - elapsedTime) / 1000); // بالثواني
+
+  if (remainingTime > 0) {
+    return { allowed: false, remainingTime, attemptsCount };
+  }
+
+  // إذا مرت 10 دقائق من أقدم محاولة، مسموح
+  return { allowed: true, attemptsCount };
+}
+
+/**
+ * حذف المحاولات القديمة (أكثر من ساعة)
+ */
+export async function clearOldAttempts(): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  await db.delete(passwordResetAttempts).where(lt(passwordResetAttempts.attemptedAt, oneHourAgo));
 }

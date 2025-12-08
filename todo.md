@@ -2321,4 +2321,32 @@
 - [x] إضافة رابط "نسيت كلمة المرور؟" في صفحة Login
 - [x] إضافة المسارات في App.tsx
 - [x] كتابة الاختبارات الشاملة (10 اختبارات ناجحة)
+- [x] حفظ Checkpoint (5af1c5c2)
+
+## نظام Rate Limiting لاستعادة كلمة المرور
+
+### المرحلة 1: تحديث Schema
+- [x] إضافة جدول password_reset_attempts في schema.ts
+- [x] تشغيل drizzle-kit generate
+- [x] تطبيق Migration على قاعدة البيانات (0031_round_misty_knight.sql)
+
+### المرحلة 2: دوال قاعدة البيانات
+- [x] إنشاء دالة trackResetAttempt
+- [x] إنشاء دالة getResetAttempts
+- [x] إنشاء دالة canRequestReset
+- [x] إنشاء دالة clearOldAttempts
+
+### المرحلة 3: تحديث API
+- [x] تحديث auth.requestPasswordReset مع فحص Rate Limiting
+- [x] إضافة رسائل خطأ واضحة (عربي/إنجليزي)
+- [x] حساب الوقت المتبقي للانتظار
+
+### المرحلة 4: تحديث الواجهة
+- [x] تحديث صفحة ForgotPassword لعرض رسائل Rate Limiting
+- [x] إضافة عداد تنازلي للوقت المتبقي
+- [x] تحسين تجربة المستخدم
+
+### المرحلة 5: الاختبارات والنشر
+- [x] كتابة اختبارات Rate Limiting (10 اختبارات)
+- [x] اختبار السيناريوهات المختلفة
 - [ ] حفظ Checkpoint

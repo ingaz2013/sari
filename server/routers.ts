@@ -190,6 +190,29 @@ export const appRouter = router({
         email: z.string().email(),
       }))
       .mutation(async ({ input }) => {
+        // Check rate limiting first
+        const rateLimitCheck = await db.canRequestReset(input.email);
+        
+        if (!rateLimitCheck.allowed) {
+          const minutes = Math.floor(rateLimitCheck.remainingTime! / 60);
+          const seconds = rateLimitCheck.remainingTime! % 60;
+          const timeString = minutes > 0 
+            ? `${minutes} دقيقة و ${seconds} ثانية`
+            : `${seconds} ثانية`;
+          
+          throw new TRPCError({ 
+            code: 'TOO_MANY_REQUESTS', 
+            message: `لقد تجاوزت الحد الأقصى للمحاولات (3 محاولات). يرجى الانتظار ${timeString} قبل المحاولة مرة أخرى.`,
+            cause: {
+              remainingTime: rateLimitCheck.remainingTime,
+              attemptsCount: rateLimitCheck.attemptsCount,
+            }
+          });
+        }
+        
+        // Track this attempt
+        await db.trackResetAttempt({ email: input.email });
+        
         const user = await db.getUserByEmail(input.email);
         
         // Don't reveal if user exists or not (security best practice)

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
@@ -6,23 +6,61 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowRight, Mail, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ArrowRight, Mail, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
 
   const requestResetMutation = trpc.auth.requestPasswordReset.useMutation({
     onSuccess: () => {
       setSubmitted(true);
+      setRemainingTime(null);
+    },
+    onError: (error) => {
+      // Check if it's a rate limit error
+      if (error.data?.code === 'TOO_MANY_REQUESTS') {
+        // Extract remainingTime from error message or data
+        const errorData = error.data as any;
+        if (errorData?.cause?.remainingTime) {
+          setRemainingTime(errorData.cause.remainingTime);
+        }
+      }
     },
   });
 
+  // Countdown timer
+  useEffect(() => {
+    if (remainingTime === null || remainingTime <= 0) return;
+
+    const interval = setInterval(() => {
+      setRemainingTime((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [remainingTime]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email || remainingTime !== null) return;
     
     requestResetMutation.mutate({ email });
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    if (minutes > 0) {
+      return `${minutes} دقيقة و ${secs} ثانية`;
+    }
+    return `${secs} ثانية`;
   };
 
   if (submitted) {
@@ -98,6 +136,25 @@ export default function ForgotPassword() {
               </Alert>
             )}
 
+            {remainingTime !== null && remainingTime > 0 && (
+              <Alert className="border-orange-200 bg-orange-50">
+                <Clock className="h-4 w-4 text-orange-600" />
+                <AlertDescription className="text-sm text-gray-700 leading-relaxed">
+                  <div className="space-y-2">
+                    <p className="font-semibold text-orange-800">
+                      لقد تجاوزت الحد الأقصى للمحاولات (3 محاولات)
+                    </p>
+                    <p>
+                      يرجى الانتظار <strong className="text-orange-600 text-lg">{formatTime(remainingTime)}</strong> قبل المحاولة مرة أخرى.
+                    </p>
+                    <p className="text-xs text-gray-600 mt-2">
+                      هذا الإجراء لحماية حسابك من الوصول غير المصرح به.
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium text-gray-700">
                 البريد الإلكتروني
@@ -111,7 +168,7 @@ export default function ForgotPassword() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  disabled={requestResetMutation.isPending}
+                  disabled={requestResetMutation.isPending || remainingTime !== null}
                   className="pr-10 h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                   dir="ltr"
                 />
@@ -124,12 +181,17 @@ export default function ForgotPassword() {
             <Button 
               type="submit" 
               className="w-full h-12 text-base font-semibold bg-blue-600 hover:bg-blue-700"
-              disabled={requestResetMutation.isPending || !email}
+              disabled={requestResetMutation.isPending || !email || remainingTime !== null}
             >
               {requestResetMutation.isPending ? (
                 <span className="flex items-center gap-2">
                   <span className="animate-spin">⏳</span>
                   جاري الإرسال...
+                </span>
+              ) : remainingTime !== null ? (
+                <span className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  انتظر {formatTime(remainingTime)}
                 </span>
               ) : (
                 'إرسال رابط إعادة التعيين'

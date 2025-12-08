@@ -1075,3 +1075,17 @@ export const passwordResetTokens = mysqlTable('password_reset_tokens', {
 
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
 export type InsertPasswordResetToken = typeof passwordResetTokens.$inferInsert;
+
+/**
+ * Password Reset Attempts - محاولات إعادة تعيين كلمة المرور (Rate Limiting)
+ */
+export const passwordResetAttempts = mysqlTable('password_reset_attempts', {
+  id: int('id').primaryKey().autoincrement(),
+  email: varchar('email', { length: 320 }).notNull(), // Email address
+  attemptedAt: timestamp('attempted_at').defaultNow().notNull(), // When was the attempt made?
+  ipAddress: varchar('ip_address', { length: 45 }), // IP address (optional, for security)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type PasswordResetAttempt = typeof passwordResetAttempts.$inferSelect;
+export type InsertPasswordResetAttempt = typeof passwordResetAttempts.$inferInsert;
