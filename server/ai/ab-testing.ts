@@ -140,7 +140,8 @@ export async function applyWinningVariant(testId: number): Promise<number | null
   // إنشاء رد سريع جديد
   const responseId = await db.createQuickResponse({
     merchantId: test.merchantId,
-    keyword: test.keyword,
+    trigger: test.keyword,
+    keywords: test.keyword,
     response: winningText,
     isActive: true,
     priority: 10, // أولوية عالية
@@ -154,7 +155,7 @@ export async function applyWinningVariant(testId: number): Promise<number | null
     await db.updateQuickResponse(test.variantBId, { isActive: false });
   }
 
-  return responseId;
+  return responseId ? Number(responseId) : null;
 }
 
 /**
@@ -198,7 +199,7 @@ export async function suggestABTests(merchantId: number): Promise<Array<{
   reason: string;
 }>> {
   // الحصول على الردود السريعة الأكثر استخداماً
-  const responses = await db.getQuickResponsesByMerchant(merchantId);
+  const responses = await db.getQuickResponses(merchantId);
   
   // ترتيب حسب الاستخدام
   const mostUsed = responses
@@ -211,7 +212,7 @@ export async function suggestABTests(merchantId: number): Promise<Array<{
   for (const response of mostUsed) {
     // اقتراح نسخة محسّنة
     suggestions.push({
-      keyword: response.keyword,
+      keyword: response.trigger || response.keywords || '',
       currentResponse: response.response,
       suggestedVariant: `${response.response} 😊`, // مثال بسيط: إضافة emoji
       reason: 'إضافة emoji قد يزيد من ودية الرد',

@@ -3914,28 +3914,29 @@ export async function getKeywordStats(merchantId: number, options?: {
   const db = await getDb();
   if (!db) return [];
   
-  let query = db.select().from(keywordAnalysis)
-    .where(eq(keywordAnalysis.merchantId, merchantId));
+  const conditions = [eq(keywordAnalysis.merchantId, merchantId)];
 
   if (options?.category) {
-    query = query.where(eq(keywordAnalysis.category, options.category as any));
+    conditions.push(eq(keywordAnalysis.category, options.category as any));
   }
 
   if (options?.status) {
-    query = query.where(eq(keywordAnalysis.status, options.status as any));
+    conditions.push(eq(keywordAnalysis.status, options.status as any));
   }
 
   if (options?.minFrequency) {
-    query = query.where(gte(keywordAnalysis.frequency, options.minFrequency));
+    conditions.push(gte(keywordAnalysis.frequency, options.minFrequency));
   }
 
-  query = query.orderBy(desc(keywordAnalysis.frequency));
+  const baseQuery = db.select().from(keywordAnalysis)
+    .where(and(...conditions))
+    .orderBy(desc(keywordAnalysis.frequency));
 
   if (options?.limit) {
-    query = query.limit(options.limit);
+    return await baseQuery.limit(options.limit);
   }
 
-  return await query;
+  return await baseQuery;
 }
 
 /**

@@ -2243,3 +2243,22 @@
 - [x] إضافة APIs في routers.ts (createTest, getTestResults, declareWinner)
 - [ ] تحديث صفحة Quick Responses بميزة A/B testing
 - [x] كتابة الاختبارات
+
+
+## Phase 5: لوحة التحكم التحليلية والتقارير الذكية ✅
+- [x] تحديث اللوجو بالصورة الجديدة (Asset3.png)
+- [x] إنشاء لوحة تحكم تحليلية (/merchant/insights)
+- [x] عرض إحصائيات الكلمات المفتاحية مع رسوم بيانية
+- [x] عرض التقارير الأسبوعية للمشاعر
+- [x] عرض نتائج اختبارات A/B النشطة
+- [x] رسوم بيانية تفاعلية باستخدام Chart.js
+- [x] إنشاء نظام Cron Job للتقارير الأسبوعية (server/jobs/weekly-sentiment-report.ts)
+- [x] دالة generateWeeklySentimentReport (server/ai/weekly-sentiment.ts)
+- [x] جدولة إرسال تقارير تلقائية كل يوم أحد الساعة 9 صباحاً
+- [x] ربط نظام الكلمات المفتاحية مع Webhook
+- [x] استخراج الكلمات المفتاحية من الرسائل الواردة (server/ai/keyword-extraction.ts)
+- [x] تطبيق A/B testing على الردود الفورية في Webhook
+- [x] إنشاء APIs للوحة التحكم (server/routers-insights.ts)
+- [x] إنشاء دوال قاعدة البيانات (server/db-insights.ts)
+- [x] كتابة اختبارات شاملة (server/insights.test.ts - 5 اختبارات ناجحة)
+- [x] حفظ Checkpoint

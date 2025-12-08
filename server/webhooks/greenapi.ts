@@ -7,6 +7,8 @@ import * as db from '../db';
 import { sendTextMessage } from '../whatsapp';
 import { chatWithSari } from '../ai/sari-personality';
 import { processVoiceMessage, hasReachedVoiceLimit, incrementVoiceMessageUsage } from '../ai/voice-handler';
+import { extractKeywordsFromMessage } from '../ai/keyword-extraction';
+import { selectABTestVariant, recordABTestResult } from '../ai/ab-testing';
 import {
   hasReachedConversationLimit,
   hasReachedMessageLimit,
@@ -181,6 +183,28 @@ async function processTextMessage(params: {
     });
     
     console.log('[Webhook] Sari response:', response);
+    
+    // استخراج الكلمات المفتاحية من الرسالة
+    try {
+      await extractKeywordsFromMessage(params.merchantId, params.messageText, params.conversationId);
+    } catch (error) {
+      console.error('[Webhook] Error extracting keywords:', error);
+    }
+    
+    // تطبيق A/B testing على الردود السريعة
+    let finalResponse = response;
+    try {
+      const abTestResult = await selectABTestVariant(params.merchantId, params.messageText);
+      if (abTestResult) {
+        finalResponse = abTestResult.text;
+        console.log(`[Webhook] Using A/B test variant: ${abTestResult.variant}`);
+        
+        // تسجيل الاستخدام (سيتم تحديد النجاح لاحقاً بناءً على رد العميل)
+        await recordABTestResult(abTestResult.testId, abTestResult.variant, true);
+      }
+    } catch (error) {
+      console.error('[Webhook] Error applying A/B test:', error);
+    }
     
     // Save outgoing message
     await db.createMessage({

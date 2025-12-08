@@ -53,6 +53,7 @@ import BotSettings from "./pages/merchant/BotSettings";
 import ScheduledMessages from "./pages/merchant/ScheduledMessages";
 import SariPersonality from "./pages/merchant/SariPersonality";
 import QuickResponses from "./pages/merchant/QuickResponses";
+import InsightsDashboard from "./pages/merchant/InsightsDashboard";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -258,6 +259,12 @@ function Router() {
       <Route path="/merchant/quick-responses">
         <DashboardLayout>
           <QuickResponses />
+        </DashboardLayout>
+      </Route>
+
+      <Route path="/merchant/insights">
+        <DashboardLayout>
+          <InsightsDashboard />
         </DashboardLayout>
       </Route>
       
