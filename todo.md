@@ -1728,3 +1728,32 @@
 - [x] اختبار معالجة الأخطاء (2 اختبار)
 - [x] نسبة النجاح: 100% (16/16)
 - [x] حفظ checkpoint
+
+
+## صفحة اختبار ساري AI (Test Sari Playground)
+
+### المرحلة 1: تصميم الواجهة
+- [x] إنشاء صفحة /merchant/test-sari
+- [x] واجهة محادثة تشبه WhatsApp
+- [x] حقل إدخال الرسالة مع زر إرسال
+- [x] عرض الرسائل المتبادلة (user + sari)
+- [x] زر إعادة تعيين المحادثة
+- [x] عرض حالة الكتابة (typing indicator)
+
+### المرحلة 2: APIs
+- [x] API testSari.sendMessage في routers.ts
+- [x] API testSari.resetConversation
+- [x] ربط مع chatWithSari من ai/sari-personality.ts
+- [x] ربط مع searchProducts من ai/product-intelligence.ts (تلقائي في chatWithSari)
+
+### المرحلة 3: الميزات الإضافية
+- [x] عرض المنتجات المقترحة في الرسائل (تلقائي في chatWithSari)
+- [x] حفظ سياق المحادثة في session (في الذاكرة فقط)
+- [x] عرض وقت كل رسالة
+- [x] دعم الرسائل الطويلة مع scroll
+
+### المرحلة 4: الاختبار
+- [x] كتابة اختبارات للـ APIs (5 اختبارات)
+- [x] اختبار المحادثة التجريبية
+- [x] اختبار إعادة التعيين
+- [x] حفظ checkpoint

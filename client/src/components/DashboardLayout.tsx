@@ -64,6 +64,7 @@ const getMerchantMenuItems = (t: any) => [
   { icon: CreditCard, label: t('sidebar.merchant.subscriptions'), path: "/merchant/subscriptions" },
   { icon: Smartphone, label: t('sidebar.merchant.whatsapp'), path: "/merchant/whatsapp" },
   { icon: Smartphone, label: t('sidebar.merchant.whatsappInstances'), path: "/merchant/whatsapp-instances" },
+  { icon: MessageSquare, label: 'اختبار ساري AI', path: "/merchant/test-sari" },
   { icon: Bell, label: t('sidebar.merchant.orderNotifications'), path: "/merchant/order-notifications" },
   { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla" },
   { icon: Settings, label: t('sidebar.merchant.settings'), path: "/merchant/settings" },

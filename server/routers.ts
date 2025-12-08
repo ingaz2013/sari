@@ -3728,6 +3728,41 @@ export const appRouter = router({
         return { message };
       }),
   }),
+
+  // Test Sari AI - Playground for testing conversations
+  testSari: router({
+    // Send a test message and get AI response
+    sendMessage: protectedProcedure
+      .input(z.object({
+        message: z.string(),
+        conversationHistory: z.array(z.object({
+          role: z.enum(['user', 'assistant']),
+          content: z.string(),
+        })).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        const { chatWithSari } = await import('./ai/sari-personality');
+        
+        const response = await chatWithSari({
+          merchantId: merchant.id,
+          customerPhone: 'test-playground',
+          customerName: 'عميل تجريبي',
+          message: input.message,
+        });
+
+        return { response };
+      }),
+
+    // Reset test conversation (no-op, just for UI)
+    resetConversation: protectedProcedure.mutation(async () => {
+      return { success: true };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;
