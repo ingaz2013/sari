@@ -18,6 +18,12 @@ import SolutionsMarketing from "./pages/SolutionsMarketing";
 import SolutionsSupport from "./pages/SolutionsSupport";
 import ProductAI from "./pages/ProductAI";
 import CompanyAbout from "./pages/CompanyAbout";
+import Blog from "./pages/resources/Blog";
+import HelpCenter from "./pages/resources/HelpCenter";
+import SuccessStories from "./pages/resources/SuccessStories";
+import Contact from "./pages/company/Contact";
+import Terms from "./pages/company/Terms";
+import Privacy from "./pages/company/Privacy";
 
 // Merchant pages
 import MerchantDashboard from "./pages/merchant/Dashboard";
@@ -89,6 +95,12 @@ function Router() {
       <Route path="/solutions/support" component={SolutionsSupport} />
       <Route path="/product/ai-agent" component={ProductAI} />
       <Route path="/company/about" component={CompanyAbout} />
+      <Route path="/resources/blog" component={Blog} />
+      <Route path="/resources/help-center" component={HelpCenter} />
+      <Route path="/resources/success-stories" component={SuccessStories} />
+      <Route path="/company/contact" component={Contact} />
+      <Route path="/company/terms" component={Terms} />
+      <Route path="/company/privacy" component={Privacy} />
       
       {/* Merchant Routes */}
       <Route path="/merchant/dashboard">
