@@ -2274,3 +2274,13 @@
 - [x] كتابة الاختبارات (5 اختبارات ناجحة)
 - [x] إضافة المسار في App.tsx
 - [x] إضافة رابط في DashboardLayout
+
+
+## التحويل إلى SMTP2GO API
+- [x] البحث عن SMTP2GO API documentation
+- [x] تحديث server/_core/env.ts (إزالة SMTP التقليدي، إضافة API Key)
+- [x] تحديث server/reports/email-sender.ts لاستخدام API
+- [x] تحديث server/invoices/email.ts لاستخدام API
+- [x] تحديث صفحة SMTPSettings.tsx (تبسيط الحقول)
+- [x] تحديث APIs في routers.ts
+- [x] كتابة الاختبارات (8 اختبارات ناجحة)

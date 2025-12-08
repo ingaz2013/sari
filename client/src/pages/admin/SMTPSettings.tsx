@@ -6,20 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
-import { Mail, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Send, CheckCircle, AlertCircle, Loader2, Key, ExternalLink } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export default function SMTPSettings() {
   const { t } = useTranslation();
 
   
-  const [smtpSettings, setSmtpSettings] = useState({
-    host: 'mail.smtp2go.com',
-    port: '2525',
-    user: '',
-    pass: '',
-    from: 'noreply@sary.live',
-  });
+  const [apiKey, setApiKey] = useState('');
+  const [fromEmail, setFromEmail] = useState('noreply@sary.live');
   
   const [testEmail, setTestEmail] = useState('');
   const [isTesting, setIsTesting] = useState(false);
@@ -27,7 +22,7 @@ export default function SMTPSettings() {
 
   const updateSettingsMutation = trpc.smtp.updateSettings.useMutation({
     onSuccess: () => {
-      toast.success('تم حفظ إعدادات SMTP بنجاح');
+      toast.success('تم حفظ إعدادات SMTP2GO API بنجاح');
     },
     onError: (error: any) => {
       toast.error(error.message);
@@ -52,12 +47,14 @@ export default function SMTPSettings() {
   });
 
   const handleSaveSettings = () => {
+    if (!apiKey) {
+      toast.error('يرجى إدخال API Key');
+      return;
+    }
+    
     updateSettingsMutation.mutate({
-      host: smtpSettings.host,
-      port: parseInt(smtpSettings.port),
-      user: smtpSettings.user,
-      pass: smtpSettings.pass,
-      from: smtpSettings.from,
+      apiKey,
+      from: fromEmail,
     });
   };
 
@@ -80,27 +77,23 @@ export default function SMTPSettings() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">إعدادات SMTP</h1>
+        <h1 className="text-3xl font-bold">إعدادات SMTP2GO API</h1>
         <p className="text-muted-foreground mt-2">
-          قم بإعداد خدمة SMTP2GO لإرسال رسائل البريد الإلكتروني التلقائية
+          قم بإعداد SMTP2GO API لإرسال رسائل البريد الإلكتروني التلقائية
         </p>
       </div>
 
-      {/* معلومات SMTP2GO */}
+      {/* معلومات SMTP2GO API */}
       <Alert>
-        <Mail className="h-4 w-4" />
+        <Key className="h-4 w-4" />
         <AlertDescription>
-          <strong>كيفية الحصول على بيانات SMTP2GO:</strong>
+          <strong>كيفية الحصول على SMTP2GO API Key:</strong>
           <ol className="list-decimal mr-6 mt-2 space-y-1">
-            <li>سجل حساب مجاني في <a href="https://www.smtp2go.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">SMTP2GO</a></li>
-            <li>من لوحة التحكم، اذهب إلى Settings → Users</li>
-            <li>أنشئ مستخدم SMTP جديد واحصل على Username و Password</li>
-            <li>استخدم الإعدادات التالية:
-              <ul className="list-disc mr-6 mt-1">
-                <li>Host: mail.smtp2go.com</li>
-                <li>Port: 2525 (أو 80، 8025، 587)</li>
-              </ul>
-            </li>
+            <li>سجل حساب مجاني في <a href="https://www.smtp2go.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">SMTP2GO <ExternalLink className="h-3 w-3" /></a></li>
+            <li>من لوحة التحكم، اذهب إلى <strong>Settings → API Keys</strong></li>
+            <li>اضغط على <strong>"Create API Key"</strong></li>
+            <li>اختر الصلاحيات: <strong>Send Email</strong></li>
+            <li>انسخ الـ API Key واحفظه في مكان آمن</li>
           </ol>
         </AlertDescription>
       </Alert>
@@ -109,61 +102,37 @@ export default function SMTPSettings() {
         {/* بطاقة الإعدادات */}
         <Card>
           <CardHeader>
-            <CardTitle>إعدادات SMTP</CardTitle>
+            <CardTitle>إعدادات API</CardTitle>
             <CardDescription>
-              أدخل بيانات SMTP2GO الخاصة بك
+              أدخل SMTP2GO API Key الخاص بك
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="host">SMTP Host</Label>
+              <Label htmlFor="apiKey">SMTP2GO API Key</Label>
               <Input
-                id="host"
-                value={smtpSettings.host}
-                onChange={(e) => setSmtpSettings({ ...smtpSettings, host: e.target.value })}
-                placeholder="mail.smtp2go.com"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="port">SMTP Port</Label>
-              <Input
-                id="port"
-                value={smtpSettings.port}
-                onChange={(e) => setSmtpSettings({ ...smtpSettings, port: e.target.value })}
-                placeholder="2525"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="user">SMTP Username</Label>
-              <Input
-                id="user"
-                value={smtpSettings.user}
-                onChange={(e) => setSmtpSettings({ ...smtpSettings, user: e.target.value })}
-                placeholder="your-smtp-username"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="pass">SMTP Password</Label>
-              <Input
-                id="pass"
+                id="apiKey"
                 type="password"
-                value={smtpSettings.pass}
-                onChange={(e) => setSmtpSettings({ ...smtpSettings, pass: e.target.value })}
-                placeholder="your-smtp-password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="api-xxxxxxxxxxxxxxxx"
               />
+              <p className="text-xs text-muted-foreground">
+                يبدأ عادة بـ api-
+              </p>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="from">From Email</Label>
               <Input
                 id="from"
-                value={smtpSettings.from}
-                onChange={(e) => setSmtpSettings({ ...smtpSettings, from: e.target.value })}
+                value={fromEmail}
+                onChange={(e) => setFromEmail(e.target.value)}
                 placeholder="noreply@sary.live"
               />
+              <p className="text-xs text-muted-foreground">
+                البريد الذي سيظهر كمُرسِل
+              </p>
             </div>
 
             <Button 
@@ -180,6 +149,17 @@ export default function SMTPSettings() {
                 'حفظ الإعدادات'
               )}
             </Button>
+
+            <Alert variant="default" className="mt-4">
+              <AlertDescription className="text-xs">
+                <strong>ملاحظة:</strong> بعد حفظ الإعدادات، يجب إضافة المتغيرات في <strong>Settings → Secrets</strong>:
+                <ul className="list-disc mr-4 mt-1">
+                  <li><code>SMTP2GO_API_KEY</code></li>
+                  <li><code>SMTP_FROM</code></li>
+                </ul>
+                ثم إعادة تشغيل الخادم.
+              </AlertDescription>
+            </Alert>
           </CardContent>
         </Card>
 
@@ -235,17 +215,17 @@ export default function SMTPSettings() {
             <div className="pt-4 border-t">
               <h4 className="font-semibold mb-2">ملاحظات هامة:</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• احفظ الإعدادات أولاً قبل الاختبار</li>
+                <li>• احفظ الإعدادات وأضفها في Secrets أولاً</li>
+                <li>• أعد تشغيل الخادم بعد إضافة Secrets</li>
                 <li>• تحقق من صندوق البريد المزعج (Spam)</li>
                 <li>• الحد المجاني: 1,000 رسالة/شهر</li>
-                <li>• يستخدم للفواتير والتقارير الأسبوعية</li>
               </ul>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* بطاقة الاستخدام */}
+      {/* بطاقة الاستخدامات */}
       <Card>
         <CardHeader>
           <CardTitle>استخدامات البريد الإلكتروني في النظام</CardTitle>
@@ -286,6 +266,41 @@ export default function SMTPSettings() {
                   إشعارات الاشتراكات والتحديثات الهامة
                 </p>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* بطاقة المميزات */}
+      <Card>
+        <CardHeader>
+          <CardTitle>✨ مميزات SMTP2GO API</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className="text-sm">سهولة الإعداد - API Key واحد فقط</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className="text-sm">لا حاجة لإعدادات DNS معقدة</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className="text-sm">1,000 رسالة مجاناً شهرياً</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className="text-sm">تتبع حالة الرسائل في الوقت الفعلي</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className="text-sm">دعم فني متاح 24/7</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-500" />
+              <span className="text-sm">معدل توصيل عالي (99%+)</span>
             </div>
           </div>
         </CardContent>

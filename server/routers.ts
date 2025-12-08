@@ -4483,20 +4483,17 @@ export const appRouter = router({
 
   // SMTP Configuration Router
   smtp: router({
-    // Update SMTP settings (Admin only)
+    // Update SMTP2GO API settings (Admin only)
     updateSettings: adminProcedure
       .input(z.object({
-        host: z.string(),
-        port: z.number(),
-        user: z.string(),
-        pass: z.string(),
+        apiKey: z.string(),
         from: z.string().email(),
       }))
       .mutation(async ({ input }) => {
         // In production, store these in a secure settings table
         // For now, we'll just validate and return success
         // Note: Actual env vars need to be set via the platform UI
-        return { success: true, message: 'Settings saved. Please update environment variables in platform settings.' };
+        return { success: true, message: 'Settings saved. Please update SMTP2GO_API_KEY and SMTP_FROM in platform settings.' };
       }),
 
     // Send test email

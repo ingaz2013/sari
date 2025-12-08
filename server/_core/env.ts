@@ -9,10 +9,7 @@ export const ENV = {
   forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
   tapSecretKey: process.env.TAP_SECRET_KEY ?? "",
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
-  // SMTP2GO Configuration
-  smtpHost: process.env.SMTP_HOST ?? "mail.smtp2go.com",
-  smtpPort: parseInt(process.env.SMTP_PORT ?? "2525"),
-  smtpUser: process.env.SMTP_USER ?? "",
-  smtpPass: process.env.SMTP_PASS ?? "",
+  // SMTP2GO API Configuration
+  smtp2goApiKey: process.env.SMTP2GO_API_KEY ?? "",
   smtpFrom: process.env.SMTP_FROM ?? "noreply@sary.live",
 };
