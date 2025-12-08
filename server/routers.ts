@@ -3762,6 +3762,73 @@ export const appRouter = router({
     resetConversation: protectedProcedure.mutation(async () => {
       return { success: true };
     }),
+
+    // Save test message to database
+    saveMessage: protectedProcedure
+      .input(z.object({
+        conversationId: z.number(),
+        sender: z.enum(['user', 'sari']),
+        content: z.string(),
+        responseTime: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await db.saveTestMessage(input);
+        return { success: true };
+      }),
+
+    // Mark conversation as deal
+    markAsDeal: protectedProcedure
+      .input(z.object({
+        conversationId: z.number().optional(),
+        dealValue: z.number().positive(),
+        messageCount: z.number(),
+        timeToConversion: z.number(), // in seconds
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        const dealId = await db.markTestConversationAsDeal({
+          merchantId: merchant.id,
+          conversationId: input.conversationId,
+          dealValue: input.dealValue,
+          messageCount: input.messageCount,
+          timeToConversion: input.timeToConversion,
+        });
+
+        return { success: true, dealId };
+      }),
+
+    // Get all 15 metrics
+    getMetrics: protectedProcedure
+      .input(z.object({
+        period: z.enum(['day', 'week', 'month']).default('day'),
+      }))
+      .query(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        const { calculateAllMetrics } = await import('./metrics');
+        const metrics = await calculateAllMetrics(merchant.id, input.period);
+
+        return metrics;
+      }),
+
+    // Create test conversation
+    createConversation: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        const conversationId = await db.createTestConversation(merchant.id);
+        return { conversationId };
+      }),
   }),
 });
 

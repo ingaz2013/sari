@@ -101,6 +101,10 @@ import {
   notificationTemplates,
   NotificationTemplate,
   InsertNotificationTemplate,
+  testConversations,
+  testMessages,
+  testDeals,
+  testMetricsDaily,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -2879,4 +2883,139 @@ export async function cancelOrder(id: number, reason?: string): Promise<void> {
     notes: reason || 'تم إلغاء الطلب',
     updatedAt: new Date()
   }).where(eq(orders.id, id));
+}
+
+// ============================================
+// Test Conversations & Metrics
+// ============================================
+
+/**
+ * Create or get test conversation
+ */
+export async function createTestConversation(merchantId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+
+  const result = await db.insert(testConversations).values({
+    merchantId,
+    startedAt: new Date(),
+  });
+
+  return Number(result[0].insertId);
+}
+
+/**
+ * Save test message
+ */
+export async function saveTestMessage(data: {
+  conversationId: number;
+  sender: 'user' | 'sari';
+  content: string;
+  responseTime?: number;
+  rating?: 'positive' | 'negative' | null;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.insert(testMessages).values({
+    conversationId: data.conversationId,
+    sender: data.sender,
+    content: data.content,
+    responseTime: data.responseTime || null,
+    rating: data.rating || null,
+    sentAt: new Date(),
+  });
+}
+
+/**
+ * Update message rating
+ */
+export async function updateTestMessageRating(
+  conversationId: number,
+  messageIndex: number,
+  rating: 'positive' | 'negative' | null
+): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  // Get all messages for this conversation
+  const messages = await db
+    .select()
+    .from(testMessages)
+    .where(eq(testMessages.conversationId, conversationId))
+    .orderBy(testMessages.sentAt);
+
+  if (messages[messageIndex]) {
+    await db
+      .update(testMessages)
+      .set({ rating })
+      .where(eq(testMessages.id, messages[messageIndex].id));
+  }
+}
+
+/**
+ * Mark conversation as deal
+ */
+export async function markTestConversationAsDeal(data: {
+  merchantId: number;
+  conversationId?: number;
+  dealValue: number;
+  messageCount: number;
+  timeToConversion: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+
+  const result = await db.insert(testDeals).values({
+    merchantId: data.merchantId,
+    conversationId: data.conversationId || null,
+    dealValue: data.dealValue,
+    messageCount: data.messageCount,
+    timeToConversion: data.timeToConversion,
+    markedAt: new Date(),
+  });
+
+  return Number(result[0].insertId);
+}
+
+/**
+ * Get test conversation messages
+ */
+export async function getTestConversationMessages(conversationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(testMessages)
+    .where(eq(testMessages.conversationId, conversationId))
+    .orderBy(testMessages.sentAt);
+}
+
+/**
+ * Get merchant test conversations
+ */
+export async function getMerchantTestConversations(merchantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(testConversations)
+    .where(eq(testConversations.merchantId, merchantId))
+    .orderBy(desc(testConversations.startedAt));
+}
+
+/**
+ * Get test deals for merchant
+ */
+export async function getMerchantTestDeals(merchantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(testDeals)
+    .where(eq(testDeals.merchantId, merchantId))
+    .orderBy(desc(testDeals.markedAt));
 }

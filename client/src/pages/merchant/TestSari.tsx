@@ -114,6 +114,21 @@ export default function TestSari() {
   const [dealValue, setDealValue] = useState("");
   const [showDealDialog, setShowDealDialog] = useState(false);
   const [conversationStartTime] = useState(new Date());
+  const [conversationId, setConversationId] = useState<number | null>(null);
+
+  // Create conversation on mount
+  const createConversationMutation = trpc.testSari.createConversation.useMutation({
+    onSuccess: (data) => {
+      setConversationId(data.conversationId);
+    },
+  });
+
+  useEffect(() => {
+    createConversationMutation.mutate();
+  }, []);
+
+  const saveMessageMutation = trpc.testSari.saveMessage.useMutation();
+  const markAsDealMutation = trpc.testSari.markAsDeal.useMutation();
 
   const sendMessageMutation = trpc.testSari.sendMessage.useMutation({
     onSuccess: (data) => {
@@ -125,6 +140,15 @@ export default function TestSari() {
       };
       setMessages((prev) => [...prev, assistantMessage]);
       setIsTyping(false);
+
+      // Save assistant message to database
+      if (conversationId) {
+        saveMessageMutation.mutate({
+          conversationId,
+          sender: 'sari',
+          content: data.response,
+        });
+      }
     },
     onError: (error) => {
       toast.error(t("toast.conversations.sendFailed"));
@@ -148,6 +172,9 @@ export default function TestSari() {
       setRatings({ positive: 0, negative: 0 });
       setRatingHistory([]);
       toast.success("تم إعادة تعيين المحادثة");
+      
+      // Create new conversation
+      createConversationMutation.mutate();
     },
   });
 
@@ -164,6 +191,15 @@ export default function TestSari() {
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
     setInputMessage("");
+
+    // Save user message to database
+    if (conversationId) {
+      saveMessageMutation.mutate({
+        conversationId,
+        sender: 'user',
+        content: inputMessage,
+      });
+    }
 
     sendMessageMutation.mutate({
       message: inputMessage,
@@ -188,13 +224,14 @@ export default function TestSari() {
     setShowDealDialog(false);
     toast.success(`✅ تم تسجيل الاتفاق بقيمة ${dealValue} ريال`);
 
-    // TODO: Save to database via API
-    // const timeToConversion = Math.floor((new Date().getTime() - conversationStartTime.getTime()) / 1000);
-    // markAsDealMutation.mutate({
-    //   dealValue: parseFloat(dealValue),
-    //   messageCount: messages.length,
-    //   timeToConversion,
-    // });
+    // Save to database
+    const timeToConversion = Math.floor((new Date().getTime() - conversationStartTime.getTime()) / 1000);
+    markAsDealMutation.mutate({
+      conversationId: conversationId || undefined,
+      dealValue: parseFloat(dealValue),
+      messageCount: messages.length,
+      timeToConversion,
+    });
   };
 
   const handleApplyScenario = (scenarioId: string) => {

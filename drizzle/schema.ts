@@ -148,7 +148,7 @@ export type InsertTestMessage = typeof testMessages.$inferInsert;
  */
 export const testDeals = mysqlTable("testDeals", {
   id: int("id").autoincrement().primaryKey(),
-  conversationId: int("conversationId").notNull().unique(),
+  conversationId: int("conversationId"),
   merchantId: int("merchantId").notNull(),
   dealValue: int("dealValue").notNull(), // in SAR
   timeToConversion: int("timeToConversion"), // in seconds

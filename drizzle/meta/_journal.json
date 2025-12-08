@@ -162,6 +162,13 @@
       "when": 1765191619744,
       "tag": "0022_hot_zaladane",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "5",
+      "when": 1765193421610,
+      "tag": "0023_broken_human_fly",
+      "breakpoints": true
     }
   ]
 }
