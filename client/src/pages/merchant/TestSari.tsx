@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Bot, Send, RotateCcw, User, Loader2, Sparkles, ThumbsUp, ThumbsDown, TrendingUp, BarChart3 } from "lucide-react";
 import { toast } from "sonner";
-import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, LineChart, Line, Tooltip as RechartsTooltip } from "recharts";
 
 interface Message {
   id: string;
@@ -105,6 +105,9 @@ export default function TestSari() {
     positive: 0,
     negative: 0,
   });
+  const [ratingHistory, setRatingHistory] = useState<
+    Array<{ timestamp: Date; satisfactionRate: number; positive: number; negative: number }>
+  >([]);
 
   const sendMessageMutation = trpc.testSari.sendMessage.useMutation({
     onSuccess: (data) => {
@@ -203,28 +206,59 @@ export default function TestSari() {
     setMessages((prev) =>
       prev.map((msg) => {
         if (msg.id === messageId) {
+          let newPositive = ratings.positive;
+          let newNegative = ratings.negative;
+
           // If same rating, remove it (toggle off)
           if (msg.rating === rating) {
             // Decrement count
-            setRatings((r) => ({
-              ...r,
-              [rating]: Math.max(0, r[rating] - 1),
-            }));
+            if (rating === "positive") newPositive = Math.max(0, newPositive - 1);
+            else newNegative = Math.max(0, newNegative - 1);
+
+            setRatings({ positive: newPositive, negative: newNegative });
+
+            // Update history
+            const total = newPositive + newNegative;
+            if (total > 0) {
+              setRatingHistory((prev) => [
+                ...prev,
+                {
+                  timestamp: new Date(),
+                  satisfactionRate: Math.round((newPositive / total) * 100),
+                  positive: newPositive,
+                  negative: newNegative,
+                },
+              ]);
+            }
+
             return { ...msg, rating: undefined };
           }
+
           // If different rating, update it
           if (msg.rating) {
             // Decrement old rating
-            setRatings((r) => ({
-              ...r,
-              [msg.rating!]: Math.max(0, r[msg.rating!] - 1),
-            }));
+            if (msg.rating === "positive") newPositive = Math.max(0, newPositive - 1);
+            else newNegative = Math.max(0, newNegative - 1);
           }
+
           // Increment new rating
-          setRatings((r) => ({
-            ...r,
-            [rating]: r[rating] + 1,
-          }));
+          if (rating === "positive") newPositive += 1;
+          else newNegative += 1;
+
+          setRatings({ positive: newPositive, negative: newNegative });
+
+          // Update history
+          const total = newPositive + newNegative;
+          setRatingHistory((prev) => [
+            ...prev,
+            {
+              timestamp: new Date(),
+              satisfactionRate: Math.round((newPositive / total) * 100),
+              positive: newPositive,
+              negative: newNegative,
+            },
+          ]);
+
           return { ...msg, rating };
         }
         return msg;
@@ -593,6 +627,64 @@ export default function TestSari() {
             )}
           </CardContent>
         </Card>
+
+        {ratingHistory.length >= 2 && (
+          <Card className="col-span-1 lg:col-span-2">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <CardTitle>تطور نسبة الرضا</CardTitle>
+              </div>
+              <CardDescription>
+                تتبع تحسن أو تراجع أداء ساري عبر الوقت
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={ratingHistory.map((item, index) => ({
+                      name: `#${index + 1}`,
+                      time: item.timestamp.toLocaleTimeString("ar-SA", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                      نسبة_الرضا: item.satisfactionRate,
+                    }))}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
+                    <XAxis dataKey="time" />
+                    <YAxis domain={[0, 100]} label={{ value: "%", position: "insideLeft" }} />
+                    <RechartsTooltip
+                      contentStyle={{
+                        backgroundColor: "hsl(var(--background))",
+                        border: "1px solid hsl(var(--border))",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="نسبة_الرضا"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={3}
+                      dot={{ fill: "hsl(var(--primary))", r: 5 }}
+                      activeDot={{ r: 7 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-4 flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="h-3 w-3 rounded-full bg-primary" />
+                  <span>نسبة الرضا (%)</span>
+                </div>
+                <span>•</span>
+                <span>عدد التقييمات: {ratingHistory.length}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
