@@ -318,6 +318,33 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
     
     console.log('[Webhook] Merchant ID:', instance.merchantId);
     
+    // Check if bot should respond based on settings
+    const { shouldRespond, reason } = await db.shouldBotRespond(instance.merchantId);
+    
+    if (!shouldRespond) {
+      console.log('[Webhook] Bot should not respond:', reason);
+      
+      // Send out-of-hours message if configured
+      if (reason === 'Outside working hours' || reason === 'Outside working days') {
+        const settings = await db.getBotSettings(instance.merchantId);
+        if (settings.outOfHoursMessage) {
+          await sendResponseWithDelay({
+            customerPhone: extractPhoneNumber(payload.senderData.chatId),
+            message: settings.outOfHoursMessage,
+            delayMs: 1000,
+          });
+        }
+      }
+      
+      return {
+        success: true,
+        message: 'Bot not responding: ' + reason
+      };
+    }
+    
+    // Get bot settings for response customization
+    const botSettings = await db.getBotSettings(instance.merchantId);
+    
     // Get or create conversation
     const conversationId = await getOrCreateConversation({
       merchantId: instance.merchantId,
@@ -368,10 +395,11 @@ export async function handleGreenAPIWebhook(webhookData: any): Promise<WebhookRe
       });
     }
     
-    // Send response
+    // Send response with custom delay from settings
     await sendResponseWithDelay({
       customerPhone,
       message: response,
+      delayMs: (botSettings.responseDelay ?? 2) * 1000,
     });
     
     console.log('[Webhook] Message processed successfully');

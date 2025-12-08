@@ -3830,6 +3830,53 @@ export const appRouter = router({
         return { conversationId };
       }),
   }),
+
+  // Bot Settings
+  botSettings: router({
+    // Get bot settings for current merchant
+    get: protectedProcedure.query(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      }
+
+      return await db.getBotSettings(merchant.id);
+    }),
+
+    // Update bot settings
+    update: protectedProcedure
+      .input(z.object({
+        autoReplyEnabled: z.boolean().optional(),
+        workingHoursEnabled: z.boolean().optional(),
+        workingHoursStart: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+        workingHoursEnd: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+        workingDays: z.string().optional(),
+        welcomeMessage: z.string().optional(),
+        outOfHoursMessage: z.string().optional(),
+        responseDelay: z.number().min(1).max(10).optional(),
+        maxResponseLength: z.number().min(50).max(500).optional(),
+        tone: z.enum(['friendly', 'professional', 'casual']).optional(),
+        language: z.enum(['ar', 'en', 'both']).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        return await db.updateBotSettings(merchant.id, input);
+      }),
+
+    // Check if bot should respond (for testing)
+    shouldRespond: protectedProcedure.query(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      }
+
+      return await db.shouldBotRespond(merchant.id);
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

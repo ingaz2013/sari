@@ -784,3 +784,40 @@ export const notificationTemplates = mysqlTable('notification_templates', {
 
 export type NotificationTemplate = typeof notificationTemplates.$inferSelect;
 export type InsertNotificationTemplate = typeof notificationTemplates.$inferInsert;
+
+
+/**
+ * Bot Settings (إعدادات الروبوت)
+ * Customize AI bot behavior for each merchant
+ */
+export const botSettings = mysqlTable('bot_settings', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().unique().references(() => merchants.id, { onDelete: 'cascade' }),
+  
+  // Auto-reply settings
+  autoReplyEnabled: boolean('auto_reply_enabled').default(true).notNull(),
+  
+  // Working hours (24-hour format)
+  workingHoursEnabled: boolean('working_hours_enabled').default(false).notNull(),
+  workingHoursStart: varchar('working_hours_start', { length: 5 }).default('09:00'), // HH:MM format
+  workingHoursEnd: varchar('working_hours_end', { length: 5 }).default('18:00'), // HH:MM format
+  workingDays: varchar('working_days', { length: 50 }).default('1,2,3,4,5'), // 0=Sunday, 1=Monday, etc.
+  
+  // Messages
+  welcomeMessage: text('welcome_message'), // First message to new customers
+  outOfHoursMessage: text('out_of_hours_message'), // Message when outside working hours
+  
+  // Response behavior
+  responseDelay: int('response_delay').default(2), // Delay in seconds (1-10)
+  maxResponseLength: int('max_response_length').default(200), // Max characters in response
+  
+  // AI personality
+  tone: mysqlEnum('tone', ['friendly', 'professional', 'casual']).default('friendly').notNull(),
+  language: mysqlEnum('language', ['ar', 'en', 'both']).default('ar').notNull(),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type BotSettings = typeof botSettings.$inferSelect;
+export type InsertBotSettings = typeof botSettings.$inferInsert;

@@ -105,6 +105,9 @@ import {
   testMessages,
   testDeals,
   testMetricsDaily,
+  botSettings,
+  BotSettings,
+  InsertBotSettings,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3018,4 +3021,128 @@ export async function getMerchantTestDeals(merchantId: number) {
     .from(testDeals)
     .where(eq(testDeals.merchantId, merchantId))
     .orderBy(desc(testDeals.markedAt));
+}
+
+
+// ============================================================
+// Bot Settings Functions
+// ============================================================
+
+/**
+ * Get bot settings for a merchant (create default if not exists)
+ */
+export async function getBotSettings(merchantId: number): Promise<BotSettings> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  // Try to get existing settings
+  const existing = await db
+    .select()
+    .from(botSettings)
+    .where(eq(botSettings.merchantId, merchantId))
+    .limit(1);
+  
+  if (existing.length > 0) {
+    return existing[0];
+  }
+  
+  // Create default settings
+  const result = await db
+    .insert(botSettings)
+    .values({
+      merchantId,
+      autoReplyEnabled: true,
+      workingHoursEnabled: false,
+      workingHoursStart: '09:00',
+      workingHoursEnd: '18:00',
+      workingDays: '1,2,3,4,5', // Monday-Friday
+      welcomeMessage: 'مرحباً! أنا ساري، مساعدك الذكي. كيف أقدر أساعدك اليوم؟ 😊',
+      outOfHoursMessage: 'شكراً لتواصلك! نحن حالياً خارج أوقات العمل. سنرد عليك في أقرب وقت ممكن. ⏰',
+      responseDelay: 2,
+      maxResponseLength: 200,
+      tone: 'friendly',
+      language: 'ar',
+    });
+  
+  const insertId = Number(result[0].insertId);
+  const newSettings = await db
+    .select()
+    .from(botSettings)
+    .where(eq(botSettings.id, insertId))
+    .limit(1);
+  
+  return newSettings[0];
+}
+
+/**
+ * Update bot settings
+ */
+export async function updateBotSettings(
+  merchantId: number,
+  updates: Partial<InsertBotSettings>
+): Promise<BotSettings> {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  // Ensure settings exist first
+  await getBotSettings(merchantId);
+  
+  // Update
+  await db
+    .update(botSettings)
+    .set(updates)
+    .where(eq(botSettings.merchantId, merchantId));
+  
+  // Return updated settings
+  return getBotSettings(merchantId);
+}
+
+/**
+ * Check if bot should respond based on working hours
+ */
+export async function shouldBotRespond(merchantId: number): Promise<{
+  shouldRespond: boolean;
+  reason?: string;
+}> {
+  const settings = await getBotSettings(merchantId);
+  
+  // Check if auto-reply is enabled
+  if (!settings.autoReplyEnabled) {
+    return {
+      shouldRespond: false,
+      reason: 'Auto-reply is disabled',
+    };
+  }
+  
+  // If working hours not enabled, always respond
+  if (!settings.workingHoursEnabled) {
+    return { shouldRespond: true };
+  }
+  
+  // Check working hours
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, etc.
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  
+  // Check if today is a working day
+  const workingDays = settings.workingDays?.split(',').map(d => parseInt(d)) || [];
+  if (!workingDays.includes(dayOfWeek)) {
+    return {
+      shouldRespond: false,
+      reason: 'Outside working days',
+    };
+  }
+  
+  // Check if current time is within working hours
+  const start = settings.workingHoursStart || '09:00';
+  const end = settings.workingHoursEnd || '18:00';
+  
+  if (currentTime < start || currentTime >= end) {
+    return {
+      shouldRespond: false,
+      reason: 'Outside working hours',
+    };
+  }
+  
+  return { shouldRespond: true };
 }
