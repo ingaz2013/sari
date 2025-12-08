@@ -48,6 +48,7 @@ import TestSari from "./pages/merchant/TestSari";
 import MetricsDashboard from "./pages/merchant/MetricsDashboard";
 import WhatsAppWebhookSetup from "./pages/merchant/WhatsAppWebhookSetup";
 import BotSettings from "./pages/merchant/BotSettings";
+import ScheduledMessages from "./pages/merchant/ScheduledMessages";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -223,6 +224,12 @@ function Router() {
       <Route path="/merchant/bot-settings">
         <DashboardLayout>
           <BotSettings />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/scheduled-messages">
+        <DashboardLayout>
+          <ScheduledMessages />
         </DashboardLayout>
       </Route>
       

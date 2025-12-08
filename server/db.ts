@@ -3146,3 +3146,136 @@ export async function shouldBotRespond(merchantId: number): Promise<{
   
   return { shouldRespond: true };
 }
+
+
+// ==================== Scheduled Messages ====================
+
+/**
+ * Get all scheduled messages for a merchant
+ */
+export async function getScheduledMessages(merchantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  return await db.select().from(scheduledMessages).where(eq(scheduledMessages.merchantId, merchantId));
+}
+
+/**
+ * Get a single scheduled message by ID
+ */
+export async function getScheduledMessageById(id: number, merchantId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  const results = await db.select().from(scheduledMessages)
+    .where(and(eq(scheduledMessages.id, id), eq(scheduledMessages.merchantId, merchantId)));
+  
+  return results[0] || null;
+}
+
+/**
+ * Create a new scheduled message
+ */
+export async function createScheduledMessage(data: {
+  merchantId: number;
+  title: string;
+  message: string;
+  dayOfWeek: number;
+  time: string;
+  isActive?: boolean;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  const result = await db.insert(scheduledMessages).values(data);
+  
+  const insertedId = Number(result[0].insertId);
+  return await getScheduledMessageById(insertedId, data.merchantId);
+}
+
+/**
+ * Update a scheduled message
+ */
+export async function updateScheduledMessage(
+  id: number,
+  merchantId: number,
+  data: {
+    title?: string;
+    message?: string;
+    dayOfWeek?: number;
+    time?: string;
+    isActive?: boolean;
+  }
+) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  await db.update(scheduledMessages)
+    .set(data)
+    .where(and(eq(scheduledMessages.id, id), eq(scheduledMessages.merchantId, merchantId)));
+  
+  return await getScheduledMessageById(id, merchantId);
+}
+
+/**
+ * Delete a scheduled message
+ */
+export async function deleteScheduledMessage(id: number, merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  await db.delete(scheduledMessages)
+    .where(and(eq(scheduledMessages.id, id), eq(scheduledMessages.merchantId, merchantId)));
+  
+  return true;
+}
+
+/**
+ * Toggle scheduled message active status
+ */
+export async function toggleScheduledMessage(id: number, merchantId: number, isActive: boolean) {
+  return await updateScheduledMessage(id, merchantId, { isActive });
+}
+
+/**
+ * Get all active scheduled messages that should be sent now
+ */
+export async function getScheduledMessagesToSend() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  const now = new Date();
+  const dayOfWeek = now.getDay(); // 0=Sunday, 1=Monday, etc.
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  
+  // Get all active messages for today
+  const results = await db.select().from(scheduledMessages)
+    .where(and(
+      eq(scheduledMessages.isActive, true),
+      eq(scheduledMessages.dayOfWeek, dayOfWeek),
+      eq(scheduledMessages.time, currentTime)
+    ));
+  
+  return results;
+}
+
+/**
+ * Update last sent timestamp for a scheduled message
+ */
+export async function updateScheduledMessageLastSent(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error('Database not available');
+  
+  const { scheduledMessages } = await import('../drizzle/schema');
+  await db.update(scheduledMessages)
+    .set({ lastSentAt: new Date() })
+    .where(eq(scheduledMessages.id, id));
+  
+  return true;
+}

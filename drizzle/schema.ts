@@ -821,3 +821,28 @@ export const botSettings = mysqlTable('bot_settings', {
 
 export type BotSettings = typeof botSettings.$inferSelect;
 export type InsertBotSettings = typeof botSettings.$inferInsert;
+
+/**
+ * Scheduled Messages - للرسائل المجدولة التلقائية
+ */
+export const scheduledMessages = mysqlTable('scheduled_messages', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().references(() => merchants.id, { onDelete: 'cascade' }),
+  
+  title: varchar('title', { length: 255 }).notNull(), // عنوان الرسالة (مثل: عرض الخميس)
+  message: text('message').notNull(), // محتوى الرسالة
+  
+  // Scheduling
+  dayOfWeek: int('day_of_week').notNull(), // 0=Sunday, 1=Monday, ..., 4=Thursday, 6=Saturday
+  time: varchar('time', { length: 5 }).notNull(), // HH:MM format (24-hour)
+  
+  // Status
+  isActive: boolean('is_active').default(true).notNull(),
+  lastSentAt: timestamp('last_sent_at'), // آخر مرة تم إرسال الرسالة
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type ScheduledMessage = typeof scheduledMessages.$inferSelect;
+export type InsertScheduledMessage = typeof scheduledMessages.$inferInsert;

@@ -176,6 +176,13 @@
       "when": 1765195369296,
       "tag": "0024_solid_ink",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "5",
+      "when": 1765197824254,
+      "tag": "0025_plain_lilith",
+      "breakpoints": true
     }
   ]
 }

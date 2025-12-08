@@ -1987,3 +1987,31 @@
 - [x] إضافة زر "إرسال رسالة تجريبية" في صفحة BotSettings
 - [x] عرض حالة الإرسال (نجاح/فشل) عبر toast
 - [x] sendTestMutation مع onSuccess و onError
+- [x] حفظ checkpoint (56ad5615)
+
+
+## جدولة الرسائل التلقائية (Scheduled Messages)
+
+### 1. قاعدة البيانات
+- [x] إضافة جدول scheduled_messages في schema.ts
+- [x] الحقول: id, merchantId, title, message, dayOfWeek, time, isActive, lastSentAt, createdAt
+- [x] تطبيق التغييرات بـ pnpm db:push
+
+### 2. Backend
+- [x] إضافة دوال قاعدة البيانات في db.ts
+- [x] إضافة APIs في routers.ts (list, create, update, delete, toggle)
+- [x] إنشاء Cron Job للتحقق وإرسال الرسائل المجدولة (scheduled-messages.ts)
+- [x] إضافة startScheduledMessagesJob في _core/index.ts
+
+### 3. Frontend
+- [x] إنشاء صفحة /merchant/scheduled-messages
+- [x] نموذج إنشاء رسالة مجدولة جديدة
+- [x] جدول عرض الرسائل المجدولة
+- [x] زر تفعيل/تعطيل لكل رسالة
+- [x] إضافة المسار في App.tsx
+- [x] إضافة رابط في DashboardLayout مع أيقونة Calendar
+- [x] إضافة مفاتيح الترجمة في ar.json و en.json
+
+### 4. الاختبار
+- [ ] اختبار النظام
+- [ ] حفظ checkpoint

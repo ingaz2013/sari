@@ -41,7 +41,8 @@ import {
   ShoppingBag,
   PartyPopper,
   Bell,
-  Bot
+  Bot,
+  Calendar
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -69,6 +70,7 @@ const getMerchantMenuItems = (t: any) => [
   { icon: Bell, label: t('sidebar.merchant.orderNotifications'), path: "/merchant/order-notifications" },
   { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla" },
   { icon: Bot, label: t('sidebar.merchant.botSettings'), path: "/merchant/bot-settings" },
+  { icon: Calendar, label: t('sidebar.merchant.scheduledMessages'), path: "/merchant/scheduled-messages" },
   { icon: Settings, label: t('sidebar.merchant.settings'), path: "/merchant/settings" },
 ];
 
