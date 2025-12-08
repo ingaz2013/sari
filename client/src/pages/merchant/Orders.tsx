@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { trpc } from '@/lib/trpc';
+import { formatCurrency } from '@/../../shared/currency';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ export default function Orders() {
     undefined,
     { enabled: !!user }
   );
+  const currency = merchant?.currency || 'SAR';
 
   // Get orders with filters
   const { data: orders, isLoading, refetch } = trpc.orders.getWithFilters.useQuery(
@@ -122,10 +124,7 @@ export default function Orders() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('ar-SA', {
-      style: 'currency',
-      currency: 'SAR',
-    }).format(price);
+    return formatCurrency(price, currency);
   };
 
   if (isLoading) {

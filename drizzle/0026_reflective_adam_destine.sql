@@ -1,0 +1,1 @@
+ALTER TABLE `merchants` ADD `currency` enum('SAR','USD') DEFAULT 'SAR' NOT NULL;

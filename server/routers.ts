@@ -212,6 +212,7 @@ export const appRouter = router({
         businessName: z.string().optional(),
         phone: z.string().optional(),
         autoReplyEnabled: z.boolean().optional(),
+        currency: z.enum(['SAR', 'USD']).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         const merchant = await db.getMerchantByUserId(ctx.user.id);

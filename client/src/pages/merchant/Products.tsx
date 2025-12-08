@@ -25,6 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Package, Plus, Upload, Edit, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useState } from 'react';
+import { formatCurrency } from '@/../../shared/currency';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'wouter';
 import { ProductsSkeleton } from '@/components/ProductsSkeleton';
@@ -33,7 +34,9 @@ export default function Products() {
   const { t } = useTranslation();
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
-  const { data: products, isLoading } = trpc.products.list.useQuery();
+  const { data: products, refetch, isLoading } = trpc.products.list.useQuery();
+  const { data: merchant } = trpc.merchants.getCurrent.useQuery();
+  const currency = merchant?.currency || 'SAR';
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -196,7 +199,7 @@ export default function Products() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="price">السعر (ريال) *</Label>
+                  <Label htmlFor="price">السعر ({currency === 'SAR' ? 'ريال' : '$'}) *</Label>
                   <Input
                     id="price"
                     type="number"
@@ -327,7 +330,7 @@ export default function Products() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium">{product.price} ريال</span>
+                        <span className="font-medium">{formatCurrency(product.price, currency)}</span>
                       </TableCell>
                       <TableCell>
                         {product.stock !== null && product.stock !== undefined ? (
@@ -405,7 +408,7 @@ export default function Products() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-price">السعر (ريال) *</Label>
+              <Label htmlFor="edit-price">السعر ({currency === 'SAR' ? 'ريال' : '$'}) *</Label>
               <Input
                 id="edit-price"
                 type="number"

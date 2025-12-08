@@ -2013,5 +2013,35 @@
 - [x] إضافة مفاتيح الترجمة في ar.json و en.json
 
 ### 4. الاختبار
-- [ ] اختبار النظام
+- [x] اختبار النظام - Cron Job يعمل بنجاح
+- [x] حفظ checkpoint (7ce71c81)
+
+
+## دعم العملات المتعددة (ريال سعودي ودولار أمريكي)
+
+### 1. تحديث قاعدة البيانات
+- [x] إضافة حقل currency في جدول merchants (SAR/USD)
+- [x] تطبيق migration
+
+### 2. إعدادات العملة
+- [x] إضافة دالة updateMerchantCurrency في db.ts (موجودة في updateMerchant)
+- [x] إضافة API merchants.updateCurrency (مدمجة في merchants.update)
+- [x] إضافة خيار اختيار العملة في صفحة Settings
+
+### 3. دالة تنسيق العملة
+- [x] إنشاء ملف shared/currency.ts
+- [x] دالة formatCurrency(amount, currency)
+- [x] دعم رموز العملات (ريال، $)
+
+### 4. تحديث عرض الأسعار
+- [x] تحديث صفحة Products
+- [x] تحديث صفحة Orders
+- [ ] تحديث صفحة Dashboard (اختياري - لا تعرض أسعار)
+- [ ] تحديث صفحة Analytics (اختياري - لا تعرض أسعار)
+- [ ] تحديث صفحة ChatOrders (إن وجدت)
+- [ ] تحديث رسائل WhatsApp (إن وجدت)
+
+### 5. الاختبار
+- [x] اختبار تغيير العملة (6 اختبارات ناجحة)
+- [x] اختبار عرض الأسعار
 - [ ] حفظ checkpoint

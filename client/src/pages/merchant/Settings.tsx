@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Settings as SettingsIcon, User, Store, CreditCard, Save, Bot } from 'lucide-react';
+import { Settings as SettingsIcon, User, Store, CreditCard, Save, Bot, DollarSign } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ export default function MerchantSettings() {
   const [businessName, setBusinessName] = useState('');
   const [phone, setPhone] = useState('');
   const [autoReplyEnabled, setAutoReplyEnabled] = useState(true);
+  const [currency, setCurrency] = useState<'SAR' | 'USD'>('SAR');
 
   // Initialize form data
   useEffect(() => {
@@ -37,6 +39,7 @@ export default function MerchantSettings() {
       setBusinessName(merchant.businessName || '');
       setPhone(merchant.phone || '');
       setAutoReplyEnabled(merchant.autoReplyEnabled ?? true);
+      setCurrency(merchant.currency || 'SAR');
     }
   }, [merchant]);
 
@@ -82,6 +85,7 @@ export default function MerchantSettings() {
       businessName,
       phone: phone || undefined,
       autoReplyEnabled,
+      currency,
     });
   };
 
@@ -175,6 +179,32 @@ export default function MerchantSettings() {
                 placeholder="+966 5X XXX XXXX"
                 dir="ltr"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="currency">العملة</Label>
+              <Select value={currency} onValueChange={(value: 'SAR' | 'USD') => setCurrency(value)}>
+                <SelectTrigger id="currency">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="SAR">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      ريال سعودي (SAR)
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="USD">
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      دولار أمريكي (USD)
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                العملة المستخدمة لعرض الأسعار في متجرك
+              </p>
             </div>
           </div>
 

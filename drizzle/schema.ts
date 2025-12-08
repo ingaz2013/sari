@@ -33,6 +33,7 @@ export const merchants = mysqlTable("merchants", {
   onboardingCompleted: boolean("onboardingCompleted").default(false).notNull(), // Has merchant completed onboarding wizard?
   onboardingStep: int("onboardingStep").default(0).notNull(), // Current onboarding step (0-4)
   onboardingCompletedAt: timestamp("onboardingCompletedAt"), // When onboarding was completed
+  currency: mysqlEnum("currency", ["SAR", "USD"]).default("SAR").notNull(), // Merchant's preferred currency
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
