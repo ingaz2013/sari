@@ -7,7 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Bot, Send, RotateCcw, User, Loader2, Sparkles } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Bot, Send, RotateCcw, User, Loader2, Sparkles, ThumbsUp, ThumbsDown } from "lucide-react";
 import { toast } from "sonner";
 
 interface Message {
@@ -15,6 +16,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  rating?: "positive" | "negative";
 }
 
 interface Scenario {
@@ -98,6 +100,10 @@ export default function TestSari() {
   const [inputMessage, setInputMessage] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [ratings, setRatings] = useState<{ positive: number; negative: number }>({
+    positive: 0,
+    negative: 0,
+  });
 
   const sendMessageMutation = trpc.testSari.sendMessage.useMutation({
     onSuccess: (data) => {
@@ -190,6 +196,39 @@ export default function TestSari() {
     }
 
     toast.success(`تم تطبيق سيناريو: ${scenario.title}`);
+  };
+
+  const handleRating = (messageId: string, rating: "positive" | "negative") => {
+    setMessages((prev) =>
+      prev.map((msg) => {
+        if (msg.id === messageId) {
+          // If same rating, remove it (toggle off)
+          if (msg.rating === rating) {
+            // Decrement count
+            setRatings((r) => ({
+              ...r,
+              [rating]: Math.max(0, r[rating] - 1),
+            }));
+            return { ...msg, rating: undefined };
+          }
+          // If different rating, update it
+          if (msg.rating) {
+            // Decrement old rating
+            setRatings((r) => ({
+              ...r,
+              [msg.rating!]: Math.max(0, r[msg.rating!] - 1),
+            }));
+          }
+          // Increment new rating
+          setRatings((r) => ({
+            ...r,
+            [rating]: r[rating] + 1,
+          }));
+          return { ...msg, rating };
+        }
+        return msg;
+      })
+    );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -312,12 +351,58 @@ export default function TestSari() {
                         {message.content}
                       </p>
                     </div>
-                    <span className="text-xs text-muted-foreground px-2">
-                      {message.timestamp.toLocaleTimeString("ar-SA", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                    <div className="flex items-center gap-2 px-2">
+                      <span className="text-xs text-muted-foreground">
+                        {message.timestamp.toLocaleTimeString("ar-SA", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      {message.role === "assistant" && message.id !== "welcome" && (
+                        <TooltipProvider>
+                          <div className="flex gap-1">
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-6 w-6 p-0 ${
+                                    message.rating === "positive"
+                                      ? "text-green-600 hover:text-green-700"
+                                      : "text-muted-foreground hover:text-green-600"
+                                  }`}
+                                  onClick={() => handleRating(message.id, "positive")}
+                                >
+                                  <ThumbsUp className="h-3 w-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>رد مفيد</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className={`h-6 w-6 p-0 ${
+                                    message.rating === "negative"
+                                      ? "text-red-600 hover:text-red-700"
+                                      : "text-muted-foreground hover:text-red-600"
+                                  }`}
+                                  onClick={() => handleRating(message.id, "negative")}
+                                >
+                                  <ThumbsDown className="h-3 w-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>رد غير مفيد</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </div>
+                        </TooltipProvider>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -379,7 +464,37 @@ export default function TestSari() {
         </div>
       </Card>
 
-      <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">📊 إحصائيات التقييم</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">إيجابي 👍</span>
+                <span className="text-lg font-bold text-green-600">{ratings.positive}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">سلبي 👎</span>
+                <span className="text-lg font-bold text-red-600">{ratings.negative}</span>
+              </div>
+              <div className="pt-2 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">نسبة الرضا</span>
+                  <span className="text-sm font-semibold">
+                    {ratings.positive + ratings.negative === 0
+                      ? "0%"
+                      : `${Math.round(
+                          (ratings.positive / (ratings.positive + ratings.negative)) * 100
+                        )}%`}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">💡 نصيحة</CardTitle>
