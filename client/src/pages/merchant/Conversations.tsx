@@ -22,16 +22,16 @@ export default function Conversations() {
 
   const { data: conversations, isLoading } = trpc.conversations.list.useQuery();
   const uploadAudioMutation = trpc.voice.uploadAudio.useMutation();
-
-  // Show loading skeleton
-  if (isLoading) {
-    return <ConversationsSkeleton />;
-  }
   
   const { data: messages } = trpc.conversations.getMessages.useQuery(
     { conversationId: selectedConversationId! },
     { enabled: selectedConversationId !== null }
   );
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <ConversationsSkeleton />;
+  }
 
   const filteredConversations = conversations?.filter(conv =>
     conv.customerPhone.includes(searchQuery) ||

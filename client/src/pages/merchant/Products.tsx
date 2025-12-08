@@ -34,11 +34,6 @@ export default function Products() {
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
   const { data: products, isLoading } = trpc.products.list.useQuery();
-
-  // Show loading skeleton
-  if (isLoading) {
-    return <ProductsSkeleton />;
-  }
   
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -145,6 +140,11 @@ export default function Products() {
       deleteMutation.mutate({ productId });
     }
   };
+
+  // Show loading skeleton
+  if (isLoading) {
+    return <ProductsSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
