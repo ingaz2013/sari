@@ -111,6 +111,15 @@ import {
   botSettings,
   BotSettings,
   InsertBotSettings,
+  sariPersonalitySettings,
+  SariPersonalitySetting,
+  InsertSariPersonalitySetting,
+  quickResponses,
+  QuickResponse,
+  InsertQuickResponse,
+  sentimentAnalysis,
+  SentimentAnalysis,
+  InsertSentimentAnalysis,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -3471,4 +3480,354 @@ export async function getReferralsWithDetails(merchantId: number) {
   if (!referralCode) return [];
 
   return getReferralsByCodeId(referralCode.id);
+}
+
+// ============================================================================
+// Sari Personality Settings
+// ============================================================================
+
+/**
+ * Get personality settings for a merchant
+ */
+export async function getSariPersonalitySettings(merchantId: number): Promise<SariPersonalitySetting | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(sariPersonalitySettings)
+    .where(eq(sariPersonalitySettings.merchantId, merchantId))
+    .limit(1);
+  
+  return result[0];
+}
+
+/**
+ * Create personality settings for a merchant
+ */
+export async function createSariPersonalitySettings(data: InsertSariPersonalitySetting): Promise<SariPersonalitySetting | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.insert(sariPersonalitySettings).values(data);
+  return getSariPersonalitySettings(data.merchantId);
+}
+
+/**
+ * Update personality settings
+ */
+export async function updateSariPersonalitySettings(
+  merchantId: number,
+  data: Partial<InsertSariPersonalitySetting>
+): Promise<SariPersonalitySetting | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db.update(sariPersonalitySettings)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(sariPersonalitySettings.merchantId, merchantId));
+
+  return getSariPersonalitySettings(merchantId);
+}
+
+/**
+ * Get or create personality settings (with defaults)
+ */
+export async function getOrCreatePersonalitySettings(merchantId: number): Promise<SariPersonalitySetting> {
+  let settings = await getSariPersonalitySettings(merchantId);
+  
+  if (!settings) {
+    settings = await createSariPersonalitySettings({
+      merchantId,
+      tone: 'friendly',
+      style: 'saudi_dialect',
+      emojiUsage: 'moderate',
+      maxResponseLength: 200,
+      responseDelay: 2,
+      recommendationStyle: 'consultative',
+    });
+  }
+
+  return settings!;
+}
+
+// ============================================================================
+// Quick Responses
+// ============================================================================
+
+/**
+ * Get all quick responses for a merchant
+ */
+export async function getQuickResponses(merchantId: number): Promise<QuickResponse[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(quickResponses)
+    .where(eq(quickResponses.merchantId, merchantId))
+    .orderBy(desc(quickResponses.priority), desc(quickResponses.useCount));
+}
+
+/**
+ * Get active quick responses for a merchant
+ */
+export async function getActiveQuickResponses(merchantId: number): Promise<QuickResponse[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(quickResponses)
+    .where(
+      and(
+        eq(quickResponses.merchantId, merchantId),
+        eq(quickResponses.isActive, true)
+      )
+    )
+    .orderBy(desc(quickResponses.priority), desc(quickResponses.useCount));
+}
+
+/**
+ * Create quick response
+ */
+export async function createQuickResponse(data: InsertQuickResponse): Promise<QuickResponse | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.insert(quickResponses).values(data);
+  const id = result[0].insertId;
+  
+  return getQuickResponseById(id);
+}
+
+/**
+ * Get quick response by ID
+ */
+export async function getQuickResponseById(id: number): Promise<QuickResponse | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(quickResponses)
+    .where(eq(quickResponses.id, id))
+    .limit(1);
+  
+  return result[0];
+}
+
+/**
+ * Update quick response
+ */
+export async function updateQuickResponse(
+  id: number,
+  data: Partial<InsertQuickResponse>
+): Promise<QuickResponse | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  await db.update(quickResponses)
+    .set({ ...data, updatedAt: new Date() })
+    .where(eq(quickResponses.id, id));
+
+  return getQuickResponseById(id);
+}
+
+/**
+ * Delete quick response
+ */
+export async function deleteQuickResponse(id: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+
+  await db.delete(quickResponses).where(eq(quickResponses.id, id));
+  return true;
+}
+
+/**
+ * Increment use count for quick response
+ */
+export async function incrementQuickResponseUse(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(quickResponses)
+    .set({ 
+      useCount: sql`${quickResponses.useCount} + 1`,
+      lastUsedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(quickResponses.id, id));
+}
+
+/**
+ * Find matching quick response for a message
+ */
+export async function findMatchingQuickResponse(
+  merchantId: number,
+  message: string
+): Promise<QuickResponse | null> {
+  const responses = await getActiveQuickResponses(merchantId);
+  
+  if (responses.length === 0) return null;
+
+  const lowerMessage = message.toLowerCase().trim();
+
+  // Try exact trigger match first
+  for (const response of responses) {
+    if (lowerMessage === response.trigger.toLowerCase().trim()) {
+      await incrementQuickResponseUse(response.id);
+      return response;
+    }
+  }
+
+  // Try keyword match
+  for (const response of responses) {
+    if (response.keywords) {
+      try {
+        const keywords = JSON.parse(response.keywords) as string[];
+        const hasMatch = keywords.some(kw => 
+          lowerMessage.includes(kw.toLowerCase())
+        );
+        
+        if (hasMatch) {
+          await incrementQuickResponseUse(response.id);
+          return response;
+        }
+      } catch (e) {
+        // Invalid JSON, skip
+      }
+    }
+  }
+
+  return null;
+}
+
+// ============================================================================
+// Sentiment Analysis
+// ============================================================================
+
+/**
+ * Create sentiment analysis record
+ */
+export async function createSentimentAnalysis(data: InsertSentimentAnalysis): Promise<SentimentAnalysis | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.insert(sentimentAnalysis).values(data);
+  const id = result[0].insertId;
+  
+  return getSentimentAnalysisById(id);
+}
+
+/**
+ * Get sentiment analysis by ID
+ */
+export async function getSentimentAnalysisById(id: number): Promise<SentimentAnalysis | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(sentimentAnalysis)
+    .where(eq(sentimentAnalysis.id, id))
+    .limit(1);
+  
+  return result[0];
+}
+
+/**
+ * Get sentiment analysis for a message
+ */
+export async function getSentimentByMessageId(messageId: number): Promise<SentimentAnalysis | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(sentimentAnalysis)
+    .where(eq(sentimentAnalysis.messageId, messageId))
+    .limit(1);
+  
+  return result[0];
+}
+
+/**
+ * Get all sentiment analyses for a conversation
+ */
+export async function getSentimentsByConversationId(conversationId: number): Promise<SentimentAnalysis[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select().from(sentimentAnalysis)
+    .where(eq(sentimentAnalysis.conversationId, conversationId))
+    .orderBy(desc(sentimentAnalysis.createdAt));
+}
+
+/**
+ * Get sentiment statistics for a merchant
+ */
+export async function getMerchantSentimentStats(merchantId: number, days: number = 30) {
+  const db = await getDb();
+  if (!db) return {
+    total: 0,
+    positive: 0,
+    negative: 0,
+    neutral: 0,
+    angry: 0,
+    happy: 0,
+    sad: 0,
+    frustrated: 0,
+    averageConfidence: 0,
+  };
+
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - days);
+
+  // Get all conversations for this merchant
+  const merchantConversations = await db.select({ id: conversations.id })
+    .from(conversations)
+    .where(eq(conversations.merchantId, merchantId));
+
+  if (merchantConversations.length === 0) {
+    return {
+      total: 0,
+      positive: 0,
+      negative: 0,
+      neutral: 0,
+      angry: 0,
+      happy: 0,
+      sad: 0,
+      frustrated: 0,
+      averageConfidence: 0,
+    };
+  }
+
+  const conversationIds = merchantConversations.map(c => c.id);
+
+  // Get sentiment analyses
+  const sentiments = await db.select().from(sentimentAnalysis)
+    .where(
+      and(
+        sql`${sentimentAnalysis.conversationId} IN (${sql.join(conversationIds.map(id => sql`${id}`), sql`, `)})`,
+        gte(sentimentAnalysis.createdAt, startDate)
+      )
+    );
+
+  const stats = {
+    total: sentiments.length,
+    positive: 0,
+    negative: 0,
+    neutral: 0,
+    angry: 0,
+    happy: 0,
+    sad: 0,
+    frustrated: 0,
+    averageConfidence: 0,
+  };
+
+  if (sentiments.length === 0) return stats;
+
+  let totalConfidence = 0;
+
+  sentiments.forEach(s => {
+    const sentimentKey = s.sentiment;
+    if (sentimentKey in stats) {
+      stats[sentimentKey]++;
+    }
+    totalConfidence += s.confidence;
+  });
+
+  stats.averageConfidence = Math.round(totalConfidence / sentiments.length);
+
+  return stats;
 }

@@ -5,9 +5,150 @@
 
 import { callGPT4, ChatMessage } from './openai';
 import * as db from '../db';
+import { analyzeSentiment, adjustResponseForSentiment } from './sentiment-analysis';
+import type { SariPersonalitySetting } from '../../drizzle/schema';
 
 /**
- * Enhanced system prompt for Sari's personality with specific guidelines
+ * Build dynamic system prompt based on personality settings
+ */
+function buildSystemPrompt(settings?: SariPersonalitySetting): string {
+  // Base personality
+  let prompt = `أنت ساري، مساعد مبيعات ذكي وودود عبر الواتساب. أنت خبير في فهم احتياجات العملاء واقتراح المنتجات المناسبة.
+
+## شخصيتك المميزة:
+`;
+
+  // Tone
+  if (settings?.tone === 'professional') {
+    prompt += `- محترف ورسمي في التعامل
+- تستخدم لغة دقيقة ومهنية
+- تركز على الحقائق والمعلومات
+`;
+  } else if (settings?.tone === 'casual') {
+    prompt += `- مرح وخفيف الظل
+- تستخدم لغة عامية بسيطة
+- تبني علاقة ودية مع العميل
+`;
+  } else if (settings?.tone === 'enthusiastic') {
+    prompt += `- متحمس وإيجابي جداً
+- تستخدم تعبيرات حماسية
+- تشجع العميل بقوة
+`;
+  } else { // friendly (default)
+    prompt += `- ودود ومحترف في نفس الوقت
+- مثل صديق يساعد صديقه
+- متحمس لكن ليس مبالغاً
+`;
+  }
+
+  // Style
+  if (settings?.style === 'formal_arabic') {
+    prompt += `- تتحدث باللغة العربية الفصحى
+- تستخدم تعبيرات رسمية
+`;
+  } else if (settings?.style === 'english') {
+    prompt += `- تتحدث بالإنجليزية فقط
+- استخدم أسلوب احترافي
+`;
+  } else if (settings?.style === 'bilingual') {
+    prompt += `- تتحدث بالعربية والإنجليزية حسب لغة العميل
+- تمزج بينهما إذا فعل العميل ذلك
+`;
+  } else { // saudi_dialect (default)
+    prompt += `- تتحدث باللهجة السعودية الطبيعية (نجدية/حجازية)
+- تستخدم: أبغى، شو، حلو، ماشي، تمام
+`;
+  }
+
+  // Emoji usage
+  if (settings?.emojiUsage === 'none') {
+    prompt += `- لا تستخدم الإيموجي نهائياً
+`;
+  } else if (settings?.emojiUsage === 'minimal') {
+    prompt += `- استخدم إيموجي واحد فقط في نهاية الرسالة
+`;
+  } else if (settings?.emojiUsage === 'frequent') {
+    prompt += `- استخدم الإيموجي بكثرة (3-5 في الرسالة)
+`;
+  } else { // moderate (default)
+    prompt += `- استخدم الإيموجي بذكاء (1-2 في الرسالة)
+`;
+  }
+
+  // Custom instructions
+  if (settings?.customInstructions) {
+    prompt += `
+## تعليمات إضافية من التاجر:
+${settings.customInstructions}
+`;
+  }
+
+  // Brand voice
+  if (settings?.brandVoice) {
+    prompt += `
+## صوت العلامة التجارية:
+${settings.brandVoice}
+`;
+  }
+
+  // Custom greeting
+  if (settings?.customGreeting) {
+    prompt += `
+## رسالة الترحيب المخصصة:
+${settings.customGreeting}
+`;
+  }
+
+  // Recommendation style
+  if (settings?.recommendationStyle === 'direct') {
+    prompt += `
+## أسلوب الاقتراح:
+- كن مباشراً وسريعاً
+- اذكر المنتج والسعر مباشرة
+- لا تطرح أسئلة كثيرة
+`;
+  } else if (settings?.recommendationStyle === 'enthusiastic') {
+    prompt += `
+## أسلوب الاقتراح:
+- كن متحمساً جداً للمنتجات
+- اذكر جميع المميزات بحماس
+- شجع العميل بقوة على الشراء
+`;
+  } else { // consultative (default)
+    prompt += `
+## أسلوب الاقتراح:
+- اسأل أسئلة ذكية لفهم الاحتياجات
+- اقترح المنتج الأنسب
+- اشرح السبب وراء الاقتراح
+`;
+  }
+
+  // Continue with the rest of the original prompt
+  prompt += `
+## مهامك الذكية:
+1. **الترحيب المخصص**: اذكر اسم العميل إن كان متوفراً
+2. **الفهم العميق**: اسأل أسئلة ذكية لفهم الاحتياجات
+3. **البحث الذكي**: اقترح منتجات محددة من القائمة المتوفرة
+4. **البيع الإضافي**: اقترح منتجات مكملة بطريقة طبيعية
+5. **تسهيل الشراء**: اشرح خطوات الطلب بوضوح
+6. **معالجة الاعتراضات**: اقترح بدائل عند الاعتراض على السعر
+
+## قواعد ذهبية:
+1. لا تخترع معلومات - استخدم فقط المنتجات المتوفرة
+2. كن محدداً - اذكر الاسم والسعر والمميزات
+3. اقترح 2-3 منتجات فقط
+4. اسأل قبل الافتراض
+5. كن صادقاً
+6. لا تكرر نفسك
+7. ردود قصيرة: ${settings?.maxResponseLength || 200} حرف كحد أقصى
+
+تذكر: هدفك مساعدة العميل يشتري بثقة وسعادة! 🎯`;
+
+  return prompt;
+}
+
+/**
+ * Original system prompt (kept for backward compatibility)
  */
 const SARI_SYSTEM_PROMPT = `أنت ساري، مساعد مبيعات ذكي وودود عبر الواتساب. أنت خبير في فهم احتياجات العملاء واقتراح المنتجات المناسبة.
 
@@ -246,6 +387,24 @@ export async function chatWithSari(params: {
       }
     }
 
+    // Get personality settings
+    const personalitySettings = await db.getOrCreatePersonalitySettings(params.merchantId);
+
+    // Check for quick response match first
+    const quickResponse = await db.findMatchingQuickResponse(params.merchantId, params.message);
+    if (quickResponse) {
+      return quickResponse.response;
+    }
+
+    // Analyze sentiment
+    const sentiment = await analyzeSentiment(params.message);
+    
+    // Save sentiment analysis if we have a conversation
+    if (params.conversationId) {
+      // We'll save it after creating the message
+      // For now, just use it to adjust the response
+    }
+
     // Get all products
     const allProducts = await db.getProductsByMerchantId(params.merchantId);
     
@@ -269,19 +428,26 @@ export async function chatWithSari(params: {
       isFirstMessage,
     });
 
+    // Build system prompt with personality settings
+    const systemPrompt = buildSystemPrompt(personalitySettings) + contextPrompt;
+
     // Prepare messages with few-shot examples for better quality
     const messages: ChatMessage[] = [
-      { role: 'system', content: SARI_SYSTEM_PROMPT + contextPrompt },
+      { role: 'system', content: systemPrompt },
       ...FEW_SHOT_EXAMPLES, // Add examples for better understanding
       ...previousMessages,
       { role: 'user', content: params.message },
     ];
 
     // Call GPT-4 with optimized parameters
-    const response = await callGPT4(messages, {
+    const maxTokens = Math.min(personalitySettings.maxResponseLength * 2, 600);
+    let response = await callGPT4(messages, {
       temperature: 0.7, // Balanced between creativity and consistency
-      maxTokens: 400, // Shorter, more focused responses
+      maxTokens,
     });
+
+    // Adjust response based on sentiment
+    response = adjustResponseForSentiment(response, sentiment);
 
     return response.trim();
   } catch (error: any) {

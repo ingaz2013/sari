@@ -870,3 +870,86 @@ export const scheduledMessages = mysqlTable('scheduled_messages', {
 
 export type ScheduledMessage = typeof scheduledMessages.$inferSelect;
 export type InsertScheduledMessage = typeof scheduledMessages.$inferInsert;
+
+/**
+ * Sari Personality Settings - تخصيص شخصية ساري لكل تاجر
+ */
+export const sariPersonalitySettings = mysqlTable('sari_personality_settings', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().unique().references(() => merchants.id, { onDelete: 'cascade' }),
+  
+  // Basic personality
+  tone: mysqlEnum('tone', ['friendly', 'professional', 'casual', 'enthusiastic']).default('friendly').notNull(),
+  style: mysqlEnum('style', ['saudi_dialect', 'formal_arabic', 'english', 'bilingual']).default('saudi_dialect').notNull(),
+  emojiUsage: mysqlEnum('emoji_usage', ['none', 'minimal', 'moderate', 'frequent']).default('moderate').notNull(),
+  
+  // Custom instructions
+  customInstructions: text('custom_instructions'), // تعليمات إضافية من التاجر
+  brandVoice: text('brand_voice'), // صوت العلامة التجارية
+  
+  // Response preferences
+  maxResponseLength: int('max_response_length').default(200).notNull(), // أقصى طول للرد
+  responseDelay: int('response_delay').default(2).notNull(), // تأخير بالثواني (1-10)
+  
+  // Greeting messages
+  customGreeting: text('custom_greeting'), // تحية مخصصة
+  customFarewell: text('custom_farewell'), // وداع مخصص
+  
+  // Product recommendation style
+  recommendationStyle: mysqlEnum('recommendation_style', ['direct', 'consultative', 'enthusiastic']).default('consultative').notNull(),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type SariPersonalitySetting = typeof sariPersonalitySettings.$inferSelect;
+export type InsertSariPersonalitySetting = typeof sariPersonalitySettings.$inferInsert;
+
+/**
+ * Quick Responses - الردود السريعة المخصصة
+ */
+export const quickResponses = mysqlTable('quick_responses', {
+  id: int('id').primaryKey().autoincrement(),
+  merchantId: int('merchant_id').notNull().references(() => merchants.id, { onDelete: 'cascade' }),
+  
+  // Trigger
+  trigger: varchar('trigger', { length: 255 }).notNull(), // السؤال أو الكلمة المفتاحية
+  keywords: text('keywords'), // JSON array of keywords
+  
+  // Response
+  response: text('response').notNull(), // الرد الجاهز
+  
+  // Settings
+  isActive: boolean('is_active').default(true).notNull(),
+  priority: int('priority').default(0).notNull(), // أعلى أولوية = يستخدم أولاً
+  useCount: int('use_count').default(0).notNull(), // عدد مرات الاستخدام
+  lastUsedAt: timestamp('last_used_at'),
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().onUpdateNow().notNull(),
+});
+
+export type QuickResponse = typeof quickResponses.$inferSelect;
+export type InsertQuickResponse = typeof quickResponses.$inferInsert;
+
+/**
+ * Sentiment Analysis - تحليل مشاعر العملاء
+ */
+export const sentimentAnalysis = mysqlTable('sentiment_analysis', {
+  id: int('id').primaryKey().autoincrement(),
+  messageId: int('message_id').notNull().references(() => messages.id, { onDelete: 'cascade' }),
+  conversationId: int('conversation_id').notNull().references(() => conversations.id, { onDelete: 'cascade' }),
+  
+  // Sentiment
+  sentiment: mysqlEnum('sentiment', ['positive', 'negative', 'neutral', 'angry', 'happy', 'sad', 'frustrated']).notNull(),
+  confidence: int('confidence').notNull(), // 0-100
+  
+  // Details
+  keywords: text('keywords'), // JSON array of detected keywords
+  reasoning: text('reasoning'), // سبب التصنيف
+  
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type SentimentAnalysis = typeof sentimentAnalysis.$inferSelect;
+export type InsertSentimentAnalysis = typeof sentimentAnalysis.$inferInsert;
