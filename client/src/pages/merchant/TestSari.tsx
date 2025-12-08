@@ -431,7 +431,7 @@ export default function TestSari() {
         </div>
       </div>
 
-      <Card className="h-[600px] flex flex-col">
+      <Card className="flex flex-col">
         <CardHeader className="border-b bg-muted/50">
           <div className="flex items-center gap-3">
             <Avatar>
@@ -446,7 +446,7 @@ export default function TestSari() {
           </div>
         </CardHeader>
 
-        <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+        <ScrollArea className="h-[500px] p-4" ref={scrollRef}>
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -582,10 +582,10 @@ export default function TestSari() {
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="col-span-1 lg:col-span-2">
           <CardHeader>
-            <div className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              <CardTitle>إحصائيات التقييم</CardTitle>
-            </div>
+              <span>إحصائيات التقييم</span>
+            </CardTitle>
             <CardDescription>
               تحليل شامل لتقييمات ردود ساري AI
             </CardDescription>
@@ -711,10 +711,10 @@ export default function TestSari() {
         {ratingHistory.length >= 2 && (
           <Card className="col-span-1 lg:col-span-2">
             <CardHeader>
-              <div className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-primary" />
-                <CardTitle>تطور نسبة الرضا</CardTitle>
-              </div>
+                <span>تطور نسبة الرضا</span>
+              </CardTitle>
               <CardDescription>
                 تتبع تحسن أو تراجع أداء ساري عبر الوقت
               </CardDescription>
