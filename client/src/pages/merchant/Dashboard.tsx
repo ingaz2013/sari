@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { trpc } from '@/lib/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare, Send, Users, TrendingUp, ArrowUp, ArrowDown, Package } from 'lucide-react';
+import { MessageSquare, Send, Users, TrendingUp, ArrowUp, ArrowDown, Package, UserPlus, Star } from 'lucide-react';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -23,6 +23,7 @@ export default function MerchantDashboard() {
   const { data: ordersTrend, isLoading: ordersTrendLoading } = trpc.dashboard.getOrdersTrend.useQuery({ days: 30 });
   const { data: revenueTrend, isLoading: revenueTrendLoading } = trpc.dashboard.getRevenueTrend.useQuery({ days: 30 });
   const { data: topProducts, isLoading: topProductsLoading } = trpc.dashboard.getTopProducts.useQuery({ limit: 5 });
+  const { data: reviewStats } = trpc.reviews.getStats.useQuery({ merchantId: merchant?.id || 1 });
 
   const isLoading = merchantLoading || subscriptionLoading || conversationsLoading || campaignsLoading || 
                      statsLoading || comparisonLoading || ordersTrendLoading || revenueTrendLoading || topProductsLoading;
@@ -81,6 +82,15 @@ export default function MerchantDashboard() {
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
     },
+    {
+      title: 'متوسط التقييم',
+      value: reviewStats ? `${reviewStats.averageRating.toFixed(1)} ⭐` : '0.0 ⭐',
+      growth: 0,
+      icon: Star,
+      description: `${reviewStats?.totalReviews || 0} تقييم`,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+    },
   ];
 
   // Prepare chart data for orders trend
@@ -119,7 +129,7 @@ export default function MerchantDashboard() {
         </div>
 
         {/* Main Stats Grid with Growth */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
           {mainStats.map((stat) => {
             const Icon = stat.icon;
             const isPositiveGrowth = stat.growth >= 0;

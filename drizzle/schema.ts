@@ -512,6 +512,8 @@ export const customerReviews = mysqlTable("customer_reviews", {
   comment: text("comment"),
   productId: int("productId"), // Optional: review for specific product
   isPublic: boolean("isPublic").default(true).notNull(),
+  merchantReply: text("merchantReply"), // Merchant's reply to the review
+  repliedAt: timestamp("repliedAt"), // When merchant replied
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

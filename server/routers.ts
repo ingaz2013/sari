@@ -3254,6 +3254,47 @@ export const appRouter = router({
 
         return review;
       }),
+
+    // Reply to a review
+    reply: protectedProcedure
+      .input(z.object({
+        reviewId: z.number(),
+        reply: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        const review = await db.getCustomerReviewById(input.reviewId);
+        if (!review) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Review not found' });
+        }
+
+        const order = await db.getOrderById(review.orderId);
+        if (!order) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Order not found' });
+        }
+
+        const merchant = await db.getMerchantById(order.merchantId);
+        if (!merchant || merchant.userId !== ctx.user.id) {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+        }
+
+        // Update review with merchant reply
+        await db.updateCustomerReview(input.reviewId, {
+          merchantReply: input.reply,
+          repliedAt: new Date(),
+        });
+
+        // Send reply via WhatsApp
+        try {
+          const { sendTextMessage } = await import('./whatsapp');
+          const message = `شكراً لتقييمك! \n\nردنا:\n${input.reply}`;
+          await sendTextMessage(review.customerPhone, message);
+        } catch (error) {
+          console.error('Failed to send WhatsApp reply:', error);
+          // Don't fail the whole operation if WhatsApp fails
+        }
+
+        return { success: true };
+      }),
   }),
 });
 

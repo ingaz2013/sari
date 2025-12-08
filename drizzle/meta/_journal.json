@@ -127,6 +127,13 @@
       "when": 1765125732096,
       "tag": "0017_perpetual_scarecrow",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "5",
+      "when": 1765157405245,
+      "tag": "0018_late_star_brand",
+      "breakpoints": true
     }
   ]
 }
