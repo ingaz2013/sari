@@ -3876,6 +3876,54 @@ export const appRouter = router({
 
       return await db.shouldBotRespond(merchant.id);
     }),
+
+    // Send test message
+    sendTestMessage: protectedProcedure.mutation(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      }
+
+      // Get WhatsApp connection
+      const connection = await db.getWhatsappConnectionByMerchantId(merchant.id);
+      if (!connection || connection.status !== 'connected') {
+        throw new TRPCError({ 
+          code: 'PRECONDITION_FAILED', 
+          message: 'يجب ربط حساب WhatsApp أولاً' 
+        });
+      }
+
+      // Get bot settings
+      const settings = await db.getBotSettings(merchant.id);
+      if (!settings) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Bot settings not found' });
+      }
+
+      // Import WhatsApp module
+      const { sendTextMessage } = await import('./whatsapp');
+
+      // Send welcome message to merchant's phone
+      if (!merchant.phone) {
+        throw new TRPCError({ 
+          code: 'PRECONDITION_FAILED', 
+          message: 'يجب إضافة رقم هاتف في الإعدادات' 
+        });
+      }
+
+      const result = await sendTextMessage(
+        merchant.phone,
+        settings.welcomeMessage || 'مرحباً! هذه رسالة تجريبية من ساري.'
+      );
+
+      if (!result.success) {
+        throw new TRPCError({ 
+          code: 'INTERNAL_SERVER_ERROR', 
+          message: `فشل إرسال الرسالة: ${result.error}` 
+        });
+      }
+
+      return { success: true, message: 'تم إرسال الرسالة التجريبية بنجاح!' };
+    }),
   }),
 });
 

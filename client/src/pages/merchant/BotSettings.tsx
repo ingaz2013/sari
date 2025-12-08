@@ -19,7 +19,8 @@ import {
   AlertCircle,
   Info,
   Sparkles,
-  Eye
+  Eye,
+  Send
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { trpc } from '@/lib/trpc';
@@ -40,6 +41,16 @@ export default function BotSettings() {
     },
     onError: (error) => {
       toast.error('فشل حفظ الإعدادات: ' + error.message);
+    },
+  });
+
+  // Send test message mutation
+  const sendTestMutation = trpc.botSettings.sendTestMessage.useMutation({
+    onSuccess: (data) => {
+      toast.success(data.message);
+    },
+    onError: (error) => {
+      toast.error(error.message);
     },
   });
 
@@ -112,13 +123,14 @@ export default function BotSettings() {
     );
   }
 
-  // Templates
-  const templates = [
+  // General Templates
+  const generalTemplates = [
     {
       id: 'formal',
       name: 'رسمي',
       description: 'أسلوب رسمي ومحترف للشركات',
       icon: '💼',
+      category: 'general',
       settings: {
         welcomeMessage: 'مرحباً بكم في متجرنا. نحن هنا لخدمتكم ومساعدتكم في اختيار أفضل المنتجات. كيف يمكنني مساعدتكم اليوم؟',
         outOfHoursMessage: 'نشكركم على تواصلكم. نحن حالياً خارج أوقات العمل الرسمية. سنقوم بالرد عليكم في أقرب وقت ممكن.',
@@ -131,6 +143,7 @@ export default function BotSettings() {
       name: 'ودود',
       description: 'أسلوب ودي ومريح للتواصل',
       icon: '😊',
+      category: 'general',
       settings: {
         welcomeMessage: 'هلا وغلا! 👋 أهلين فيك عندنا. أنا ساري ومستعد أساعدك في أي شي تحتاجه. كيف أقدر أخدمك اليوم؟',
         outOfHoursMessage: 'يعطيك العافية على التواصل! 🙏 الحين أحنا مقفلين، بس باكر بنرد عليك على طول. شكراً على صبرك!',
@@ -143,6 +156,7 @@ export default function BotSettings() {
       name: 'عصري',
       description: 'أسلوب عصري ومباشر',
       icon: '⚡',
+      category: 'general',
       settings: {
         welcomeMessage: 'مرحباً! أنا ساري، مساعدك الذكي. جاهز لمساعدتك في إيجاد ما تبحث عنه بسرعة وسهولة. وش تحتاج؟',
         outOfHoursMessage: 'شكراً على رسالتك! حالياً خارج ساعات الدوام. بنرجع لك بأقرب وقت.',
@@ -152,7 +166,91 @@ export default function BotSettings() {
     },
   ];
 
-  const applyTemplate = (template: typeof templates[0]) => {
+  // Industry-Specific Templates
+  const industryTemplates = [
+    {
+      id: 'restaurant',
+      name: 'مطاعم',
+      description: 'مخصص للمطاعم والمقاهي',
+      icon: '🍴',
+      category: 'industry',
+      settings: {
+        welcomeMessage: 'أهلاً وسهلاً! 🍴 مرحباً بك في مطعمنا. أنا ساري وجاهز أساعدك في اختيار ألذ الأطباق. تبي تشوف قائمة الطعام أو عندك استفسار معين؟',
+        outOfHoursMessage: 'شكراً على تواصلك! 🙏 المطعم حالياً مقفل. ساعات العمل من 12 ظهراً إلى 12 منتصف الليل. بنرد عليك بكرة!',
+        tone: 'friendly' as const,
+        responseDelay: 2,
+      },
+    },
+    {
+      id: 'fashion',
+      name: 'أزياء',
+      description: 'مخصص لمتاجر الأزياء والموضة',
+      icon: '👗',
+      category: 'industry',
+      settings: {
+        welcomeMessage: 'مرحباً بك في متجرنا! 👗✨ أنا ساري، مستشارك الشخصي للموضة. عندنا أحدث التصاميم وأجمل القطع. وش تدور عليه اليوم؟',
+        outOfHoursMessage: 'شكراً على اهتمامك! 💖 نحن حالياً مقفلين، بس بنرجع لك بكرة نساعدك تختار إطلالتك المثالية!',
+        tone: 'friendly' as const,
+        responseDelay: 2,
+      },
+    },
+    {
+      id: 'electronics',
+      name: 'إلكترونيات',
+      description: 'مخصص لمتاجر الإلكترونيات',
+      icon: '📱',
+      category: 'industry',
+      settings: {
+        welcomeMessage: 'مرحباً بك! 📱 أنا ساري، مستشارك التقني. عندنا أحدث الأجهزة والإكسسوارات بأفضل الأسعار. وش الجهاز اللي تدور عليه؟',
+        outOfHoursMessage: 'شكراً على تواصلك! 👍 المتجر حالياً مقفل. بنرجع لك في ساعات الدوام نساعدك تختار الجهاز المناسب!',
+        tone: 'professional' as const,
+        responseDelay: 2,
+      },
+    },
+    {
+      id: 'beauty',
+      name: 'تجميل',
+      description: 'مخصص لصالونات التجميل ومستحضرات التجميل',
+      icon: '💄',
+      category: 'industry',
+      settings: {
+        welcomeMessage: 'أهلاً وسهلاً! 💄✨ مرحباً بك في عالم الجمال. أنا ساري وجاهزة أساعدك في حجز موعدك أو الاستفسار عن خدماتنا. كيف أقدر أخدمك؟',
+        outOfHoursMessage: 'شكراً على تواصلك! 💕 الصالون حالياً مقفل. بنرد عليك بكرة نحجز لك موعدك المثالي!',
+        tone: 'friendly' as const,
+        responseDelay: 2,
+      },
+    },
+    {
+      id: 'realestate',
+      name: 'عقارات',
+      description: 'مخصص لمكاتب العقارات',
+      icon: '🏠',
+      category: 'industry',
+      settings: {
+        welcomeMessage: 'مرحباً بكم في مكتبنا العقاري. 🏠 أنا ساري، مستشارك العقاري. عندنا أفضل العروض للبيع والإيجار. كيف يمكنني مساعدتكم؟',
+        outOfHoursMessage: 'نشكركم على تواصلكم. نحن حالياً خارج ساعات الدوام الرسمي. سنقوم بالتواصل معكم في أقرب وقت لمناقشة احتياجاتكم.',
+        tone: 'professional' as const,
+        responseDelay: 3,
+      },
+    },
+    {
+      id: 'services',
+      name: 'خدمات',
+      description: 'مخصص لمقدمي الخدمات',
+      icon: '🛠️',
+      category: 'industry',
+      settings: {
+        welcomeMessage: 'مرحباً بك! 🛠️ أنا ساري من فريق خدمة العملاء. نحن متخصصون في تقديم أفضل الخدمات بجودة عالية. كيف أقدر أساعدك اليوم؟',
+        outOfHoursMessage: 'شكراً على تواصلك. نحن حالياً خارج ساعات العمل. سنرد عليك في أقرب وقت لتقديم الخدمة المطلوبة.',
+        tone: 'professional' as const,
+        responseDelay: 2,
+      },
+    },
+  ];
+
+  const allTemplates = [...generalTemplates, ...industryTemplates];
+
+  const applyTemplate = (template: typeof allTemplates[0]) => {
     setFormData({
       ...formData,
       ...template.settings,
@@ -180,29 +278,63 @@ export default function BotSettings() {
             اختر قالباً جاهزاً لتطبيق الإعدادات بضغطة واحدة
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-3 gap-4">
-            {templates.map((template) => (
-              <Card key={template.id} className="border-2 hover:border-primary/50 transition-colors">
-                <CardHeader className="pb-3">
-                  <div className="text-3xl mb-2">{template.icon}</div>
-                  <CardTitle className="text-lg">{template.name}</CardTitle>
-                  <CardDescription className="text-sm">
-                    {template.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => applyTemplate(template)}
-                  >
-                    تطبيق
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+        <CardContent className="space-y-6">
+          {/* General Templates */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">قوالب عامة</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {generalTemplates.map((template) => (
+                <Card key={template.id} className="border-2 hover:border-primary/50 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="text-3xl mb-2">{template.icon}</div>
+                    <CardTitle className="text-lg">{template.name}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {template.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => applyTemplate(template)}
+                    >
+                      تطبيق
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Industry Templates */}
+          <div>
+            <h3 className="text-sm font-semibold mb-3">قوالب متخصصة حسب نوع النشاط</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              {industryTemplates.map((template) => (
+                <Card key={template.id} className="border-2 hover:border-primary/50 transition-colors">
+                  <CardHeader className="pb-3">
+                    <div className="text-3xl mb-2">{template.icon}</div>
+                    <CardTitle className="text-lg">{template.name}</CardTitle>
+                    <CardDescription className="text-sm">
+                      {template.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => applyTemplate(template)}
+                    >
+                      تطبيق
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -557,8 +689,19 @@ export default function BotSettings() {
           </AlertDescription>
         </Alert>
 
-        {/* Save Button */}
-        <div className="flex justify-end">
+        {/* Action Buttons */}
+        <div className="flex justify-between items-center">
+          <Button 
+            type="button"
+            variant="outline"
+            size="lg"
+            onClick={() => sendTestMutation.mutate()}
+            disabled={sendTestMutation.isPending}
+          >
+            <Send className="h-4 w-4 ml-2" />
+            {sendTestMutation.isPending ? 'جاري الإرسال...' : 'إرسال رسالة تجريبية'}
+          </Button>
+
           <Button 
             type="submit" 
             size="lg"
