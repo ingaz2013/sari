@@ -46,6 +46,8 @@ import WhatsAppTest from "./pages/merchant/WhatsAppTest";
 import Reviews from "./pages/merchant/Reviews";
 import TestSari from "./pages/merchant/TestSari";
 import MetricsDashboard from "./pages/merchant/MetricsDashboard";
+import SariPlayground from "./pages/SariPlayground";
+import SariAnalytics from "./pages/SariAnalytics";
 import WhatsAppWebhookSetup from "./pages/merchant/WhatsAppWebhookSetup";
 import BotSettings from "./pages/merchant/BotSettings";
 import ScheduledMessages from "./pages/merchant/ScheduledMessages";
@@ -224,6 +226,18 @@ function Router() {
       <Route path="/merchant/bot-settings">
         <DashboardLayout>
           <BotSettings />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/sari-playground">
+        <DashboardLayout>
+          <SariPlayground />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/sari-analytics">
+        <DashboardLayout>
+          <SariAnalytics />
         </DashboardLayout>
       </Route>
       

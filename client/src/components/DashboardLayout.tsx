@@ -67,6 +67,8 @@ const getMerchantMenuItems = (t: any) => [
   { icon: Smartphone, label: t('sidebar.merchant.whatsapp'), path: "/merchant/whatsapp" },
   { icon: Smartphone, label: t('sidebar.merchant.whatsappInstances'), path: "/merchant/whatsapp-instances" },
   { icon: MessageSquare, label: 'اختبار ساري AI', path: "/merchant/test-sari" },
+  { icon: Bot, label: 'ملعب ساري AI', path: "/merchant/sari-playground" },
+  { icon: BarChart3, label: 'إحصائيات ساري AI', path: "/merchant/sari-analytics" },
   { icon: Bell, label: t('sidebar.merchant.orderNotifications'), path: "/merchant/order-notifications" },
   { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla" },
   { icon: Bot, label: t('sidebar.merchant.botSettings'), path: "/merchant/bot-settings" },
