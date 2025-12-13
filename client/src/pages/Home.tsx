@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import LiveChatDemo from '@/components/LiveChatDemo';
 import {
   Bot,
   MessageSquare,
@@ -339,22 +340,7 @@ export default function Home() {
         <div className="container">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="order-2 lg:order-1">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border bg-card">
-                <video 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  className="w-full h-auto"
-                  poster="/video-scene-1.png"
-                >
-                  <source src="/sari-voice-order-demo.mp4" type="video/mp4" />
-                  متصفحك لا يدعم تشغيل الفيديو
-                </video>
-                <div className="absolute bottom-4 left-4 right-4 bg-black/60 backdrop-blur-sm rounded-lg p-3">
-                  <p className="text-white text-sm font-medium">فيديو توضيحي: كيف يعمل الطلب بالرسالة الصوتية</p>
-                </div>
-              </div>
+              <LiveChatDemo />
             </div>
 
             <div className="order-1 lg:order-2 space-y-6">
@@ -364,23 +350,23 @@ export default function Home() {
               </div>
               
               <h2 className="text-3xl md:text-5xl font-bold leading-tight">
-                طلب كامل برسالة
+                محادثة ذكية تتحول
                 <br />
-                <span className="text-primary">صوتية واحدة</span>
+                <span className="text-primary">إلى طلب مكتمل</span>
               </h2>
               
               <p className="text-xl text-muted-foreground leading-relaxed">
-                عملاؤك يقدرون يطلبون برسالة صوتية وحدة فقط! ساري يحول الصوت إلى نص، يفهم الطلب، يتأكد من التفاصيل، وينشئ رابط الدفع تلقائياً.
+                شاهد كيف يتحدث ساري مع عملائك بشكل طبيعي، يفهم احتياجاتهم، يعرض المنتجات المناسبة، ويحول المحادثة إلى طلب مكتمل مع رابط الدفع تلقائياً!
               </p>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <Mic className="w-5 h-5 text-primary" />
+                    <MessageSquare className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">تحويل صوتي ذكي</h3>
-                    <p className="text-muted-foreground">يفهم اللهجة السعودية ويحول الصوت لنص بدقة عالية</p>
+                    <h3 className="font-semibold mb-1">محادثة طبيعية</h3>
+                    <p className="text-muted-foreground">يتحدث باللهجة السعودية ويفهم السياق بذكاء</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -388,8 +374,8 @@ export default function Home() {
                     <ShoppingCart className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">إنشاء طلب تلقائي</h3>
-                    <p className="text-muted-foreground">يستخرج المنتج، الكمية، والعنوان من الرسالة</p>
+                    <h3 className="font-semibold mb-1">عرض منتجات مخصص</h3>
+                    <p className="text-muted-foreground">يقترح المنتجات المناسبة مع الأسعار والتفاصيل</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4">
@@ -397,8 +383,8 @@ export default function Home() {
                     <CheckCircle2 className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold mb-1">تأكيد ودفع</h3>
-                    <p className="text-muted-foreground">يرسل تفاصيل الطلب ورابط الدفع فوراً</p>
+                    <h3 className="font-semibold mb-1">إتمام الطلب تلقائياً</h3>
+                    <p className="text-muted-foreground">يجمع التفاصيل ويرسل رابط الدفع فوراً</p>
                   </div>
                 </div>
               </div>
