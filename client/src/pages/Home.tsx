@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LiveChatDemo from '@/components/LiveChatDemo';
+import LiveStats from '@/components/LiveStats';
 import {
   Bot,
   MessageSquare,
@@ -298,6 +299,23 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Live Stats Section */}
+      <section className="py-16 bg-gradient-to-b from-white to-blue-50 dark:from-background dark:to-blue-950/20">
+        <div className="container">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              في الوقت الفعلي
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              شاهد نشاط ساري مباشرة - محادثات وطلبات تتم الآن
+            </p>
+          </div>
+          <div className="max-w-2xl mx-auto">
+            <LiveStats targetConversations={12847} targetOrders={8956} duration={2500} />
           </div>
         </div>
       </section>

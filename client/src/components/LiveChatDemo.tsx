@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Bot, User, CheckCircle2, Package, CreditCard } from 'lucide-react';
+import { Bot, User, CheckCircle2, Package, CreditCard, Mic } from 'lucide-react';
+import AudioWaveAnimation from './AudioWaveAnimation';
 
 interface Message {
   id: number;
@@ -8,6 +9,7 @@ interface Message {
   timestamp?: string;
   status?: 'sending' | 'sent' | 'delivered';
   isTyping?: boolean;
+  isVoice?: boolean;
 }
 
 const chatScenario: Omit<Message, 'id'>[] = [
@@ -23,8 +25,9 @@ const chatScenario: Omit<Message, 'id'>[] = [
   },
   {
     sender: 'customer',
-    text: 'أبي Apple Watch',
+    text: 'رسالة صوتية - 0:05',
     status: 'delivered',
+    isVoice: true,
   },
   {
     sender: 'sari',
@@ -172,7 +175,17 @@ export default function LiveChatDemo() {
                   : 'bg-white dark:bg-[#1F2C33] text-gray-900 dark:text-white rounded-tl-none'
               }`}
             >
-              <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
+              {message.isVoice ? (
+                <div className="flex items-center gap-3 min-w-[200px]">
+                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                    <Mic className="w-4 h-4 text-white" />
+                  </div>
+                  <AudioWaveAnimation isPlaying={true} className="flex-1" />
+                  <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">0:05</span>
+                </div>
+              ) : (
+                <p className="text-sm whitespace-pre-line leading-relaxed">{message.text}</p>
+              )}
               <div className="flex items-center justify-end gap-1 mt-1">
                 <span className="text-[10px] text-gray-500 dark:text-gray-400">
                   {new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}
