@@ -513,7 +513,10 @@ export async function receiveNotification(
     const baseURL = `${apiUrl}/waInstance${instanceId}`;
     
     const response = await axios.get(`${baseURL}/receiveNotification/${apiToken}`, {
-      timeout: 30000, // 30 seconds timeout for long polling
+      timeout: 45000, // 45 seconds timeout for long polling
+      headers: {
+        'Connection': 'keep-alive',
+      },
     });
 
     if (response.data) {
@@ -525,6 +528,11 @@ export async function receiveNotification(
 
     return { notification: null, receiptId: null };
   } catch (error: any) {
+    // Timeout is normal for long polling - don't log as error
+    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
+      return { notification: null, receiptId: null };
+    }
+    
     console.error('Error receiving notification:', error.response?.data || error.message);
     return {
       notification: null,

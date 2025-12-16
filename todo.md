@@ -2476,3 +2476,11 @@
 - [x] تقليل فترة الـ Polling من 5 ثواني إلى 2 ثانية
 - [x] إضافة نظام لمنع الرد المكرر على نفس الرسالة
 - [x] معالجة الرسائل الصوتية باستخدام Whisper API
+
+
+## إصلاح مشكلة انقطاع الاتصال بـ Green API
+- [x] إضافة retry mechanism لطلبات Green API
+- [x] زيادة timeout للطلبات (من 30s إلى 45s)
+- [x] تحسين error handling في نظام Polling
+- [x] إضافة exponential backoff عند فشل الاتصال
+- [x] تجاهل timeout errors (طبيعية في long polling)
