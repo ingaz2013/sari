@@ -1123,7 +1123,10 @@ export async function updateWhatsAppConnectionRequest(
 
 export async function approveWhatsAppConnectionRequest(
   id: number,
-  reviewedBy: number
+  reviewedBy: number,
+  instanceId?: string,
+  apiToken?: string,
+  apiUrl?: string
 ): Promise<void> {
   const db = await getDb();
   if (!db) return;
@@ -1132,6 +1135,9 @@ export async function approveWhatsAppConnectionRequest(
     status: 'approved',
     reviewedBy,
     reviewedAt: new Date(),
+    instanceId: instanceId || undefined,
+    apiToken: apiToken || undefined,
+    apiUrl: apiUrl || 'https://api.green-api.com',
   }).where(eq(whatsappConnectionRequests.id, id));
 }
 

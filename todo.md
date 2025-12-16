@@ -467,6 +467,17 @@
 - [ ] اختبار دفع حقيقي في الإنتاج (يدوي)
 
 
+## إضافة ميزة مسح QR Code من لوحة تحكم التاجر
+- [x] تحديث schema لإضافة حقول instanceId و apiToken و apiUrl
+- [x] تحديث API approveRequest لقبول بيانات Green API
+- [x] تحديث API getQRCode لاستخدام بيانات الطلب المعتمد
+- [x] تحديث API getStatus للتحقق من حالة الاتصال
+- [x] تحديث صفحة WhatsApp للتاجر لعرض QR Code بعد الموافقة
+- [x] إضافة زر "ربط الواتساب" يظهر QR Code
+- [x] إضافة التحقق التلقائي من حالة الاتصال (polling كل 3 ثواني)
+- [x] تحديث صفحة Admin WhatsAppRequests لإدخال بيانات Green API
+- [x] اختبار الميزة
+
 ## تكامل Salla API مع التخزين المحلي
 - [x] تحديث schema.ts بإضافة الجداول الجديدة
   - [x] جدول salla_connections

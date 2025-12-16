@@ -403,10 +403,15 @@ export const whatsappConnectionRequests = mysqlTable("whatsapp_connection_reques
   countryCode: varchar("countryCode", { length: 10 }).notNull(), // e.g., "+966"
   phoneNumber: varchar("phoneNumber", { length: 20 }).notNull(), // WhatsApp number without country code
   fullNumber: varchar("fullNumber", { length: 30 }).notNull(), // Full number with country code
-  status: mysqlEnum("status", ["pending", "approved", "rejected"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "connected"]).default("pending").notNull(),
   rejectionReason: text("rejectionReason"), // Reason for rejection if rejected
   reviewedBy: int("reviewedBy"), // Admin user ID who reviewed the request
   reviewedAt: timestamp("reviewedAt"), // When the request was reviewed
+  // Green API credentials (filled by admin on approval)
+  instanceId: varchar("instanceId", { length: 255 }), // Green API instance ID
+  apiToken: varchar("apiToken", { length: 255 }), // Green API token
+  apiUrl: varchar("apiUrl", { length: 255 }).default("https://api.green-api.com"), // Green API base URL
+  connectedAt: timestamp("connectedAt"), // When WhatsApp was successfully connected
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

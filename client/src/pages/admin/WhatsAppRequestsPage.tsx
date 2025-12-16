@@ -44,6 +44,9 @@ export default function WhatsAppRequestsPage() {
     approveMutation.mutate(
       {
         requestId: selectedRequest.id,
+        instanceId: instanceId,
+        apiToken: token,
+        apiUrl: apiUrl || 'https://api.green-api.com',
       },
       {
         onSuccess: () => {

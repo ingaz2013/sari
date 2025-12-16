@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,10 +17,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Loader2, CheckCircle2, XCircle, Clock, Smartphone, Send, RefreshCcw } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Loader2, CheckCircle2, XCircle, Clock, Smartphone, Send, RefreshCcw, QrCode, Wifi, WifiOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTranslation } from 'react-i18next';
+
 // Popular country codes
 const COUNTRY_CODES = [
   { code: '+966', name: 'السعودية', flag: '🇸🇦' },
@@ -40,9 +48,18 @@ export default function WhatsAppConnection() {
 
   const [countryCode, setCountryCode] = useState('+966');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [showQRDialog, setShowQRDialog] = useState(false);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false);
 
   // Get current request status
   const { data: requestStatus, refetch: refetchRequest } = trpc.whatsapp.getRequestStatus.useQuery();
+
+  // Get connection status
+  const { data: connectionStatus, refetch: refetchStatus } = trpc.whatsapp.getStatus.useQuery(undefined, {
+    enabled: requestStatus?.status === 'approved' || requestStatus?.status === 'connected',
+    refetchInterval: showQRDialog ? 3000 : false, // Poll every 3 seconds when QR dialog is open
+  });
 
   // Initialize form with existing request data
   useEffect(() => {
@@ -51,6 +68,16 @@ export default function WhatsAppConnection() {
       setPhoneNumber(requestStatus.phoneNumber);
     }
   }, [requestStatus]);
+
+  // Check if connected and close dialog
+  useEffect(() => {
+    if (connectionStatus?.connected && showQRDialog) {
+      setShowQRDialog(false);
+      setQrCode(null);
+      toast.success('تم ربط الواتساب بنجاح! 🎉');
+      refetchRequest();
+    }
+  }, [connectionStatus?.connected, showQRDialog, refetchRequest]);
 
   // Request connection mutation
   const requestConnectionMutation = trpc.whatsapp.requestConnection.useMutation({
@@ -64,6 +91,23 @@ export default function WhatsAppConnection() {
     },
   });
 
+  // Get QR Code mutation
+  const getQRCodeMutation = trpc.whatsapp.getQRCode.useMutation({
+    onSuccess: (data) => {
+      if (data.alreadyConnected) {
+        toast.success('الواتساب مربوط بالفعل!');
+        refetchRequest();
+        refetchStatus();
+      } else if (data.qrCode) {
+        setQrCode(data.qrCode);
+        setShowQRDialog(true);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message || 'فشل جلب QR Code');
+    },
+  });
+
   // Disconnect mutation
   const disconnectMutation = trpc.whatsapp.disconnect.useMutation({
     onSuccess: () => {
@@ -71,6 +115,7 @@ export default function WhatsAppConnection() {
       refetchRequest();
       setPhoneNumber('');
       setCountryCode('+966');
+      setQrCode(null);
     },
     onError: (error) => {
       toast.error(error.message || 'فشل فك الربط');
@@ -102,8 +147,48 @@ export default function WhatsAppConnection() {
     disconnectMutation.mutate();
   };
 
+  const handleGetQRCode = () => {
+    getQRCodeMutation.mutate();
+  };
+
+  const handleRefreshQRCode = () => {
+    getQRCodeMutation.mutate();
+  };
+
+  const handleCheckStatus = useCallback(async () => {
+    setIsCheckingStatus(true);
+    await refetchStatus();
+    setIsCheckingStatus(false);
+  }, [refetchStatus]);
+
   const getStatusBadge = () => {
     if (!requestStatus) return null;
+
+    // If connected, show connected status
+    if (requestStatus.status === 'connected' || connectionStatus?.connected) {
+      return (
+        <Alert className="border-green-500 bg-green-50">
+          <Wifi className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            <div className="font-semibold flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4" />
+              الواتساب مربوط ونشط
+            </div>
+            <div className="text-sm mt-1">
+              رقم الواتساب الخاص بك جاهز لاستقبال الرسائل والرد عليها تلقائياً.
+            </div>
+            <div className="text-sm mt-2 font-mono">
+              الرقم المربوط: {requestStatus.fullNumber}
+            </div>
+            {connectionStatus?.phoneNumber && (
+              <div className="text-sm mt-1 font-mono text-green-700">
+                رقم WhatsApp: {connectionStatus.phoneNumber}
+              </div>
+            )}
+          </AlertDescription>
+        </Alert>
+      );
+    }
 
     switch (requestStatus.status) {
       case 'pending':
@@ -123,15 +208,15 @@ export default function WhatsAppConnection() {
         );
       case 'approved':
         return (
-          <Alert className="border-green-500 bg-green-50">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
-              <div className="font-semibold">تمت الموافقة!</div>
+          <Alert className="border-blue-500 bg-blue-50">
+            <CheckCircle2 className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800">
+              <div className="font-semibold">تمت الموافقة - جاهز للربط!</div>
               <div className="text-sm mt-1">
-                تم قبول طلب الربط. يمكنك الآن استخدام رقم الواتساب.
+                تم قبول طلب الربط. اضغط على زر "ربط الواتساب" أدناه لمسح QR Code وإتمام الربط.
               </div>
               <div className="text-sm mt-2 font-mono">
-                الرقم المربوط: {requestStatus.fullNumber}
+                الرقم: {requestStatus.fullNumber}
               </div>
             </AlertDescription>
           </Alert>
@@ -155,7 +240,9 @@ export default function WhatsAppConnection() {
   };
 
   const canSubmitNewRequest = !requestStatus || requestStatus.status === 'rejected';
-  const canDisconnect = requestStatus && (requestStatus.status === 'pending' || requestStatus.status === 'approved');
+  const canDisconnect = requestStatus && (requestStatus.status === 'pending' || requestStatus.status === 'approved' || requestStatus.status === 'connected');
+  const canConnectWhatsApp = requestStatus?.status === 'approved' && !connectionStatus?.connected;
+  const isConnected = requestStatus?.status === 'connected' || connectionStatus?.connected;
 
   return (
     <div className="container py-8">
@@ -176,6 +263,50 @@ export default function WhatsAppConnection() {
           <div className="space-y-4">
             {getStatusBadge()}
             
+            {/* Connect WhatsApp Button - Only show when approved but not connected */}
+            {canConnectWhatsApp && (
+              <Button
+                onClick={handleGetQRCode}
+                className="w-full bg-green-600 hover:bg-green-700"
+                size="lg"
+                disabled={getQRCodeMutation.isPending}
+              >
+                {getQRCodeMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-5 h-5 ml-2 animate-spin" />
+                    جاري جلب QR Code...
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="w-5 h-5 ml-2" />
+                    ربط الواتساب الآن
+                  </>
+                )}
+              </Button>
+            )}
+
+            {/* Check Status Button - Show when connected */}
+            {isConnected && (
+              <Button
+                onClick={handleCheckStatus}
+                variant="outline"
+                className="w-full"
+                disabled={isCheckingStatus}
+              >
+                {isCheckingStatus ? (
+                  <>
+                    <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                    جاري التحقق...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCcw className="w-4 h-4 ml-2" />
+                    تحقق من حالة الاتصال
+                  </>
+                )}
+              </Button>
+            )}
+            
             {/* Disconnect Button */}
             {canDisconnect && (
               <AlertDialog>
@@ -192,7 +323,7 @@ export default function WhatsAppConnection() {
                       </>
                     ) : (
                       <>
-                        <RefreshCcw className="w-4 h-4 ml-2" />
+                        <WifiOff className="w-4 h-4 ml-2" />
                         فك الربط وطلب رقم جديد
                       </>
                     )}
@@ -323,12 +454,75 @@ export default function WhatsAppConnection() {
           <CardContent className="space-y-2 text-sm text-muted-foreground">
             <p>• يجب أن يكون رقم الواتساب نشطاً ومتاحاً للربط</p>
             <p>• سيتم مراجعة طلبك من قبل المدير قبل الموافقة</p>
-            <p>• ستتلقى إشعاراً عند معالجة طلبك</p>
-            <p>• في حال الرفض، يمكنك تقديم طلب جديد برقم مختلف</p>
-            <p>• بعد الموافقة، سيتم الرد التلقائي على جميع الرسائل الواردة</p>
-            <p>• يمكنك فك الربط في أي وقت وطلب ربط رقم جديد</p>
+            <p>• بعد الموافقة، اضغط على "ربط الواتساب" لمسح QR Code</p>
+            <p>• افتح WhatsApp على هاتفك → الإعدادات → الأجهزة المرتبطة → ربط جهاز</p>
+            <p>• امسح QR Code الظاهر على الشاشة</p>
+            <p>• بعد الربط، سيتم الرد التلقائي على جميع الرسائل الواردة</p>
           </CardContent>
         </Card>
+
+        {/* QR Code Dialog */}
+        <Dialog open={showQRDialog} onOpenChange={setShowQRDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center">امسح QR Code لربط الواتساب</DialogTitle>
+              <DialogDescription className="text-center">
+                افتح WhatsApp على هاتفك → الإعدادات → الأجهزة المرتبطة → ربط جهاز
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col items-center space-y-4 py-4">
+              {qrCode ? (
+                <div className="bg-white p-4 rounded-lg shadow-inner">
+                  <img
+                    src={`data:image/png;base64,${qrCode}`}
+                    alt="WhatsApp QR Code"
+                    className="w-64 h-64"
+                  />
+                </div>
+              ) : (
+                <div className="w-64 h-64 bg-muted rounded-lg flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                </div>
+              )}
+              
+              <div className="text-center space-y-2">
+                <p className="text-sm text-muted-foreground">
+                  ينتهي QR Code خلال دقيقتين
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRefreshQRCode}
+                  disabled={getQRCodeMutation.isPending}
+                >
+                  {getQRCodeMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <RefreshCcw className="w-4 h-4 ml-2" />
+                      تحديث QR Code
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              {/* Connection Status Indicator */}
+              <div className="flex items-center gap-2 text-sm">
+                {connectionStatus?.connected ? (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 text-green-600" />
+                    <span className="text-green-600">تم الربط بنجاح!</span>
+                  </>
+                ) : (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                    <span className="text-blue-600">في انتظار مسح QR Code...</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

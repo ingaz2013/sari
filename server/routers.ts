@@ -1318,9 +1318,14 @@ export const appRouter = router({
         return await db.getAllWhatsAppConnectionRequests(input.status);
       }),
 
-    // Approve connection request (Admin only)
+    // Approve connection request (Admin only) - with Green API credentials
     approveRequest: adminProcedure
-      .input(z.object({ requestId: z.number() }))
+      .input(z.object({
+        requestId: z.number(),
+        instanceId: z.string().min(1, 'Instance ID is required'),
+        apiToken: z.string().min(1, 'API Token is required'),
+        apiUrl: z.string().url().optional().default('https://api.green-api.com'),
+      }))
       .mutation(async ({ input, ctx }) => {
         const request = await db.getWhatsAppConnectionRequestById(input.requestId);
         if (!request) {
@@ -1332,7 +1337,13 @@ export const appRouter = router({
         }
 
         const userId = typeof ctx.user.id === 'string' ? parseInt(ctx.user.id) : ctx.user.id;
-        await db.approveWhatsAppConnectionRequest(input.requestId, userId);
+        await db.approveWhatsAppConnectionRequest(
+          input.requestId,
+          userId,
+          input.instanceId,
+          input.apiToken,
+          input.apiUrl
+        );
 
         return { success: true };
       }),
@@ -1356,26 +1367,116 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    // Get QR Code for connection
+    // Get QR Code for connection (from approved request)
     getQRCode: protectedProcedure.mutation(async ({ ctx }) => {
       const merchant = await db.getMerchantByUserId(ctx.user.id);
       if (!merchant) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
       }
 
-      const whatsapp = await import('./whatsapp');
-      return await whatsapp.getQRCode();
+      // Get the approved request with credentials
+      const request = await db.getWhatsAppConnectionRequestByMerchantId(merchant.id);
+      if (!request) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'No WhatsApp request found' });
+      }
+
+      if (request.status !== 'approved' && request.status !== 'connected') {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Request not approved yet' });
+      }
+
+      if (!request.instanceId || !request.apiToken) {
+        throw new TRPCError({ code: 'BAD_REQUEST', message: 'Instance credentials not set by admin' });
+      }
+
+      // Get QR code from Green API using merchant's credentials
+      try {
+        const axios = await import('axios');
+        const instancePrefix = request.instanceId.substring(0, 4);
+        const baseUrl = `https://${instancePrefix}.api.greenapi.com`;
+        const url = `${baseUrl}/waInstance${request.instanceId}/qr/${request.apiToken}`;
+        
+        console.log('[QR Code] Fetching from:', url);
+        
+        const response = await axios.default.get(url, { timeout: 15000 });
+        
+        if (response.data && response.data.type === 'qrCode') {
+          return {
+            success: true,
+            qrCode: response.data.message, // Base64 encoded QR code
+            message: 'Scan this QR code with WhatsApp',
+          };
+        } else if (response.data && response.data.type === 'alreadyLogged') {
+          // Already connected
+          return {
+            success: true,
+            alreadyConnected: true,
+            message: 'WhatsApp is already connected',
+          };
+        } else {
+          throw new Error('Unexpected response from Green API');
+        }
+      } catch (error: any) {
+        console.error('[QR Code] Error:', error.message);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.response?.data?.message || error.message || 'Failed to get QR code',
+        });
+      }
     }),
 
-    // Get connection status
+    // Get connection status (check if WhatsApp is connected)
     getStatus: protectedProcedure.query(async ({ ctx }) => {
       const merchant = await db.getMerchantByUserId(ctx.user.id);
       if (!merchant) {
         throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
       }
 
-      const whatsapp = await import('./whatsapp');
-      return await whatsapp.getConnectionStatus();
+      // Get the approved request with credentials
+      const request = await db.getWhatsAppConnectionRequestByMerchantId(merchant.id);
+      if (!request || !request.instanceId || !request.apiToken) {
+        return { connected: false, status: 'no_credentials' };
+      }
+
+      if (request.status !== 'approved' && request.status !== 'connected') {
+        return { connected: false, status: request.status };
+      }
+
+      // Check connection status from Green API
+      try {
+        const axios = await import('axios');
+        const instancePrefix = request.instanceId.substring(0, 4);
+        const baseUrl = `https://${instancePrefix}.api.greenapi.com`;
+        const url = `${baseUrl}/waInstance${request.instanceId}/getStateInstance/${request.apiToken}`;
+        
+        const response = await axios.default.get(url, { timeout: 10000 });
+        
+        if (response.data && response.data.stateInstance === 'authorized') {
+          // Update request status to connected if not already
+          if (request.status !== 'connected') {
+            await db.updateWhatsAppConnectionRequest(request.id, {
+              status: 'connected',
+              connectedAt: new Date(),
+            });
+          }
+          return {
+            connected: true,
+            status: 'authorized',
+            phoneNumber: response.data.phoneNumber,
+          };
+        } else {
+          return {
+            connected: false,
+            status: response.data?.stateInstance || 'unknown',
+          };
+        }
+      } catch (error: any) {
+        console.error('[WhatsApp Status] Error:', error.message);
+        return {
+          connected: false,
+          status: 'error',
+          error: error.message,
+        };
+      }
     }),
 
     // Send text message

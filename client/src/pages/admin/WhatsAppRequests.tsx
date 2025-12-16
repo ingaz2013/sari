@@ -6,18 +6,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle2, XCircle, Clock, Smartphone } from 'lucide-react';
+import { CheckCircle2, XCircle, Clock, Smartphone, Wifi } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTranslation } from 'react-i18next';
+
 export default function WhatsAppRequests() {
   const { t } = useTranslation();
 
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+  const [instanceId, setInstanceId] = useState('');
+  const [apiToken, setApiToken] = useState('');
 
   // Get all requests
   const { data: allRequests, refetch } = trpc.whatsapp.listRequests.useQuery({});
@@ -29,6 +34,10 @@ export default function WhatsAppRequests() {
   const approveMutation = trpc.whatsapp.approveRequest.useMutation({
     onSuccess: () => {
       toast.success(t('toast.common.msg18'));
+      setIsApproveDialogOpen(false);
+      setInstanceId('');
+      setApiToken('');
+      setSelectedRequest(null);
       refetch();
     },
     onError: (error) => {
@@ -50,10 +59,26 @@ export default function WhatsAppRequests() {
     },
   });
 
-  const handleApprove = (requestId: number) => {
-    if (confirm('هل أنت متأكد من قبول هذا الطلب؟')) {
-      approveMutation.mutate({ requestId });
+  const handleApproveClick = (request: any) => {
+    setSelectedRequest(request);
+    setIsApproveDialogOpen(true);
+  };
+
+  const handleApproveConfirm = () => {
+    if (!instanceId.trim()) {
+      toast.error('يرجى إدخال Instance ID');
+      return;
     }
+    if (!apiToken.trim()) {
+      toast.error('يرجى إدخال API Token');
+      return;
+    }
+
+    approveMutation.mutate({
+      requestId: selectedRequest.id,
+      instanceId: instanceId.trim(),
+      apiToken: apiToken.trim(),
+    });
   };
 
   const handleRejectClick = (request: any) => {
@@ -84,9 +109,16 @@ export default function WhatsAppRequests() {
         );
       case 'approved':
         return (
-          <Badge variant="outline" className="gap-1 border-green-500 text-green-700">
+          <Badge variant="outline" className="gap-1 border-blue-500 text-blue-700">
             <CheckCircle2 className="w-3 h-3" />
-            مقبول
+            مقبول - في انتظار الربط
+          </Badge>
+        );
+      case 'connected':
+        return (
+          <Badge variant="outline" className="gap-1 border-green-500 text-green-700">
+            <Wifi className="w-3 h-3" />
+            مربوط
           </Badge>
         );
       case 'rejected':
@@ -154,7 +186,7 @@ export default function WhatsAppRequests() {
                     <Button
                       size="sm"
                       variant="default"
-                      onClick={() => handleApprove(request.id)}
+                      onClick={() => handleApproveClick(request)}
                       disabled={approveMutation.isPending}
                     >
                       <CheckCircle2 className="w-4 h-4 ml-1" />
@@ -174,9 +206,9 @@ export default function WhatsAppRequests() {
                   <div className="text-sm text-muted-foreground">
                     السبب: {request.rejectionReason}
                   </div>
-                ) : request.status === 'approved' && request.reviewedAt ? (
+                ) : (request.status === 'approved' || request.status === 'connected') && request.instanceId ? (
                   <div className="text-sm text-muted-foreground">
-                    تمت المراجعة: {formatDate(request.reviewedAt)}
+                    <span className="font-mono text-xs">Instance: {request.instanceId}</span>
                   </div>
                 ) : (
                   <span className="text-sm text-muted-foreground">-</span>
@@ -202,7 +234,7 @@ export default function WhatsAppRequests() {
       </div>
 
       {/* Statistics */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>قيد المراجعة</CardDescription>
@@ -211,8 +243,16 @@ export default function WhatsAppRequests() {
         </Card>
         <Card>
           <CardHeader className="pb-3">
-            <CardDescription>مقبولة</CardDescription>
-            <CardTitle className="text-3xl text-green-600">{approvedRequests?.length || 0}</CardTitle>
+            <CardDescription>في انتظار الربط</CardDescription>
+            <CardTitle className="text-3xl text-blue-600">{approvedRequests?.length || 0}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>مربوطة</CardDescription>
+            <CardTitle className="text-3xl text-green-600">
+              {allRequests?.filter((r: any) => r.status === 'connected').length || 0}
+            </CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -223,29 +263,21 @@ export default function WhatsAppRequests() {
         </Card>
       </div>
 
-      {/* Requests Table */}
+      {/* Requests Tabs */}
       <Card>
         <CardHeader>
-          <CardTitle>جميع الطلبات</CardTitle>
+          <CardTitle>قائمة الطلبات</CardTitle>
           <CardDescription>
-            عرض وإدارة جميع طلبات ربط الواتساب
+            جميع طلبات ربط الواتساب من التجار
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="all">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="all">
-                الكل ({allRequests?.length || 0})
-              </TabsTrigger>
-              <TabsTrigger value="pending">
-                قيد المراجعة ({pendingRequests?.length || 0})
-              </TabsTrigger>
-              <TabsTrigger value="approved">
-                مقبولة ({approvedRequests?.length || 0})
-              </TabsTrigger>
-              <TabsTrigger value="rejected">
-                مرفوضة ({rejectedRequests?.length || 0})
-              </TabsTrigger>
+              <TabsTrigger value="all">الكل ({allRequests?.length || 0})</TabsTrigger>
+              <TabsTrigger value="pending">قيد المراجعة ({pendingRequests?.length || 0})</TabsTrigger>
+              <TabsTrigger value="approved">مقبولة ({approvedRequests?.length || 0})</TabsTrigger>
+              <TabsTrigger value="rejected">مرفوضة ({rejectedRequests?.length || 0})</TabsTrigger>
             </TabsList>
             <TabsContent value="all">
               <RequestsTable requests={allRequests} />
@@ -263,39 +295,102 @@ export default function WhatsAppRequests() {
         </CardContent>
       </Card>
 
-      {/* Reject Dialog */}
-      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
-        <DialogContent>
+      {/* Approve Dialog with Green API Credentials */}
+      <Dialog open={isApproveDialogOpen} onOpenChange={setIsApproveDialogOpen}>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>رفض طلب الربط</DialogTitle>
+            <DialogTitle>قبول طلب ربط الواتساب</DialogTitle>
             <DialogDescription>
-              الرجاء إدخال سبب رفض الطلب. سيتم إرسال السبب للتاجر.
+              أدخل بيانات Green API للتاجر لإتمام عملية الربط
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             {selectedRequest && (
-              <div className="space-y-2 p-4 bg-muted rounded-lg">
-                <div className="text-sm">
-                  <span className="font-semibold">رقم الواتساب:</span>{' '}
-                  <span className="font-mono" dir="ltr">{selectedRequest.fullNumber}</span>
-                </div>
-                <div className="text-sm">
-                  <span className="font-semibold">التاجر:</span> #{selectedRequest.merchantId}
-                </div>
+              <div className="bg-muted p-3 rounded-lg text-sm">
+                <p><strong>رقم الواتساب:</strong> {selectedRequest.fullNumber}</p>
+                <p><strong>التاجر:</strong> #{selectedRequest.merchantId}</p>
               </div>
             )}
             <div className="space-y-2">
-              <Label htmlFor="rejection-reason">سبب الرفض</Label>
+              <Label htmlFor="instanceId">Instance ID</Label>
+              <Input
+                id="instanceId"
+                value={instanceId}
+                onChange={(e) => setInstanceId(e.target.value)}
+                placeholder="مثال: 7103XXXXXX"
+                dir="ltr"
+                className="font-mono"
+              />
+              <p className="text-xs text-muted-foreground">
+                احصل عليه من لوحة تحكم Green API
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="apiToken">API Token</Label>
+              <Input
+                id="apiToken"
+                value={apiToken}
+                onChange={(e) => setApiToken(e.target.value)}
+                placeholder="مثال: abc123..."
+                dir="ltr"
+                className="font-mono"
+                type="password"
+              />
+              <p className="text-xs text-muted-foreground">
+                احصل عليه من لوحة تحكم Green API
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="flex-row-reverse gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsApproveDialogOpen(false);
+                setInstanceId('');
+                setApiToken('');
+                setSelectedRequest(null);
+              }}
+            >
+              إلغاء
+            </Button>
+            <Button
+              onClick={handleApproveConfirm}
+              disabled={approveMutation.isPending}
+            >
+              {approveMutation.isPending ? 'جاري القبول...' : 'قبول الطلب'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Dialog */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={setIsRejectDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>رفض طلب ربط الواتساب</DialogTitle>
+            <DialogDescription>
+              يرجى إدخال سبب الرفض لإعلام التاجر
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedRequest && (
+              <div className="bg-muted p-3 rounded-lg text-sm">
+                <p><strong>رقم الواتساب:</strong> {selectedRequest.fullNumber}</p>
+                <p><strong>التاجر:</strong> #{selectedRequest.merchantId}</p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="reason">سبب الرفض</Label>
               <Textarea
-                id="rejection-reason"
+                id="reason"
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
-                placeholder="مثال: الرقم غير صحيح، الرقم مستخدم من قبل تاجر آخر، إلخ..."
-                rows={4}
+                placeholder="أدخل سبب رفض الطلب..."
+                rows={3}
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-row-reverse gap-2">
             <Button
               variant="outline"
               onClick={() => {
@@ -311,7 +406,7 @@ export default function WhatsAppRequests() {
               onClick={handleRejectConfirm}
               disabled={rejectMutation.isPending}
             >
-              {rejectMutation.isPending ? 'جاري الرفض...' : 'تأكيد الرفض'}
+              {rejectMutation.isPending ? 'جاري الرفض...' : 'رفض الطلب'}
             </Button>
           </DialogFooter>
         </DialogContent>
