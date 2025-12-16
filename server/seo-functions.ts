@@ -427,7 +427,7 @@ export async function getSitemaps(type?: string) {
   if (!db) throw new Error("Database not available");
   if (type) {
     return db.query.seoSitemaps.findMany({
-      where: eq(seoSitemaps.sitemapType, type),
+      where: eq(seoSitemaps.sitemapType, type as any),
     });
   }
   return db.query.seoSitemaps.findMany();
@@ -440,7 +440,6 @@ export async function getSitemaps(type?: string) {
 export async function getSeoPageFullData(pageId: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  if (!db) return null;
   
   const page = await db.query.seoPages.findFirst({
     where: eq(seoPages.id, pageId),
@@ -476,7 +475,6 @@ export async function getSeoPageFullData(pageId: number) {
 export async function getSeoPageDashboard() {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  if (!db) return null;
   
   const pages = await db.query.seoPages.findMany();
   const allAlerts = await getUnresolvedAlerts();

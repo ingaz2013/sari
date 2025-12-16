@@ -80,6 +80,14 @@ import WhatsAppRequestsPage from "./pages/admin/WhatsAppRequestsPage";
 import PaymentGateways from "./pages/admin/PaymentGateways";
 import AdminCampaigns from "./pages/admin/Campaigns";
 import SMTPSettings from "./pages/admin/SMTPSettings";
+import SeoDashboard from "./pages/admin/SeoDashboard";
+import SeoPages from "./pages/admin/SeoPages";
+import SeoMetaTags from "./pages/admin/SeoMetaTags";
+import SeoOpenGraph from "./pages/admin/SeoOpenGraph";
+import SeoTracking from "./pages/admin/SeoTracking";
+import SeoAnalytics from "./pages/admin/SeoAnalytics";
+import SeoKeywords from "./pages/admin/SeoKeywords";
+import SeoBacklinks from "./pages/admin/SeoBacklinks";
 
 function Router() {
   return (
@@ -400,6 +408,55 @@ function Router() {
       <Route path="/admin/smtp-settings">
         <DashboardLayout>
           <SMTPSettings />
+        </DashboardLayout>
+      </Route>
+      
+      {/* SEO Routes */}
+      <Route path="/admin/seo/dashboard">
+        <DashboardLayout>
+          <SeoDashboard />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/pages">
+        <DashboardLayout>
+          <SeoPages />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/meta-tags">
+        <DashboardLayout>
+          <SeoMetaTags />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/open-graph">
+        <DashboardLayout>
+          <SeoOpenGraph />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/tracking">
+        <DashboardLayout>
+          <SeoTracking />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/analytics">
+        <DashboardLayout>
+          <SeoAnalytics />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/keywords">
+        <DashboardLayout>
+          <SeoKeywords />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/seo/backlinks">
+        <DashboardLayout>
+          <SeoBacklinks />
         </DashboardLayout>
       </Route>
       

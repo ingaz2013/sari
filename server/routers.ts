@@ -8,9 +8,11 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from '@trpc/server';
 import type { WhatsAppRequest } from '../drizzle/schema';
 import * as db from './db';
+import * as seoDb from './seo-functions';
 import bcrypt from 'bcryptjs';
 import { sdk } from './_core/sdk';
 import { ONE_YEAR_MS } from '@shared/const';
+import { z } from 'zod';
 
 // Admin-only procedure
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -4971,6 +4973,143 @@ export const appRouter = router({
   // Offers and AB Testing
   offers: offersRouter.offers,
   signupPrompt: offersRouter.signupPrompt,
+  
+  // SEO Router
+  seo: router({
+    // Dashboard
+    getDashboard: adminProcedure.query(async () => {
+      return await seoDb.getSeoPageDashboard();
+    }),
+    
+    // Pages
+    getPages: adminProcedure.query(async () => {
+      return await seoDb.getSeoPages();
+    }),
+    
+    getPageBySlug: adminProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        return await seoDb.getSeoPageBySlug(input.slug);
+      }),
+    
+    getPageFullData: adminProcedure
+      .input(z.object({ pageId: z.number() }))
+      .query(async ({ input }) => {
+        return await seoDb.getSeoPageFullData(input.pageId);
+      }),
+    
+    createPage: adminProcedure
+      .input(z.object({
+        pageSlug: z.string(),
+        pageTitle: z.string(),
+        pageDescription: z.string(),
+        keywords: z.string().optional(),
+        author: z.string().optional(),
+        canonicalUrl: z.string().optional(),
+        isIndexed: z.number().optional(),
+        isPriority: z.number().optional(),
+        changeFrequency: z.string().optional(),
+        priority: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await seoDb.createSeoPage(input);
+      }),
+    
+    updatePage: adminProcedure
+      .input(z.object({
+        pageId: z.number(),
+        data: z.record(z.any()),
+      }))
+      .mutation(async ({ input }) => {
+        return await seoDb.updateSeoPage(input.pageId, input.data);
+      }),
+    
+    // Meta Tags
+    getMetaTags: adminProcedure
+      .input(z.object({ pageId: z.number() }))
+      .query(async ({ input }) => {
+        return await seoDb.getMetaTagsByPageId(input.pageId);
+      }),
+    
+    createMetaTag: adminProcedure
+      .input(z.object({
+        pageId: z.number(),
+        metaName: z.string(),
+        metaContent: z.string(),
+        metaProperty: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await seoDb.createMetaTag(input);
+      }),
+    
+    // Open Graph
+    getOpenGraph: adminProcedure
+      .input(z.object({ pageId: z.number() }))
+      .query(async ({ input }) => {
+        return await seoDb.getOpenGraphByPageId(input.pageId);
+      }),
+    
+    createOpenGraph: adminProcedure
+      .input(z.object({
+        pageId: z.number(),
+        ogTitle: z.string(),
+        ogDescription: z.string(),
+        ogImage: z.string().optional(),
+        ogImageAlt: z.string().optional(),
+        ogImageWidth: z.number().optional(),
+        ogImageHeight: z.number().optional(),
+        ogType: z.string().optional(),
+        ogUrl: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await seoDb.createOpenGraph(input);
+      }),
+    
+    // Tracking Codes
+    getTrackingCodes: adminProcedure.query(async () => {
+      return await seoDb.getTrackingCodes();
+    }),
+    
+    createTrackingCode: adminProcedure
+      .input(z.object({
+        pageId: z.number().optional(),
+        trackingType: z.string(),
+        trackingId: z.string(),
+        trackingCode: z.string().optional(),
+        isActive: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return await seoDb.createTrackingCode(input);
+      }),
+    
+    // Analytics
+    getAnalytics: adminProcedure
+      .input(z.object({ pageId: z.number() }))
+      .query(async ({ input }) => {
+        return await seoDb.getAnalyticsByPageId(input.pageId);
+      }),
+    
+    // Keywords
+    getKeywords: adminProcedure
+      .input(z.object({ pageId: z.number() }))
+      .query(async ({ input }) => {
+        return await seoDb.getKeywordsByPageId(input.pageId);
+      }),
+    
+    // Backlinks
+    getBacklinks: adminProcedure
+      .input(z.object({ pageId: z.number() }))
+      .query(async ({ input }) => {
+        return await seoDb.getBacklinksByPageId(input.pageId);
+      }),
+    
+    // Sitemaps
+    getSitemaps: adminProcedure
+      .input(z.object({ type: z.string().optional() }))
+      .query(async ({ input }) => {
+        return await seoDb.getSitemaps(input.type);
+      }),
+  }),
   
 });
 export type AppRouter = typeof appRouter;

@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { 
+import {
   LayoutDashboard, 
   LogOut, 
   PanelLeft, 
@@ -54,7 +54,8 @@ import {
   Bot,
   Calendar,
   Sparkles,
-  Zap
+  Zap,
+  Search
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -98,6 +99,14 @@ const getAdminMenuItems = (t: any) => [
   { icon: CreditCard, label: t('sidebar.admin.paymentGateways'), path: "/admin/payment-gateways" },
   { icon: Settings, label: t('sidebar.admin.settings'), path: "/admin/settings" },
   { icon: MessageSquare, label: 'إعدادات SMTP', path: "/admin/smtp-settings" },
+  { icon: BarChart3, label: 'SEO - لوحة التحكم', path: "/admin/seo/dashboard" },
+  { icon: Package, label: 'SEO - الصفحات', path: "/admin/seo/pages" },
+  { icon: MessageSquare, label: 'SEO - Meta Tags', path: "/admin/seo/meta-tags" },
+  { icon: Sparkles, label: 'SEO - Open Graph', path: "/admin/seo/open-graph" },
+  { icon: Zap, label: 'SEO - رموز التتبع', path: "/admin/seo/tracking" },
+  { icon: BarChart3, label: 'SEO - الإحصائيات', path: "/admin/seo/analytics" },
+  { icon: Package, label: 'SEO - الكلمات المفتاحية', path: "/admin/seo/keywords" },
+  { icon: Smartphone, label: 'SEO - الروابط الخارجية', path: "/admin/seo/backlinks" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
