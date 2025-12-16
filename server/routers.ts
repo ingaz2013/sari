@@ -1345,6 +1345,42 @@ export const appRouter = router({
           input.apiUrl
         );
 
+        // Register Webhook URL in Green API
+        try {
+          const { setWebhookUrl } = await import('./whatsapp');
+          // Get the base URL from environment or use default
+          const baseUrl = process.env.VITE_APP_URL || 'https://sari.manus.space';
+          const webhookUrl = `${baseUrl}/api/webhooks/greenapi`;
+          
+          const webhookResult = await setWebhookUrl(
+            input.instanceId,
+            input.apiToken,
+            webhookUrl,
+            input.apiUrl
+          );
+          
+          if (webhookResult.success) {
+            console.log(`Webhook URL registered successfully for instance ${input.instanceId}: ${webhookUrl}`);
+          } else {
+            console.error(`Failed to register webhook URL: ${webhookResult.error}`);
+          }
+        } catch (webhookError) {
+          console.error('Error registering webhook URL:', webhookError);
+        }
+
+        // Send notification to merchant about approval
+        try {
+          await db.createNotification({
+            userId: request.merchantId,
+            title: 'تمت الموافقة على طلب ربط الواتساب',
+            message: `تمت الموافقة على طلب ربط رقم الواتساب ${request.phoneNumber}. يمكنك الآن ربط الرقم عبر مسح QR Code من لوحة التحكم.`,
+            type: 'success',
+            link: '/merchant/whatsapp',
+          });
+        } catch (notifError) {
+          console.error('Failed to send notification to merchant:', notifError);
+        }
+
         return { success: true };
       }),
 

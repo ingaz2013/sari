@@ -29,10 +29,18 @@ export default function WhatsAppRequestsPage() {
   const approveMutation = trpc.whatsapp.approveRequest.useMutation();
   const rejectMutation = trpc.whatsapp.rejectRequest.useMutation();
 
+  // Debug: log requests data
+  console.log('WhatsApp Requests Data:', requests);
+  if (requests && requests.length > 0) {
+    console.log('First request status:', requests[0].status, 'Type:', typeof requests[0].status);
+  }
+
+  // Filter requests by status
   const pendingRequests = requests?.filter((r: any) => r.status === 'pending') || [];
   const approvedRequests = requests?.filter((r: any) => r.status === 'approved') || [];
   const rejectedRequests = requests?.filter((r: any) => r.status === 'rejected') || [];
-  const completedRequests: any[] = []; // Old table doesn't have completed status
+  const connectedRequests = requests?.filter((r: any) => r.status === 'connected') || [];
+  const completedRequests = connectedRequests; // Connected = Completed
 
   const handleApprove = () => {
     if (!selectedRequest) return;
@@ -113,9 +121,11 @@ export default function WhatsAppRequestsPage() {
       approved: { variant: 'default', icon: CheckCircle2, label: 'تمت الموافقة' },
       rejected: { variant: 'destructive', icon: XCircle, label: 'مرفوض' },
       completed: { variant: 'outline', icon: CheckCircle2, label: 'مكتمل' },
+      connected: { variant: 'default', icon: CheckCircle2, label: 'متصل' },
     };
 
-    const config = variants[status] || variants.pending;
+    // Handle unknown status gracefully
+    const config = variants[status?.toLowerCase()] || { variant: 'secondary', icon: Clock, label: status || 'غير معروف' };
     const Icon = config.icon;
 
     return (
@@ -267,6 +277,24 @@ export default function WhatsAppRequestsPage() {
                       </div>
                     )}
                   </div>
+                  {/* أزرار الإجراءات للطلبات قيد الانتظار */}
+                  {request.status === 'pending' && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => openApproveDialog(request)}
+                      >
+                        موافقة
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => openRejectDialog(request)}
+                      >
+                        رفض
+                      </Button>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (

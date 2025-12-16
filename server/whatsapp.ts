@@ -410,3 +410,194 @@ export async function sendCampaign(
 
   return results;
 }
+
+
+/**
+ * Set Webhook URL for receiving incoming messages
+ * This should be called after WhatsApp connection is established
+ */
+export async function setWebhookUrl(
+  instanceId: string,
+  apiToken: string,
+  webhookUrl: string,
+  apiUrl: string = 'https://api.green-api.com'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const baseURL = `${apiUrl}/waInstance${instanceId}`;
+    
+    // Set webhook settings
+    const response = await axios.post(`${baseURL}/settings`, {
+      webhookUrl: webhookUrl,
+      webhookUrlToken: '',
+      delaySendMessagesMilliseconds: 1000,
+      markIncomingMessagesReaded: 'yes',
+      markIncomingMessagesReadedOnReply: 'yes',
+      outgoingWebhook: 'yes',
+      outgoingMessageWebhook: 'yes',
+      outgoingAPIMessageWebhook: 'yes',
+      incomingWebhook: 'yes',
+      deviceWebhook: 'no',
+      statusInstanceWebhook: 'yes',
+      stateWebhook: 'yes',
+      keepOnlineStatus: 'yes',
+    }, {
+      headers: {
+        'Authorization': `Bearer ${apiToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Webhook settings response:', response.data);
+
+    if (response.data && response.data.saveSettings) {
+      return { success: true };
+    }
+
+    // Try alternative method using setSettings endpoint
+    const settingsResponse = await axios.post(`${baseURL}/setSettings/${apiToken}`, {
+      webhookUrl: webhookUrl,
+      incomingWebhook: 'yes',
+      outgoingWebhook: 'yes',
+      stateWebhook: 'yes',
+    });
+
+    console.log('Alternative webhook settings response:', settingsResponse.data);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error setting webhook URL:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message,
+    };
+  }
+}
+
+/**
+ * Get current webhook settings
+ */
+export async function getWebhookSettings(
+  instanceId: string,
+  apiToken: string,
+  apiUrl: string = 'https://api.green-api.com'
+): Promise<{ webhookUrl?: string; error?: string }> {
+  try {
+    const baseURL = `${apiUrl}/waInstance${instanceId}`;
+    
+    const response = await axios.get(`${baseURL}/getSettings/${apiToken}`);
+
+    return {
+      webhookUrl: response.data?.webhookUrl,
+    };
+  } catch (error: any) {
+    console.error('Error getting webhook settings:', error.response?.data || error.message);
+    return {
+      error: error.response?.data?.message || error.message,
+    };
+  }
+}
+
+
+/**
+ * Receive notification from Green API (Polling method)
+ * This is used for free accounts that don't support webhooks
+ * 
+ * Documentation: https://green-api.com/en/docs/api/receiving/technology-http-api/ReceiveNotification/
+ */
+export async function receiveNotification(
+  instanceId: string,
+  apiToken: string,
+  apiUrl: string = 'https://api.green-api.com'
+): Promise<{ notification: any | null; receiptId: number | null; error?: string }> {
+  try {
+    const baseURL = `${apiUrl}/waInstance${instanceId}`;
+    
+    const response = await axios.get(`${baseURL}/receiveNotification/${apiToken}`, {
+      timeout: 30000, // 30 seconds timeout for long polling
+    });
+
+    if (response.data) {
+      return {
+        notification: response.data.body,
+        receiptId: response.data.receiptId,
+      };
+    }
+
+    return { notification: null, receiptId: null };
+  } catch (error: any) {
+    console.error('Error receiving notification:', error.response?.data || error.message);
+    return {
+      notification: null,
+      receiptId: null,
+      error: error.response?.data?.message || error.message,
+    };
+  }
+}
+
+/**
+ * Delete notification from Green API queue after processing
+ * 
+ * Documentation: https://green-api.com/en/docs/api/receiving/technology-http-api/DeleteNotification/
+ */
+export async function deleteNotification(
+  instanceId: string,
+  apiToken: string,
+  receiptId: number,
+  apiUrl: string = 'https://api.green-api.com'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const baseURL = `${apiUrl}/waInstance${instanceId}`;
+    
+    const response = await axios.delete(`${baseURL}/deleteNotification/${apiToken}/${receiptId}`);
+
+    return { success: response.data?.result === true };
+  } catch (error: any) {
+    console.error('Error deleting notification:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message,
+    };
+  }
+}
+
+
+/**
+ * Send text message with custom credentials (for polling system)
+ */
+export async function sendMessageWithCredentials(
+  instanceId: string,
+  apiToken: string,
+  apiUrl: string,
+  phoneNumber: string,
+  message: string
+): Promise<{ success: boolean; messageId?: string; error?: string }> {
+  try {
+    const baseURL = `${apiUrl}/waInstance${instanceId}`;
+
+    // Format phone number (remove + and spaces)
+    const formattedPhone = phoneNumber.replace(/[^0-9]/g, '');
+
+    const response = await axios.post(`${baseURL}/sendMessage/${apiToken}`, {
+      chatId: `${formattedPhone}@c.us`,
+      message,
+    });
+
+    if (response.data && response.data.idMessage) {
+      return {
+        success: true,
+        messageId: response.data.idMessage,
+      };
+    }
+
+    return {
+      success: false,
+      error: 'Failed to send message',
+    };
+  } catch (error: any) {
+    console.error('Error sending message:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message,
+    };
+  }
+}

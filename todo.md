@@ -2462,3 +2462,17 @@
 - [x] Update admin WhatsAppRequestsPage to use whatsapp_connection_requests table
 - [x] Update merchant WhatsApp page to use whatsapp_connection_requests table (already using correct table)
 - [x] Test and verify requests appear correctly
+
+## إشعارات وتسجيل Webhook
+- [ ] إضافة إشعار تلقائي للتاجر عند موافقة الأدمن على طلب ربط الواتساب
+- [ ] تسجيل Webhook URL تلقائياً في Green API بعد الربط
+- [ ] اختبار الربط الفعلي مع Green API
+
+
+
+## نظام Polling للرسائل (بديل Webhook للحسابات المجانية)
+- [x] إنشاء نظام Polling لاستقبال رسائل الواتساب من Green API
+- [x] اختبار استقبال الرسائل والرد عليها تلقائياً
+- [x] تقليل فترة الـ Polling من 5 ثواني إلى 2 ثانية
+- [x] إضافة نظام لمنع الرد المكرر على نفس الرسالة
+- [x] معالجة الرسائل الصوتية باستخدام Whisper API

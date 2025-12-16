@@ -17,6 +17,7 @@ import { startScheduledCampaignsJob } from "../jobs/scheduled-campaigns";
 import { startScheduledMessagesJob } from "../jobs/scheduled-messages";
 import { startUsageAlertsCron } from "../jobs/usage-alerts";
 import { startSubscriptionExpiryCron } from "../jobs/subscription-expiry-alerts";
+import { startAllPolling } from "../polling";
 import cron from "node-cron";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -116,6 +117,13 @@ async function startServer() {
       const { resetMonthlyUsage } = await import('../usage-tracking');
       await resetMonthlyUsage();
     });
+    
+    // Start WhatsApp message polling for all connected merchants
+    // This is used for free Green API accounts that don't support webhooks
+    setTimeout(async () => {
+      console.log('[Polling] Initializing WhatsApp message polling...');
+      await startAllPolling();
+    }, 5000); // Wait 5 seconds for server to fully initialize
   });
 }
 
