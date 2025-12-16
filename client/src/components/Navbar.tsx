@@ -184,6 +184,15 @@ export default function Navbar() {
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+
+              {/* جرب ساري */}
+              <NavigationMenuItem>
+                <Link href="/try-sari">
+                  <NavigationMenuLink className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors cursor-pointer px-4 py-2 inline-block">
+                    جرب ساري
+                  </NavigationMenuLink>
+                </Link>
+              </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -292,6 +301,16 @@ export default function Navbar() {
                 onClick={() => setIsMenuOpen(false)}
               >
                 التسعير
+              </div>
+            </Link>
+
+            {/* جرب ساري */}
+            <Link href="/try-sari">
+              <div
+                className="block py-2 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors cursor-pointer"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                جرب ساري
               </div>
             </Link>
 

@@ -4102,6 +4102,36 @@ export const appRouter = router({
       }),
   }),
 
+  // Public Sari AI - Public demo for website visitors (no auth required)
+  publicSari: router({
+    // Send a message and get AI response (public, no auth)
+    chat: publicProcedure
+      .input(z.object({
+        message: z.string(),
+        sessionId: z.string().optional(), // For tracking conversation context
+      }))
+      .mutation(async ({ input }) => {
+        // Use a demo merchant for public testing
+        // In production, you can create a dedicated "demo" merchant account
+        const demoMerchant = await db.getMerchantById(1); // Assuming merchant ID 1 is the demo
+        
+        if (!demoMerchant) {
+          throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Demo merchant not configured' });
+        }
+
+        const { chatWithSari } = await import('./ai/sari-personality');
+        
+        const response = await chatWithSari({
+          merchantId: demoMerchant.id,
+          customerPhone: input.sessionId || 'public-demo',
+          customerName: 'زائر',
+          message: input.message,
+        });
+
+        return { response };
+      }),
+  }),
+
   // Test Sari AI - Playground for testing conversations
   testSari: router({
     // Send a test message and get AI response

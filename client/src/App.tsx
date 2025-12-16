@@ -24,6 +24,7 @@ import SuccessStories from "./pages/resources/SuccessStories";
 import Contact from "./pages/company/Contact";
 import Terms from "./pages/company/Terms";
 import Privacy from "./pages/company/Privacy";
+import TrySari from "./pages/TrySari";
 
 // Merchant pages
 import MerchantDashboard from "./pages/merchant/Dashboard";
@@ -102,6 +103,7 @@ function Router() {
       <Route path="/company/contact" component={Contact} />
       <Route path="/company/terms" component={Terms} />
       <Route path="/company/privacy" component={Privacy} />
+      <Route path="/try-sari" component={TrySari} />
       
       {/* Merchant Routes */}
       <Route path="/merchant/dashboard">

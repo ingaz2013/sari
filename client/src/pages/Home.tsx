@@ -172,6 +172,14 @@ export default function Home() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
+                <Link href="/try-sari">
+                  <a>
+                    <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-lg h-14 px-8">
+                      جرب ساري الآن
+                      <Sparkles className="mr-2 w-5 h-5" />
+                    </Button>
+                  </a>
+                </Link>
                 <Link href="/login">
                   <a>
                     <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg h-14 px-8">

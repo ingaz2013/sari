@@ -2484,3 +2484,13 @@
 - [x] تحسين error handling في نظام Polling
 - [x] إضافة exponential backoff عند فشل الاتصال
 - [x] تجاهل timeout errors (طبيعية في long polling)
+
+
+## إضافة صفحة تجربة ساري العامة (Try Sari)
+- [x] إنشاء API عام لساري AI (publicSari.chat) بدون مصادقة
+- [x] إنشاء صفحة /try-sari في الموقع العام
+- [x] واجهة محادثة تفاعلية تشبه WhatsApp
+- [x] أمثلة جاهزة للتجربة السريعة
+- [x] تصميم responsive للجوال
+- [x] إضافة رابط "جرب ساري" في Navbar
+- [x] إضافة CTA في Landing Page للتوجيه لصفحة التجربة
