@@ -135,6 +135,9 @@ import {
   passwordResetAttempts,
   PasswordResetAttempt,
   InsertPasswordResetAttempt,
+  trySariAnalytics,
+  TrySariAnalytics,
+  InsertTrySariAnalytics,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -4457,4 +4460,252 @@ export async function clearOldAttempts(): Promise<void> {
 
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
   await db.delete(passwordResetAttempts).where(lt(passwordResetAttempts.attemptedAt, oneHourAgo));
+}
+
+
+// ============================================
+// Try Sari Analytics Functions
+// ============================================
+
+/**
+ * Create or update analytics session
+ */
+export async function upsertTrySariAnalytics(data: {
+  sessionId: string;
+  messageCount?: number;
+  exampleUsed?: string;
+  convertedToSignup?: boolean;
+  signupPromptShown?: boolean;
+  ipAddress?: string;
+  userAgent?: string;
+}): Promise<TrySariAnalytics | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  try {
+    // Check if session exists
+    const existing = await db
+      .select()
+      .from(trySariAnalytics)
+      .where(eq(trySariAnalytics.sessionId, data.sessionId))
+      .limit(1);
+
+    if (existing.length > 0) {
+      // Update existing session
+      await db
+        .update(trySariAnalytics)
+        .set({
+          messageCount: data.messageCount ?? existing[0].messageCount,
+          exampleUsed: data.exampleUsed ?? existing[0].exampleUsed,
+          convertedToSignup: data.convertedToSignup ?? existing[0].convertedToSignup,
+          signupPromptShown: data.signupPromptShown ?? existing[0].signupPromptShown,
+          updatedAt: new Date(),
+        })
+        .where(eq(trySariAnalytics.sessionId, data.sessionId));
+
+      return existing[0];
+    } else {
+      // Create new session
+      await db
+        .insert(trySariAnalytics)
+        .values({
+          sessionId: data.sessionId,
+          messageCount: data.messageCount ?? 0,
+          exampleUsed: data.exampleUsed,
+          convertedToSignup: data.convertedToSignup ?? false,
+          signupPromptShown: data.signupPromptShown ?? false,
+          ipAddress: data.ipAddress,
+          userAgent: data.userAgent,
+        });
+
+      // Fetch the created record
+      const created = await db
+        .select()
+        .from(trySariAnalytics)
+        .where(eq(trySariAnalytics.sessionId, data.sessionId))
+        .limit(1);
+
+      return created[0];
+    }
+  } catch (error) {
+    console.error("[DB] Error upserting try sari analytics:", error);
+    return undefined;
+  }
+}
+
+/**
+ * Increment message count for a session
+ */
+export async function incrementTrySariMessageCount(sessionId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    await db
+      .update(trySariAnalytics)
+      .set({
+        messageCount: sql`${trySariAnalytics.messageCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(trySariAnalytics.sessionId, sessionId));
+  } catch (error) {
+    console.error("[DB] Error incrementing message count:", error);
+  }
+}
+
+/**
+ * Mark session as shown signup prompt
+ */
+export async function markSignupPromptShown(sessionId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    await db
+      .update(trySariAnalytics)
+      .set({
+        signupPromptShown: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(trySariAnalytics.sessionId, sessionId));
+  } catch (error) {
+    console.error("[DB] Error marking signup prompt shown:", error);
+  }
+}
+
+/**
+ * Mark session as converted to signup
+ */
+export async function markConvertedToSignup(sessionId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    await db
+      .update(trySariAnalytics)
+      .set({
+        convertedToSignup: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(trySariAnalytics.sessionId, sessionId));
+  } catch (error) {
+    console.error("[DB] Error marking converted to signup:", error);
+  }
+}
+
+/**
+ * Get analytics session by sessionId
+ */
+export async function getTrySariAnalyticsBySessionId(sessionId: string): Promise<TrySariAnalytics | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  try {
+    const [result] = await db
+      .select()
+      .from(trySariAnalytics)
+      .where(eq(trySariAnalytics.sessionId, sessionId))
+      .limit(1);
+
+    return result;
+  } catch (error) {
+    console.error("[DB] Error getting try sari analytics:", error);
+    return undefined;
+  }
+}
+
+/**
+ * Get Try Sari analytics stats (for admin dashboard)
+ */
+export async function getTrySariAnalyticsStats(days: number = 30) {
+  const db = await getDb();
+  if (!db) return null;
+
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    // Get all sessions in the time range
+    const sessions = await db
+      .select()
+      .from(trySariAnalytics)
+      .where(gte(trySariAnalytics.createdAt, startDate));
+
+    // Calculate stats
+    const totalSessions = sessions.length;
+    const totalMessages = sessions.reduce((sum, s) => sum + s.messageCount, 0);
+    const promptsShown = sessions.filter(s => s.signupPromptShown).length;
+    const conversions = sessions.filter(s => s.convertedToSignup).length;
+    const conversionRate = promptsShown > 0 ? (conversions / promptsShown) * 100 : 0;
+
+    // Count example usage
+    const exampleUsage: Record<string, number> = {};
+    sessions.forEach(s => {
+      if (s.exampleUsed) {
+        exampleUsage[s.exampleUsed] = (exampleUsage[s.exampleUsed] || 0) + 1;
+      }
+    });
+
+    // Get unique visitors (by IP)
+    const uniqueIPs = new Set(sessions.map(s => s.ipAddress).filter(Boolean));
+    const uniqueVisitors = uniqueIPs.size;
+
+    return {
+      totalSessions,
+      uniqueVisitors,
+      totalMessages,
+      averageMessagesPerSession: totalSessions > 0 ? (totalMessages / totalSessions).toFixed(1) : '0',
+      promptsShown,
+      conversions,
+      conversionRate: conversionRate.toFixed(1),
+      exampleUsage,
+    };
+  } catch (error) {
+    console.error("[DB] Error getting try sari analytics stats:", error);
+    return null;
+  }
+}
+
+/**
+ * Get daily analytics data for charts
+ */
+export async function getTrySariDailyData(days: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const sessions = await db
+      .select()
+      .from(trySariAnalytics)
+      .where(gte(trySariAnalytics.createdAt, startDate))
+      .orderBy(trySariAnalytics.createdAt);
+
+    // Group by date
+    const dailyData: Record<string, {
+      date: string;
+      sessions: number;
+      messages: number;
+      conversions: number;
+    }> = {};
+
+    sessions.forEach(s => {
+      const dateKey = s.createdAt.toISOString().split('T')[0];
+      if (!dailyData[dateKey]) {
+        dailyData[dateKey] = { date: dateKey, sessions: 0, messages: 0, conversions: 0 };
+      }
+      dailyData[dateKey].sessions += 1;
+      dailyData[dateKey].messages += s.messageCount;
+      if (s.convertedToSignup) {
+        dailyData[dateKey].conversions += 1;
+      }
+    });
+
+    return Object.values(dailyData).sort((a, b) => a.date.localeCompare(b.date));
+  } catch (error) {
+    console.error("[DB] Error getting daily data:", error);
+    return [];
+  }
 }

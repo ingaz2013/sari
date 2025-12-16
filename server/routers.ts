@@ -4108,27 +4108,73 @@ export const appRouter = router({
     chat: publicProcedure
       .input(z.object({
         message: z.string(),
-        sessionId: z.string().optional(), // For tracking conversation context
+        sessionId: z.string(),
+        exampleUsed: z.string().optional(),
+        ipAddress: z.string().optional(),
+        userAgent: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         // Use a demo merchant for public testing
-        // In production, you can create a dedicated "demo" merchant account
-        const demoMerchant = await db.getMerchantById(1); // Assuming merchant ID 1 is the demo
+        const demoMerchant = await db.getMerchantById(1);
         
         if (!demoMerchant) {
           throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Demo merchant not configured' });
+        }
+
+        // Track analytics
+        const session = await db.getTrySariAnalyticsBySessionId(input.sessionId);
+        if (!session) {
+          // Create new session
+          await db.upsertTrySariAnalytics({
+            sessionId: input.sessionId,
+            messageCount: 1,
+            exampleUsed: input.exampleUsed,
+            ipAddress: input.ipAddress,
+            userAgent: input.userAgent,
+          });
+        } else {
+          // Increment message count
+          await db.incrementTrySariMessageCount(input.sessionId);
+          
+          // Update example if provided
+          if (input.exampleUsed && !session.exampleUsed) {
+            await db.upsertTrySariAnalytics({
+              sessionId: input.sessionId,
+              exampleUsed: input.exampleUsed,
+            });
+          }
         }
 
         const { chatWithSari } = await import('./ai/sari-personality');
         
         const response = await chatWithSari({
           merchantId: demoMerchant.id,
-          customerPhone: input.sessionId || 'public-demo',
+          customerPhone: input.sessionId,
           customerName: 'زائر',
           message: input.message,
         });
 
         return { response };
+      }),
+    
+    // Track signup prompt shown
+    trackSignupPrompt: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.markSignupPromptShown(input.sessionId);
+        return { success: true };
+      }),
+    
+    // Track conversion to signup
+    trackConversion: publicProcedure
+      .input(z.object({
+        sessionId: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        await db.markConvertedToSignup(input.sessionId);
+        return { success: true };
       }),
   }),
 
@@ -4894,6 +4940,27 @@ export const appRouter = router({
         }
         
         return { success: true };
+      }),
+  }),
+
+  // Try Sari Analytics (Admin only)
+  trySariAnalytics: router({
+    // Get analytics stats
+    getStats: adminProcedure
+      .input(z.object({
+        days: z.number().min(1).max(365).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getTrySariAnalyticsStats(input.days || 30);
+      }),
+    
+    // Get daily data for charts
+    getDailyData: adminProcedure
+      .input(z.object({
+        days: z.number().min(1).max(365).optional(),
+      }))
+      .query(async ({ input }) => {
+        return await db.getTrySariDailyData(input.days || 30);
       }),
   }),
 

@@ -478,6 +478,25 @@ export type SallaConnection = typeof sallaConnections.$inferSelect;
 export type InsertSallaConnection = typeof sallaConnections.$inferInsert;
 
 /**
+ * Try Sari Analytics - Track demo page usage
+ */
+export const trySariAnalytics = mysqlTable("trySariAnalytics", {
+  id: int("id").autoincrement().primaryKey(),
+  sessionId: varchar("sessionId", { length: 255 }).notNull(), // Unique session identifier
+  messageCount: int("messageCount").default(0).notNull(), // Number of messages sent in this session
+  exampleUsed: varchar("exampleUsed", { length: 255 }), // Which example was used (if any)
+  convertedToSignup: boolean("convertedToSignup").default(false).notNull(), // Did user sign up?
+  signupPromptShown: boolean("signupPromptShown").default(false).notNull(), // Was signup prompt shown?
+  ipAddress: varchar("ipAddress", { length: 45 }), // User IP for unique visitor tracking
+  userAgent: text("userAgent"), // Browser info
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TrySariAnalytics = typeof trySariAnalytics.$inferSelect;
+export type InsertTrySariAnalytics = typeof trySariAnalytics.$inferInsert;
+
+/**
  * Sync Logs (سجل المزامنة)
  */
 export const syncLogs = mysqlTable("sync_logs", {

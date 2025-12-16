@@ -232,6 +232,13 @@
       "when": 1765878489202,
       "tag": "0032_useful_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "5",
+      "when": 1765916617459,
+      "tag": "0033_clumsy_wolverine",
+      "breakpoints": true
     }
   ]
 }

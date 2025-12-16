@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card';
 import { Send, Bot, User, Sparkles, MessageCircle } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import SignupPromptDialog from '@/components/SignupPromptDialog';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -14,10 +15,14 @@ interface Message {
 }
 
 const EXAMPLE_MESSAGES = [
-  'مرحبا، أريد شراء منتج',
-  'ما هي المنتجات المتوفرة؟',
-  'أريد معلومات عن الأسعار',
-  'كيف يمكنني الطلب؟',
+  { text: 'مرحبا، أريد شراء منتج', category: 'basic' },
+  { text: 'ما هي المنتجات المتوفرة؟', category: 'basic' },
+  { text: 'أريد معلومات عن الأسعار', category: 'basic' },
+  { text: 'كيف يمكنني الطلب؟', category: 'basic' },
+  { text: 'أريد طلب 3 قطع من المنتج الأول و 2 من الثاني', category: 'advanced' },
+  { text: 'هل المنتج X متوفر بالمخزون؟', category: 'advanced' },
+  { text: 'أريد فاتورة لطلبي السابق رقم 1234', category: 'advanced' },
+  { text: 'المنتج وصلني تالف، كيف أرجعه؟', category: 'advanced' },
 ];
 
 export default function TrySari() {
@@ -29,9 +34,15 @@ export default function TrySari() {
     },
   ]);
   const [inputMessage, setInputMessage] = useState('');
-  const [sessionId] = useState(() => `demo-${Date.now()}`);
+  const [sessionId] = useState(() => `demo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
+  const [messageCount, setMessageCount] = useState(0);
+  const [showSignupPrompt, setShowSignupPrompt] = useState(false);
+  const [signupPromptShown, setSignupPromptShown] = useState(false);
+  const [showAdvancedExamples, setShowAdvancedExamples] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatMutation = trpc.publicSari.chat.useMutation();
+  const trackSignupPromptMutation = trpc.publicSari.trackSignupPrompt.useMutation();
+  const trackConversionMutation = trpc.publicSari.trackConversion.useMutation();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -41,7 +52,7 @@ export default function TrySari() {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = async (message?: string) => {
+  const handleSendMessage = async (message?: string, exampleUsed?: string) => {
     const messageToSend = message || inputMessage.trim();
     if (!messageToSend) return;
 
@@ -54,11 +65,26 @@ export default function TrySari() {
     setMessages((prev) => [...prev, userMessage]);
     setInputMessage('');
 
+    // Increment message count
+    const newCount = messageCount + 1;
+    setMessageCount(newCount);
+
+    // Show signup prompt after 3-5 messages (random)
+    const promptThreshold = 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
+    if (newCount >= promptThreshold && !signupPromptShown) {
+      setShowSignupPrompt(true);
+      setSignupPromptShown(true);
+      trackSignupPromptMutation.mutate({ sessionId });
+    }
+
     try {
-      // Get AI response
+      // Get AI response with analytics tracking
       const response = await chatMutation.mutateAsync({
         message: messageToSend,
         sessionId,
+        exampleUsed,
+        ipAddress: undefined, // Could be added if needed
+        userAgent: navigator.userAgent,
       });
 
       // Add assistant message
@@ -79,8 +105,17 @@ export default function TrySari() {
     }
   };
 
-  const handleExampleClick = (example: string) => {
-    handleSendMessage(example);
+  const handleExampleClick = (example: { text: string; category: string }) => {
+    handleSendMessage(example.text, example.text);
+  };
+
+  const handleSignupPromptClose = () => {
+    setShowSignupPrompt(false);
+  };
+
+  const handleSignupConversion = () => {
+    trackConversionMutation.mutate({ sessionId });
+    setShowSignupPrompt(false);
   };
 
   const handleReset = () => {
@@ -91,7 +126,11 @@ export default function TrySari() {
         timestamp: new Date(),
       },
     ]);
+    setMessageCount(0);
   };
+
+  const basicExamples = EXAMPLE_MESSAGES.filter(e => e.category === 'basic');
+  const advancedExamples = EXAMPLE_MESSAGES.filter(e => e.category === 'advanced');
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col">
@@ -237,7 +276,7 @@ export default function TrySari() {
                   <h3 className="font-semibold text-gray-900">جرّب هذه الأمثلة</h3>
                 </div>
                 <div className="space-y-2">
-                  {EXAMPLE_MESSAGES.map((example, idx) => (
+                  {basicExamples.map((example, idx) => (
                     <Button
                       key={idx}
                       variant="outline"
@@ -245,9 +284,36 @@ export default function TrySari() {
                       onClick={() => handleExampleClick(example)}
                       disabled={chatMutation.isPending}
                     >
-                      {example}
+                      {example.text}
                     </Button>
                   ))}
+                </div>
+                
+                {/* Advanced Examples Toggle */}
+                <div className="mt-4 pt-4 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={() => setShowAdvancedExamples(!showAdvancedExamples)}
+                  >
+                    {showAdvancedExamples ? '▼' : '▶'} أمثلة متقدمة
+                  </Button>
+                  {showAdvancedExamples && (
+                    <div className="space-y-2 mt-2">
+                      {advancedExamples.map((example, idx) => (
+                        <Button
+                          key={idx}
+                          variant="outline"
+                          className="w-full justify-start text-right text-xs"
+                          onClick={() => handleExampleClick(example)}
+                          disabled={chatMutation.isPending}
+                        >
+                          {example.text}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </Card>
 
@@ -295,6 +361,13 @@ export default function TrySari() {
       </main>
 
       <Footer />
+      
+      {/* Signup Prompt Dialog */}
+      <SignupPromptDialog
+        open={showSignupPrompt}
+        onClose={handleSignupPromptClose}
+        onSignup={handleSignupConversion}
+      />
     </div>
   );
 }
