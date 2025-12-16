@@ -6,7 +6,18 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle2, XCircle, Clock, Smartphone, Send } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import { Loader2, CheckCircle2, XCircle, Clock, Smartphone, Send, RefreshCcw } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useTranslation } from 'react-i18next';
@@ -53,6 +64,19 @@ export default function WhatsAppConnection() {
     },
   });
 
+  // Disconnect mutation
+  const disconnectMutation = trpc.whatsapp.disconnect.useMutation({
+    onSuccess: () => {
+      toast.success('تم فك ربط الواتساب بنجاح');
+      refetchRequest();
+      setPhoneNumber('');
+      setCountryCode('+966');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'فشل فك الربط');
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -72,6 +96,10 @@ export default function WhatsAppConnection() {
       countryCode,
       phoneNumber: cleanNumber,
     });
+  };
+
+  const handleDisconnect = () => {
+    disconnectMutation.mutate();
   };
 
   const getStatusBadge = () => {
@@ -127,6 +155,7 @@ export default function WhatsAppConnection() {
   };
 
   const canSubmitNewRequest = !requestStatus || requestStatus.status === 'rejected';
+  const canDisconnect = requestStatus && (requestStatus.status === 'pending' || requestStatus.status === 'approved');
 
   return (
     <div className="container py-8">
@@ -146,6 +175,56 @@ export default function WhatsAppConnection() {
         {requestStatus && (
           <div className="space-y-4">
             {getStatusBadge()}
+            
+            {/* Disconnect Button */}
+            {canDisconnect && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                    disabled={disconnectMutation.isPending}
+                  >
+                    {disconnectMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                        جاري فك الربط...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCcw className="w-4 h-4 ml-2" />
+                        فك الربط وطلب رقم جديد
+                      </>
+                    )}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>تأكيد فك ربط الواتساب</AlertDialogTitle>
+                    <AlertDialogDescription className="text-right">
+                      <div className="space-y-2">
+                        <p>هل أنت متأكد من فك ربط رقم الواتساب الحالي؟</p>
+                        <p className="font-mono text-sm bg-muted p-2 rounded">
+                          {requestStatus.fullNumber}
+                        </p>
+                        <p className="text-red-600">
+                          سيتم إلغاء الربط الحالي وستحتاج لتقديم طلب جديد.
+                        </p>
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="flex-row-reverse gap-2">
+                    <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDisconnect}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      نعم، فك الربط
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         )}
 
@@ -247,6 +326,7 @@ export default function WhatsAppConnection() {
             <p>• ستتلقى إشعاراً عند معالجة طلبك</p>
             <p>• في حال الرفض، يمكنك تقديم طلب جديد برقم مختلف</p>
             <p>• بعد الموافقة، سيتم الرد التلقائي على جميع الرسائل الواردة</p>
+            <p>• يمكنك فك الربط في أي وقت وطلب ربط رقم جديد</p>
           </CardContent>
         </Card>
       </div>

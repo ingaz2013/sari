@@ -1279,6 +1279,38 @@ export const appRouter = router({
       return await db.getWhatsAppConnectionRequestByMerchantId(merchant.id);
     }),
 
+    // Disconnect WhatsApp (Reset) - allows merchant to remove current connection and request a new one
+    disconnect: protectedProcedure.mutation(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      }
+
+      // Get current connection request
+      const existingRequest = await db.getWhatsAppConnectionRequestByMerchantId(merchant.id);
+      if (!existingRequest) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'No WhatsApp connection found' });
+      }
+
+      // Delete the connection request
+      await db.deleteWhatsAppConnectionRequest(existingRequest.id);
+
+      // Also delete any WhatsApp instances associated with this merchant
+      const instances = await db.getWhatsAppInstancesByMerchantId(merchant.id);
+      for (const instance of instances) {
+        await db.deleteWhatsAppInstance(instance.id);
+      }
+
+      // Notify admin about the disconnection
+      const notifyOwner = await import('./_core/notification');
+      await notifyOwner.notifyOwner({
+        title: 'فك ربط واتساب',
+        content: `التاجر ${merchant.businessName} قام بفك ربط رقم الواتساب: ${existingRequest.fullNumber}`,
+      });
+
+      return { success: true };
+    }),
+
     // Get all connection requests (Admin only)
     listRequests: adminProcedure
       .input(z.object({ status: z.enum(['pending', 'approved', 'rejected']).optional() }))

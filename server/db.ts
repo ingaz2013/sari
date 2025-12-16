@@ -1151,6 +1151,13 @@ export async function rejectWhatsAppConnectionRequest(
   }).where(eq(whatsappConnectionRequests.id, id));
 }
 
+export async function deleteWhatsAppConnectionRequest(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.delete(whatsappConnectionRequests).where(eq(whatsappConnectionRequests.id, id));
+}
+
 
 // ============================================
 // Payment Gateways Functions
