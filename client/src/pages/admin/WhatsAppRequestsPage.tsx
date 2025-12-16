@@ -25,14 +25,14 @@ export default function WhatsAppRequestsPage() {
   const [adminNotes, setAdminNotes] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
 
-  const { data: requests, isLoading, refetch } = trpc.whatsappRequests.listAll.useQuery();
-  const approveMutation = trpc.whatsappRequests.approve.useMutation();
-  const rejectMutation = trpc.whatsappRequests.reject.useMutation();
+  const { data: requests, isLoading, refetch } = trpc.whatsapp.listRequests.useQuery({});
+  const approveMutation = trpc.whatsapp.approveRequest.useMutation();
+  const rejectMutation = trpc.whatsapp.rejectRequest.useMutation();
 
-  const pendingRequests = requests?.filter(r => r.status === 'pending') || [];
-  const approvedRequests = requests?.filter(r => r.status === 'approved') || [];
-  const rejectedRequests = requests?.filter(r => r.status === 'rejected') || [];
-  const completedRequests = requests?.filter(r => r.status === 'completed') || [];
+  const pendingRequests = requests?.filter((r: any) => r.status === 'pending') || [];
+  const approvedRequests = requests?.filter((r: any) => r.status === 'approved') || [];
+  const rejectedRequests = requests?.filter((r: any) => r.status === 'rejected') || [];
+  const completedRequests: any[] = []; // Old table doesn't have completed status
 
   const handleApprove = () => {
     if (!selectedRequest) return;
@@ -44,10 +44,6 @@ export default function WhatsAppRequestsPage() {
     approveMutation.mutate(
       {
         requestId: selectedRequest.id,
-        instanceId,
-        token,
-        apiUrl,
-        adminNotes,
       },
       {
         onSuccess: () => {
@@ -73,7 +69,7 @@ export default function WhatsAppRequestsPage() {
     rejectMutation.mutate(
       {
         requestId: selectedRequest.id,
-        rejectionReason,
+        reason: rejectionReason,
       },
       {
         onSuccess: () => {
@@ -195,13 +191,13 @@ export default function WhatsAppRequestsPage() {
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{request.businessName}</span>
+                      <span className="font-medium">التاجر #{request.merchantId}</span>
                       {getStatusBadge(request.status)}
                     </div>
-                    {request.phoneNumber && (
+                    {request.fullNumber && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-3 w-3" />
-                        {request.phoneNumber}
+                        {request.fullNumber}
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -248,24 +244,20 @@ export default function WhatsAppRequestsPage() {
                   <div className="space-y-1 flex-1">
                     <div className="flex items-center gap-2">
                       <Building2 className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">{request.businessName}</span>
+                      <span className="font-medium">التاجر #{request.merchantId}</span>
                       {getStatusBadge(request.status)}
                     </div>
-                    {request.phoneNumber && (
+                    {request.fullNumber && (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Phone className="h-3 w-3" />
-                        {request.phoneNumber}
+                        {request.fullNumber}
                       </div>
                     )}
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-3 w-3" />
                       {new Date(request.createdAt).toLocaleDateString('ar-SA')}
                     </div>
-                    {request.instanceId && (
-                      <div className="text-xs text-muted-foreground">
-                        Instance ID: {request.instanceId}
-                      </div>
-                    )}
+
                     {request.rejectionReason && (
                       <div className="text-sm text-destructive">
                         سبب الرفض: {request.rejectionReason}

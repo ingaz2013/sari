@@ -2444,3 +2444,10 @@
 - [x] تحديث صفحة ربط الواتساب لإضافة زر Reset
 - [x] إضافة نافذة تأكيد قبل فك الربط
 - [x] اختبار الميزة
+
+
+## Bug: WhatsApp request 966112975254 not showing
+- [x] Investigate which table the request was saved to (whatsapp_connection_requests vs whatsapp_requests)
+- [x] Update admin WhatsAppRequestsPage to use whatsapp_connection_requests table
+- [x] Update merchant WhatsApp page to use whatsapp_connection_requests table (already using correct table)
+- [x] Test and verify requests appear correctly
