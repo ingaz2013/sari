@@ -4,6 +4,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { insightsRouter } from "./routers-insights";
 import { offersRouter } from "./routers-offers";
+import { googleAuthRouter } from "./routers-google-auth";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from '@trpc/server';
 import type { WhatsAppRequest } from '../drizzle/schema';
@@ -5182,5 +5183,6 @@ export const appRouter = router({
       }),
   }),
   
+  googleAuth: googleAuthRouter,
 });
 export type AppRouter = typeof appRouter;

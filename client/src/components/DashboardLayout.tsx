@@ -55,7 +55,8 @@ import {
   Calendar,
   Sparkles,
   Zap,
-  Search
+  Search,
+  Key
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -99,6 +100,7 @@ const getAdminMenuItems = (t: any) => [
   { icon: CreditCard, label: t('sidebar.admin.paymentGateways'), path: "/admin/payment-gateways" },
   { icon: Settings, label: t('sidebar.admin.settings'), path: "/admin/settings" },
   { icon: MessageSquare, label: 'إعدادات SMTP', path: "/admin/smtp-settings" },
+  { icon: Zap, label: 'إعدادات Google OAuth', path: "/admin/google-oauth" },
   { icon: BarChart3, label: 'SEO - لوحة التحكم', path: "/admin/seo/dashboard" },
   { icon: Package, label: 'SEO - الصفحات', path: "/admin/seo/pages" },
   { icon: MessageSquare, label: 'SEO - Meta Tags', path: "/admin/seo/meta-tags" },

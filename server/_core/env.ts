@@ -12,4 +12,8 @@ export const ENV = {
   // SMTP2GO API Configuration
   smtp2goApiKey: process.env.SMTP2GO_API_KEY ?? "",
   smtpFrom: process.env.SMTP_FROM ?? "noreply@sary.live",
+  // Google OAuth Configuration
+  googleClientId: process.env.VITE_GOOGLE_CLIENT_ID ?? "",
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
 };
+

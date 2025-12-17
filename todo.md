@@ -2652,3 +2652,19 @@
 - [ ] إضافة API لتصدير Sitemap
 - [ ] إضافة robots.txt
 - [ ] جدولة التحديث التلقائي
+
+
+## Google OAuth Integration
+- [x] تثبيت مكتبات Google OAuth (@react-oauth/google, google-auth-library)
+- [x] إنشاء ملف server/google-auth.ts لمعالجة التحقق من tokens
+- [x] إنشاء ملف server/routers-google-auth.ts مع API endpoints
+- [x] إنشاء مكون GoogleLoginButton في client/src/components/
+- [x] تحديث main.tsx بـ GoogleOAuthProvider
+- [x] تحديث env.ts بمتغيرات Google OAuth
+- [x] إنشاء صفحة إدارة Google OAuth في لوحة تحكم الأدمن (/admin/google-oauth)
+- [x] إضافة نموذج إدخال Client ID و Client Secret
+- [x] إضافة رابط الصفحة في قائمة الأدمن (Sidebar)
+- [x] كتابة 7 اختبارات شاملة لـ Google Auth
+- [x] جميع الاختبارات نجحت (7 passed)
+- [x] دمج GoogleLoginButton في صفحة تسجيل الدخول
+- [x] إضافة فاصل بين طرق التسجيل التقليدية و Google OAuth

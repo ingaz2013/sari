@@ -15,6 +15,13 @@
       "when": 1765926941398,
       "tag": "0001_sloppy_ghost_rider",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1765946889766,
+      "tag": "0002_clean_the_hood",
+      "breakpoints": true
     }
   ]
 }

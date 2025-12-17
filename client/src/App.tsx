@@ -90,6 +90,7 @@ import SeoKeywords from "./pages/admin/SeoKeywords";
 import SeoBacklinks from "./pages/admin/SeoBacklinks";
 import AdminRecommendations from "./pages/admin/AdminRecommendations";
 import RecommendationsAnalytics from "./pages/admin/RecommendationsAnalytics";
+import AdminGoogleOAuth from "./pages/AdminGoogleOAuth";
 
 function Router() {
   return (
@@ -410,6 +411,12 @@ function Router() {
       <Route path="/admin/smtp-settings">
         <DashboardLayout>
           <SMTPSettings />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/google-oauth">
+        <DashboardLayout>
+          <AdminGoogleOAuth />
         </DashboardLayout>
       </Route>
       

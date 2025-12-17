@@ -953,7 +953,16 @@ export const seoSitemaps = mysqlTable("seo_sitemaps", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 	});
 
-export const emailVerificationTokens = mysqlTable("email_verification_tokens", {
+	export const googleOAuthSettings = mysqlTable("google_oauth_settings", {
+		id: int().autoincrement().notNull().primaryKey(),
+		clientId: varchar({ length: 500 }).notNull().unique(),
+		clientSecret: varchar({ length: 500 }).notNull(),
+		isEnabled: tinyint("is_enabled").default(1).notNull(),
+		createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+		updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+	});
+
+	export const emailVerificationTokens = mysqlTable("email_verification_tokens", {
 	id: int().autoincrement().notNull(),
 	userId: int("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 	email: varchar({ length: 255 }).notNull(),
@@ -1045,3 +1054,5 @@ export type SeoSitemap = InferSelectType<typeof seoSitemaps>;
 export type InsertSeoSitemap = InferInsertType<typeof seoSitemaps>;
 export type EmailVerificationToken = InferSelectType<typeof emailVerificationTokens>;
 export type InsertEmailVerificationToken = InferInsertType<typeof emailVerificationTokens>;
+export type GoogleOAuthSettings = InferSelectType<typeof googleOAuthSettings>;
+export type InsertGoogleOAuthSettings = InferInsertType<typeof googleOAuthSettings>;
