@@ -13,14 +13,25 @@ import { Badge } from "./ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 export function NotificationBell() {
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
+  const { user, loading: authLoading } = useAuth();
   
-  // Fetch notifications
-  const { data: notifications = [] } = trpc.notifications.list.useQuery();
-  const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery();
+  // Only fetch notifications if user is authenticated
+  const isAuthenticated = Boolean(user);
+  
+  // Fetch notifications - only when authenticated
+  const { data: notifications = [] } = trpc.notifications.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+    retry: false,
+  });
+  const { data: unreadCount = 0 } = trpc.notifications.unreadCount.useQuery(undefined, {
+    enabled: isAuthenticated,
+    retry: false,
+  });
   
   // Mutations
   const markAsRead = trpc.notifications.markAsRead.useMutation({
@@ -67,6 +78,11 @@ export function NotificationBell() {
         return "ℹ️";
     }
   };
+  
+  // Don't render if not authenticated or still loading
+  if (authLoading || !isAuthenticated) {
+    return null;
+  }
   
   return (
     <DropdownMenu>

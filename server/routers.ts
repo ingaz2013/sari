@@ -12,7 +12,7 @@ import type { WhatsAppRequest } from '../drizzle/schema';
 import * as db from './db';
 import * as seoDb from './seo-functions';
 import bcrypt from 'bcryptjs';
-import { sdk } from './_core/sdk';
+import { createSessionToken } from './_core/auth';
 import { ONE_YEAR_MS } from '@shared/const';
 import { z } from 'zod';
 
@@ -80,7 +80,7 @@ export const appRouter = router({
         await db.updateUserLastSignedIn(user.id);
         
         // Create session token using SDK
-        const sessionToken = await sdk.createSessionToken(String(user.id), {
+        const sessionToken = await createSessionToken(String(user.id), {
           name: user.name || '',
           email: user.email || '',
           expiresInMs: ONE_YEAR_MS,
@@ -212,7 +212,7 @@ export const appRouter = router({
         }
         
         // Create session token
-        const sessionToken = await sdk.createSessionToken(String(user.id), {
+        const sessionToken = await createSessionToken(String(user.id), {
           name: user.name || '',
           email: user.email || '',
           expiresInMs: ONE_YEAR_MS,

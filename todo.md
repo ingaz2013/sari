@@ -485,6 +485,14 @@
 - [x] تحديث صفحة Admin WhatsAppRequests لإدخال بيانات Green API
 - [x] اختبار الميزة
 
+## Bug Fix - Login Loop (API calls before auth check)
+- [x] Fix NotificationBell calling APIs before auth check
+- [x] Add enabled condition to notifications queries
+- [x] Test login flow without errors
+- [x] Replace Manus SDK with custom JWT auth (auth.ts)
+- [x] Fix upsertUser -> updateUser for lastSignedIn update
+- [x] Remove sdk.ts dependency from context.ts
+
 ## تكامل Salla API مع التخزين المحلي
 - [x] تحديث schema.ts بإضافة الجداول الجديدة
   - [x] جدول salla_connections

@@ -1,8 +1,9 @@
-import express, { Router } from 'express';
+import { Router } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import * as db from './db';
-import { ONE_YEAR_MS } from '@shared/const';
+import { createSessionToken, verifySession } from './_core/auth';
+import { ONE_YEAR_MS, COOKIE_NAME } from '@shared/const';
+import { getSessionCookieOptions } from './_core/cookies';
 
 const router = Router();
 
@@ -34,23 +35,22 @@ router.post('/login', async (req, res) => {
     // Update last signed in
     await db.updateUserLastSignedIn(user.id);
 
-    // Create JWT token
-    const token = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
-      process.env.JWT_SECRET || 'secret-key',
-      { expiresIn: '1y' }
-    );
+    // Create session token using custom auth
+    const sessionToken = await createSessionToken(String(user.id), {
+      name: user.name || '',
+      email: user.email || '',
+      expiresInMs: ONE_YEAR_MS,
+    });
+
+    // Set cookie
+    const cookieOptions = getSessionCookieOptions(req);
+    res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
     console.log('🟢 [AUTH] Login successful for:', user.email);
 
     return res.json({
       success: true,
-      token,
+      token: sessionToken,
       user: {
         id: user.id,
         name: user.name,
@@ -73,9 +73,14 @@ router.post('/verify', async (req, res) => {
       return res.status(401).json({ error: 'No token provided' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-key') as any;
+    // Verify using custom auth
+    const session = await verifySession(token);
 
-    const user = await db.getUserById(decoded.id);
+    if (!session) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    const user = await db.getUserById(session.userId);
 
     if (!user) {
       return res.status(401).json({ error: 'User not found' });
