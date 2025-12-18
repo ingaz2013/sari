@@ -231,8 +231,7 @@ export const messages = mysqlTable("messages", {
 	imageUrl: varchar({ length: 500 }),
 	mediaUrl: varchar({ length: 500 }),
 	isProcessed: tinyint().default(0).notNull(),
-	aiwResponse: text(),
-	isFromCustomer: tinyint().default(0).notNull(),
+	aiResponse: text(),
 	externalId: varchar({ length: 255 }),
 	createdAt: timestamp({ mode: 'string' }).defaultNow().notNull(),
 });

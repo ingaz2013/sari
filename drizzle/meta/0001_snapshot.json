@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "4fca8a92-a46d-452e-a072-b9a3d0f0d79e",
-  "prevId": "c45a1763-8536-4e90-a4cc-e000674da268",
+  "id": "62fd731e-f62d-4b7a-abd6-f1d1ac75acb8",
+  "prevId": "7021fa27-bdba-48af-88cd-056997655c2a",
   "tables": {
     "ab_test_results": {
       "name": "ab_test_results",
@@ -1152,6 +1152,76 @@
       },
       "checkConstraint": {}
     },
+    "google_oauth_settings": {
+      "name": "google_oauth_settings",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "clientId": {
+          "name": "clientId",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "clientSecret": {
+          "name": "clientSecret",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_enabled": {
+          "name": "is_enabled",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "onUpdate": true,
+          "default": "(now())"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "google_oauth_settings_id": {
+          "name": "google_oauth_settings_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {
+        "google_oauth_settings_clientId_unique": {
+          "name": "google_oauth_settings_clientId_unique",
+          "columns": [
+            "clientId"
+          ]
+        }
+      },
+      "checkConstraint": {}
+    },
     "invoices": {
       "name": "invoices",
       "columns": {
@@ -1622,7 +1692,7 @@
         },
         "messageType": {
           "name": "messageType",
-          "type": "enum('text','voice','image')",
+          "type": "enum('text','voice','image','document')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -1649,6 +1719,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "mediaUrl": {
+          "name": "mediaUrl",
+          "type": "varchar(500)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "isProcessed": {
           "name": "isProcessed",
           "type": "tinyint",
@@ -1660,6 +1737,13 @@
         "aiResponse": {
           "name": "aiResponse",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "externalId": {
+          "name": "externalId",
+          "type": "varchar(255)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false

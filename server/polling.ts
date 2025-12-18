@@ -245,7 +245,7 @@ async function handleIncomingMessage(
       direction: 'incoming',
       content: messageText,
       messageType: 'text',
-      isProcessed: false,
+      isProcessed: 0,
     });
 
     // Update conversation

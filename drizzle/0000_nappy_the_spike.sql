@@ -146,6 +146,29 @@ CREATE TABLE `discount_codes` (
 	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP
 );
 --> statement-breakpoint
+CREATE TABLE `email_verification_tokens` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`user_id` int NOT NULL,
+	`email` varchar(255) NOT NULL,
+	`token` varchar(255) NOT NULL,
+	`expires_at` timestamp NOT NULL,
+	`is_used` tinyint NOT NULL DEFAULT 0,
+	`used_at` timestamp,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	CONSTRAINT `email_verification_tokens_token_unique` UNIQUE(`token`)
+);
+--> statement-breakpoint
+CREATE TABLE `google_oauth_settings` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`clientId` varchar(500) NOT NULL,
+	`clientSecret` varchar(500) NOT NULL,
+	`is_enabled` tinyint NOT NULL DEFAULT 1,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `google_oauth_settings_id` PRIMARY KEY(`id`),
+	CONSTRAINT `google_oauth_settings_clientId_unique` UNIQUE(`clientId`)
+);
+--> statement-breakpoint
 CREATE TABLE `invoices` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`invoice_number` varchar(50) NOT NULL,
@@ -213,12 +236,15 @@ CREATE TABLE `messages` (
 	`id` int AUTO_INCREMENT NOT NULL,
 	`conversationId` int NOT NULL,
 	`direction` enum('incoming','outgoing') NOT NULL,
-	`messageType` enum('text','voice','image') NOT NULL DEFAULT 'text',
+	`messageType` enum('text','voice','image','document') NOT NULL DEFAULT 'text',
 	`content` text NOT NULL,
 	`voiceUrl` varchar(500),
 	`imageUrl` varchar(500),
+	`mediaUrl` varchar(500),
 	`isProcessed` tinyint NOT NULL DEFAULT 0,
-	`aiResponse` text,
+	`aiwResponse` text,
+	`isFromCustomer` tinyint NOT NULL DEFAULT 0,
+	`externalId` varchar(255),
 	`createdAt` timestamp NOT NULL DEFAULT (now())
 );
 --> statement-breakpoint
@@ -916,6 +942,7 @@ ALTER TABLE `ab_test_results` ADD CONSTRAINT `ab_test_results_merchant_id_mercha
 ALTER TABLE `ab_test_results` ADD CONSTRAINT `ab_test_results_variant_a_id_quick_responses_id_fk` FOREIGN KEY (`variant_a_id`) REFERENCES `quick_responses`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `ab_test_results` ADD CONSTRAINT `ab_test_results_variant_b_id_quick_responses_id_fk` FOREIGN KEY (`variant_b_id`) REFERENCES `quick_responses`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `bot_settings` ADD CONSTRAINT `bot_settings_merchant_id_merchants_id_fk` FOREIGN KEY (`merchant_id`) REFERENCES `merchants`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE `email_verification_tokens` ADD CONSTRAINT `email_verification_tokens_user_id_users_id_fk` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `keyword_analysis` ADD CONSTRAINT `keyword_analysis_merchant_id_merchants_id_fk` FOREIGN KEY (`merchant_id`) REFERENCES `merchants`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `notification_templates` ADD CONSTRAINT `notification_templates_merchant_id_merchants_id_fk` FOREIGN KEY (`merchant_id`) REFERENCES `merchants`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE `order_notifications` ADD CONSTRAINT `order_notifications_order_id_orders_id_fk` FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

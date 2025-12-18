@@ -322,7 +322,7 @@ export async function processIncomingMessage(
       direction: 'outgoing',
       content: aiResponse,
       messageType: 'text',
-      isProcessed: true,
+      isProcessed: 1,
       aiResponse: aiResponse,
     });
 

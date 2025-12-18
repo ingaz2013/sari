@@ -169,8 +169,8 @@ async function processTextMessage(params: {
       messageType: 'text',
       content: params.messageText,
       voiceUrl: null,
-      isProcessed: false,
-      aiResponse: null,
+      isProcessed: 0,
+      aiwResponse: null,
     });
     
     // Get AI response from Sari
@@ -213,8 +213,8 @@ async function processTextMessage(params: {
       messageType: 'text',
       content: response,
       voiceUrl: null,
-      isProcessed: true,
-      aiResponse: response,
+      isProcessed: 1,
+      aiwResponse: response,
     });
     
     // Increment message usage (incoming + outgoing = 2 messages)

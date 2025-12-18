@@ -41,7 +41,7 @@ export async function processVoiceMessage(params: {
       messageType: 'voice',
       content: transcription,
       voiceUrl: params.audioUrl,
-      isProcessed: false,
+      isProcessed: 0,
       aiResponse: null,
     });
 
@@ -64,7 +64,7 @@ export async function processVoiceMessage(params: {
       messageType: 'text',
       content: response,
       voiceUrl: null,
-      isProcessed: true,
+      isProcessed: 1,
       aiResponse: response,
     });
 
