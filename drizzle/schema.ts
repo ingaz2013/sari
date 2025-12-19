@@ -219,6 +219,14 @@ export const merchants = mysqlTable("merchants", {
 	onboardingStep: int().default(0).notNull(),
 	onboardingCompletedAt: timestamp({ mode: 'string' }),
 	currency: mysqlEnum(['SAR','USD']).default('SAR').notNull(),
+	// Setup Wizard fields
+	businessType: mysqlEnum(['store','services','both']),
+	setupCompleted: tinyint().default(0).notNull(),
+	setupCompletedAt: timestamp({ mode: 'string' }),
+	address: varchar({ length: 500 }),
+	description: text(),
+	workingHoursType: mysqlEnum(['24_7','weekdays','custom']).default('weekdays'),
+	workingHours: text(), // JSON: {"saturday": {"start": "09:00", "end": "18:00"}}
 });
 
 export const messages = mysqlTable("messages", {
@@ -975,6 +983,133 @@ export const seoSitemaps = mysqlTable("seo_sitemaps", {
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
+// Setup Wizard Tables
+export const businessTemplates = mysqlTable("business_templates", {
+	id: int().autoincrement().notNull().primaryKey(),
+	business_type: mysqlEnum('business_type', ['store','services','both']).notNull(),
+	template_name: varchar("template_name", { length: 255 }).notNull(),
+	icon: varchar({ length: 50 }),
+	services: text(), // JSON array
+	products: text(), // JSON array
+	working_hours: text("working_hours"), // JSON object
+	bot_personality: text("bot_personality"), // JSON object
+	settings: text(), // JSON object
+	description: text(),
+	suitable_for: text("suitable_for"),
+	is_active: tinyint("is_active").default(1).notNull(),
+	usage_count: int("usage_count").default(0).notNull(),
+	created_at: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const services = mysqlTable("services", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	name: varchar({ length: 255 }).notNull(),
+	description: text(),
+	category: varchar({ length: 100 }),
+	// Pricing
+	priceType: mysqlEnum("price_type", ['fixed','variable','custom']).default('fixed').notNull(),
+	basePrice: int("base_price"), // in cents
+	minPrice: int("min_price"), // in cents
+	maxPrice: int("max_price"), // in cents
+	// Time
+	durationMinutes: int("duration_minutes").notNull(),
+	bufferTimeMinutes: int("buffer_time_minutes").default(0).notNull(),
+	// Booking
+	requiresAppointment: tinyint("requires_appointment").default(1).notNull(),
+	maxBookingsPerDay: int("max_bookings_per_day"),
+	advanceBookingDays: int("advance_booking_days").default(30).notNull(),
+	// Staff
+	staffIds: text("staff_ids"), // JSON array
+	// Status
+	isActive: tinyint("is_active").default(1).notNull(),
+	displayOrder: int("display_order").default(0).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+export const servicePackages = mysqlTable("service_packages", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	name: varchar({ length: 255 }).notNull(),
+	description: text(),
+	serviceIds: text("service_ids"), // JSON array
+	originalPrice: int("original_price"), // in cents
+	packagePrice: int("package_price"), // in cents
+	discountPercentage: int("discount_percentage"),
+	isActive: tinyint("is_active").default(1).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const staffMembers = mysqlTable("staff_members", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	name: varchar({ length: 255 }).notNull(),
+	phone: varchar({ length: 20 }),
+	email: varchar({ length: 255 }),
+	role: varchar({ length: 100 }),
+	workingHours: text("working_hours"), // JSON object
+	isActive: tinyint("is_active").default(1).notNull(),
+	googleCalendarId: varchar("google_calendar_id", { length: 255 }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const appointments = mysqlTable("appointments", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
+	customerName: varchar("customer_name", { length: 255 }),
+	serviceId: int("service_id").notNull().references(() => services.id, { onDelete: "cascade" }),
+	staffId: int("staff_id").references(() => staffMembers.id, { onDelete: "set null" }),
+	appointmentDate: timestamp("appointment_date", { mode: 'string' }).notNull(),
+	startTime: varchar("start_time", { length: 5 }).notNull(), // HH:MM
+	endTime: varchar("end_time", { length: 5 }).notNull(), // HH:MM
+	status: mysqlEnum(['pending','confirmed','cancelled','completed','no_show']).default('pending').notNull(),
+	googleEventId: varchar("google_event_id", { length: 255 }),
+	reminder24hSent: tinyint("reminder_24h_sent").default(0).notNull(),
+	reminder1hSent: tinyint("reminder_1h_sent").default(0).notNull(),
+	notes: text(),
+	cancellationReason: text("cancellation_reason"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+export const serviceReviews = mysqlTable("service_reviews", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	serviceId: int("service_id").notNull().references(() => services.id, { onDelete: "cascade" }),
+	customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
+	customerName: varchar("customer_name", { length: 255 }),
+	rating: int().notNull(), // 1-5
+	comment: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
+export const setupWizardProgress = mysqlTable("setup_wizard_progress", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }).unique(),
+	currentStep: int("current_step").default(1).notNull(),
+	completedSteps: text("completed_steps"), // JSON array [1, 2, 3]
+	wizardData: text("wizard_data"), // JSON object with temporary data
+	isCompleted: tinyint("is_completed").default(0).notNull(),
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+export const googleIntegrations = mysqlTable("google_integrations", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	integrationType: mysqlEnum("integration_type", ['calendar','sheets']).notNull(),
+	credentials: text(), // encrypted JSON
+	calendarId: varchar("calendar_id", { length: 255 }),
+	sheetId: varchar("sheet_id", { length: 255 }),
+	isActive: tinyint("is_active").default(1).notNull(),
+	lastSync: timestamp("last_sync", { mode: 'string' }),
+	settings: text(), // JSON object
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+});
+
 	// Type definitions
 export type User = InferSelectType<typeof users>;
 export type InsertUser = InferInsertType<typeof users>;
@@ -1058,3 +1193,19 @@ export type EmailVerificationToken = InferSelectType<typeof emailVerificationTok
 export type InsertEmailVerificationToken = InferInsertType<typeof emailVerificationTokens>;
 export type GoogleOAuthSettings = InferSelectType<typeof googleOAuthSettings>;
 export type InsertGoogleOAuthSettings = InferInsertType<typeof googleOAuthSettings>;
+export type BusinessTemplate = InferSelectType<typeof businessTemplates>;
+export type InsertBusinessTemplate = InferInsertType<typeof businessTemplates>;
+export type Service = InferSelectType<typeof services>;
+export type InsertService = InferInsertType<typeof services>;
+export type ServicePackage = InferSelectType<typeof servicePackages>;
+export type InsertServicePackage = InferInsertType<typeof servicePackages>;
+export type StaffMember = InferSelectType<typeof staffMembers>;
+export type InsertStaffMember = InferInsertType<typeof staffMembers>;
+export type Appointment = InferSelectType<typeof appointments>;
+export type InsertAppointment = InferInsertType<typeof appointments>;
+export type ServiceReview = InferSelectType<typeof serviceReviews>;
+export type InsertServiceReview = InferInsertType<typeof serviceReviews>;
+export type SetupWizardProgress = InferSelectType<typeof setupWizardProgress>;
+export type InsertSetupWizardProgress = InferInsertType<typeof setupWizardProgress>;
+export type GoogleIntegration = InferSelectType<typeof googleIntegrations>;
+export type InsertGoogleIntegration = InferInsertType<typeof googleIntegrations>;

@@ -5233,6 +5233,153 @@ export const appRouter = router({
       }),
   }),
   
+  // Setup Wizard APIs
+  setupWizard: router({
+    // Get wizard progress
+    getProgress: protectedProcedure.query(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      
+      let progress = await db.getSetupWizardProgress(merchant.id);
+      if (!progress) {
+        // Create initial progress
+        const progressId = await db.createSetupWizardProgress({
+          merchantId: merchant.id,
+          currentStep: 1,
+          completedSteps: JSON.stringify([]),
+          wizardData: JSON.stringify({}),
+          isCompleted: 0,
+        });
+        progress = await db.getSetupWizardProgress(merchant.id);
+      }
+      return progress;
+    }),
+    
+    // Save progress
+    saveProgress: protectedProcedure
+      .input(z.object({
+        currentStep: z.number(),
+        completedSteps: z.array(z.number()),
+        wizardData: z.record(z.string(), z.any()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        
+        await db.updateSetupWizardProgress(merchant.id, {
+          currentStep: input.currentStep,
+          completedSteps: JSON.stringify(input.completedSteps),
+          wizardData: JSON.stringify(input.wizardData),
+        });
+        
+        return { success: true };
+      }),
+    
+    // Complete setup
+    completeSetup: protectedProcedure
+      .input(z.object({
+        businessType: z.enum(['store', 'services', 'both']),
+        businessName: z.string(),
+        phone: z.string(),
+        address: z.string().optional(),
+        description: z.string().optional(),
+        workingHoursType: z.enum(['24_7', 'weekdays', 'custom']),
+        workingHours: z.record(z.string(), z.any()).optional(),
+        botTone: z.enum(['friendly', 'professional', 'casual']).optional(),
+        botLanguage: z.enum(['ar', 'en', 'both']).optional(),
+        welcomeMessage: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        
+        // Update merchant
+        await db.updateMerchant(merchant.id, {
+          businessType: input.businessType,
+          businessName: input.businessName,
+          phone: input.phone,
+          address: input.address,
+          description: input.description,
+          workingHoursType: input.workingHoursType,
+          workingHours: input.workingHours ? JSON.stringify(input.workingHours) : undefined,
+        });
+        
+        // Update bot settings if provided
+        if (input.botTone || input.botLanguage || input.welcomeMessage) {
+          await db.updateBotSettings(merchant.id, {
+            tone: input.botTone,
+            language: input.botLanguage,
+            welcomeMessage: input.welcomeMessage,
+          });
+        }
+        
+        // Mark setup as completed
+        await db.completeSetupWizard(merchant.id);
+        
+        return { success: true };
+      }),
+    
+    // Get templates
+    getTemplates: publicProcedure
+      .input(z.object({
+        businessType: z.enum(['store', 'services', 'both']).optional(),
+      }))
+      .query(async ({ input }) => {
+        if (input.businessType) {
+          return await db.getBusinessTemplatesByType(input.businessType);
+        }
+        return await db.getAllBusinessTemplates();
+      }),
+    
+    // Apply template
+    applyTemplate: protectedProcedure
+      .input(z.object({
+        templateId: z.number(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        
+        const template = await db.getBusinessTemplateById(input.templateId);
+        if (!template) throw new TRPCError({ code: 'NOT_FOUND', message: 'Template not found' });
+        
+        // Parse template data
+        const services = template.services ? JSON.parse(template.services) : [];
+        const products = template.products ? JSON.parse(template.products) : [];
+        const workingHours = template.working_hours ? JSON.parse(template.working_hours) : {};
+        const botPersonality = template.bot_personality ? JSON.parse(template.bot_personality) : {};
+        
+        // Apply services
+        for (const service of services) {
+          await db.createService({
+            merchantId: merchant.id,
+            ...service,
+          });
+        }
+        
+        // Apply products
+        for (const product of products) {
+          await db.createProduct({
+            merchantId: merchant.id,
+            ...product,
+          });
+        }
+        
+        // Update merchant working hours
+        await db.updateMerchant(merchant.id, {
+          workingHours: JSON.stringify(workingHours),
+        });
+        
+        // Update bot personality
+        await db.updateBotSettings(merchant.id, botPersonality);
+        
+        // Increment template usage
+        await db.incrementTemplateUsage(input.templateId);
+        
+        return { success: true };
+      }),
+  }),
+  
   googleAuth: googleAuthRouter,
 });
 export type AppRouter = typeof appRouter;

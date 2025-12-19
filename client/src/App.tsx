@@ -70,6 +70,7 @@ import SariPersonality from "./pages/merchant/SariPersonality";
 import QuickResponses from "./pages/merchant/QuickResponses";
 import InsightsDashboard from "./pages/merchant/InsightsDashboard";
 import AdvancedAnalytics from "./pages/merchant/AdvancedAnalytics";
+import SetupWizard from "./pages/SetupWizard";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -118,6 +119,7 @@ function Router() {
       <Route path="/company/terms" component={Terms} />
       <Route path="/company/privacy" component={Privacy} />
       <Route path="/try-sari" component={TrySari} />
+      <Route path="/setup-wizard" component={SetupWizard} />
       
       {/* Merchant Routes */}
       <Route path="/merchant/dashboard">

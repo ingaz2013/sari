@@ -2834,3 +2834,59 @@
 - [ ] كتابة اختبارات نظام الخدمات
 - [ ] تشغيل جميع الاختبارات
 - [ ] إنشاء Checkpoint نهائي
+
+
+---
+
+## ✅ المرحلة 0: Setup Wizard - تم الإنجاز الأساسي (قيد التنفيذ)
+
+### قاعدة البيانات
+- [x] إنشاء جدول business_templates (القوالب الجاهزة)
+- [x] إنشاء جدول services (الخدمات المحسّن)
+- [x] إنشاء جدول service_packages (حزم الخدمات)
+- [x] إنشاء جدول staff_members (الموظفين)
+- [x] إنشاء جدول appointments (المواعيد)
+- [x] إنشاء جدول service_reviews (تقييمات الخدمات)
+- [x] إنشاء جدول setup_wizard_progress (تقدم Setup Wizard)
+- [x] إنشاء جدول google_integrations (تكاملات Google)
+- [x] تحديث جدول merchants بحقول جديدة (business_type, setup_completed, etc.)
+- [x] إضافة 40+ دالة في db.ts للتعامل مع الجداول الجديدة
+
+### Backend APIs
+- [x] إنشاء setupWizard router في routers.ts
+- [x] API: getProgress - جلب تقدم المستخدم
+- [x] API: saveProgress - حفظ التقدم
+- [x] API: completeSetup - إكمال الإعداد
+- [x] API: getTemplates - جلب القوالب الجاهزة
+- [x] API: applyTemplate - تطبيق قالب
+
+### Frontend - Setup Wizard
+- [ ] إنشاء مكون SetupWizard.tsx الرئيسي
+- [ ] الخطوة 1: Welcome - شاشة الترحيب
+- [ ] الخطوة 2: BusinessType - اختيار نوع النشاط
+- [ ] الخطوة 3: Templates - اختيار قالب جاهز (اختياري)
+- [ ] الخطوة 4: BasicInfo - معلومات النشاط الأساسية
+- [ ] الخطوة 5a: Products - إضافة المنتجات (للمتاجر)
+- [ ] الخطوة 5b: Services - إضافة الخدمات (لمقدمي الخدمات)
+- [ ] الخطوة 6: Integrations - التكاملات (اختياري)
+- [ ] الخطوة 7: Personality - تخصيص شخصية ساري
+- [ ] الخطوة 8: Complete - الإكمال والمعاينة
+- [ ] Progress Bar component
+- [ ] Auto-save functionality
+
+### القوالب الجاهزة (10 قوالب)
+- [ ] قالب عيادة أسنان
+- [ ] قالب صالون تجميل
+- [ ] قالب مطعم
+- [ ] قالب متجر ملابس
+- [ ] قالب مكتبة
+- [ ] قالب نادي رياضي
+- [ ] قالب مركز تدريب
+- [ ] قالب ورشة صيانة
+- [ ] قالب مقهى
+- [ ] قالب استشارات مهنية
+
+### الاختبارات
+- [ ] اختبارات Setup Wizard APIs
+- [ ] اختبارات القوالب
+- [ ] اختبارات حفظ التقدم

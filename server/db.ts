@@ -98,6 +98,30 @@ import {
   occasionCampaigns,
   OccasionCampaign,
   InsertOccasionCampaign,
+  businessTemplates,
+  BusinessTemplate,
+  InsertBusinessTemplate,
+  services,
+  Service,
+  InsertService,
+  servicePackages,
+  ServicePackage,
+  InsertServicePackage,
+  staffMembers,
+  StaffMember,
+  InsertStaffMember,
+  appointments,
+  Appointment,
+  InsertAppointment,
+  serviceReviews,
+  ServiceReview,
+  InsertServiceReview,
+  setupWizardProgress,
+  SetupWizardProgress,
+  InsertSetupWizardProgress,
+  googleIntegrations,
+  GoogleIntegration,
+  InsertGoogleIntegration,
   whatsappInstances,
   WhatsAppInstance,
   InsertWhatsAppInstance,
@@ -4978,4 +5002,268 @@ export async function getSyncLog(merchantId: string) {
     lastSync: new Date(),
     status: "idle",
   };
+}
+
+// ============================================
+// Setup Wizard Functions
+// ============================================
+
+// Business Templates
+export async function getAllBusinessTemplates() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(businessTemplates).where(eq(businessTemplates.isActive, 1));
+}
+
+export async function getBusinessTemplatesByType(businessType: 'store' | 'services' | 'both') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(businessTemplates)
+    .where(and(
+      eq(businessTemplates.businessType, businessType),
+      eq(businessTemplates.isActive, 1)
+    ));
+}
+
+export async function getBusinessTemplateById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(businessTemplates).where(eq(businessTemplates.id, id));
+  return results[0];
+}
+
+export async function incrementTemplateUsage(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(businessTemplates)
+    .set({ usageCount: sql`${businessTemplates.usageCount} + 1` })
+    .where(eq(businessTemplates.id, id));
+}
+
+// Services
+export async function createService(service: InsertService) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(services).values(service);
+  return result[0].insertId;
+}
+
+export async function getServicesByMerchant(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(services)
+    .where(and(
+      eq(services.merchantId, merchantId),
+      eq(services.isActive, 1)
+    ))
+    .orderBy(services.displayOrder, services.name);
+}
+
+export async function getServiceById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(services).where(eq(services.id, id));
+  return results[0];
+}
+
+export async function updateService(id: number, data: Partial<InsertService>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(services).set(data).where(eq(services.id, id));
+}
+
+export async function deleteService(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(services).set({ isActive: 0 }).where(eq(services.id, id));
+}
+
+// Service Packages
+export async function createServicePackage(pkg: InsertServicePackage) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(servicePackages).values(pkg);
+  return result[0].insertId;
+}
+
+export async function getServicePackagesByMerchant(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(servicePackages)
+    .where(and(
+      eq(servicePackages.merchantId, merchantId),
+      eq(servicePackages.isActive, 1)
+    ));
+}
+
+// Staff Members
+export async function createStaffMember(staff: InsertStaffMember) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(staffMembers).values(staff);
+  return result[0].insertId;
+}
+
+export async function getStaffMembersByMerchant(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(staffMembers)
+    .where(and(
+      eq(staffMembers.merchantId, merchantId),
+      eq(staffMembers.isActive, 1)
+    ));
+}
+
+export async function getStaffMemberById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(staffMembers).where(eq(staffMembers.id, id));
+  return results[0];
+}
+
+export async function updateStaffMember(id: number, data: Partial<InsertStaffMember>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(staffMembers).set(data).where(eq(staffMembers.id, id));
+}
+
+// Appointments
+export async function createAppointment(appointment: InsertAppointment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(appointments).values(appointment);
+  return result[0].insertId;
+}
+
+export async function getAppointmentsByMerchant(merchantId: number, status?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const conditions = [eq(appointments.merchantId, merchantId)];
+  if (status) {
+    conditions.push(eq(appointments.status, status as any));
+  }
+  return await db.select().from(appointments)
+    .where(and(...conditions))
+    .orderBy(desc(appointments.appointmentDate));
+}
+
+export async function getAppointmentById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(appointments).where(eq(appointments.id, id));
+  return results[0];
+}
+
+export async function updateAppointment(id: number, data: Partial<InsertAppointment>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(appointments).set(data).where(eq(appointments.id, id));
+}
+
+export async function cancelAppointment(id: number, reason: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(appointments)
+    .set({ status: 'cancelled', cancellationReason: reason })
+    .where(eq(appointments.id, id));
+}
+
+// Service Reviews
+export async function createServiceReview(review: InsertServiceReview) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(serviceReviews).values(review);
+  return result[0].insertId;
+}
+
+export async function getServiceReviewsByMerchant(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(serviceReviews)
+    .where(eq(serviceReviews.merchantId, merchantId))
+    .orderBy(desc(serviceReviews.createdAt));
+}
+
+export async function getServiceReviewsByService(serviceId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(serviceReviews)
+    .where(eq(serviceReviews.serviceId, serviceId))
+    .orderBy(desc(serviceReviews.createdAt));
+}
+
+// Setup Wizard Progress
+export async function getSetupWizardProgress(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(setupWizardProgress)
+    .where(eq(setupWizardProgress.merchantId, merchantId));
+  return results[0];
+}
+
+export async function createSetupWizardProgress(progress: InsertSetupWizardProgress) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(setupWizardProgress).values(progress);
+  return result[0].insertId;
+}
+
+export async function updateSetupWizardProgress(merchantId: number, data: Partial<InsertSetupWizardProgress>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(setupWizardProgress)
+    .set(data)
+    .where(eq(setupWizardProgress.merchantId, merchantId));
+}
+
+export async function completeSetupWizard(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  await db.update(setupWizardProgress)
+    .set({ isCompleted: 1, completedAt: now })
+    .where(eq(setupWizardProgress.merchantId, merchantId));
+  
+  // Also update merchant table
+  await db.update(merchants)
+    .set({ setupCompleted: 1, setupCompletedAt: now })
+    .where(eq(merchants.id, merchantId));
+}
+
+// Google Integrations
+export async function createGoogleIntegration(integration: InsertGoogleIntegration) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(googleIntegrations).values(integration);
+  return result[0].insertId;
+}
+
+export async function getGoogleIntegrationsByMerchant(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(googleIntegrations)
+    .where(eq(googleIntegrations.merchantId, merchantId));
+}
+
+export async function getGoogleIntegration(merchantId: number, integrationType: 'calendar' | 'sheets') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(googleIntegrations)
+    .where(and(
+      eq(googleIntegrations.merchantId, merchantId),
+      eq(googleIntegrations.integrationType, integrationType)
+    ));
+  return results[0];
+}
+
+export async function updateGoogleIntegration(id: number, data: Partial<InsertGoogleIntegration>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(googleIntegrations).set(data).where(eq(googleIntegrations.id, id));
+}
+
+export async function deleteGoogleIntegration(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(googleIntegrations).where(eq(googleIntegrations.id, id));
 }
