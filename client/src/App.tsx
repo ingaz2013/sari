@@ -80,6 +80,8 @@ import ServicesManagement from "./pages/merchant/ServicesManagement";
 import ServiceForm from "./pages/merchant/ServiceForm";
 import ServiceCategories from "./pages/merchant/ServiceCategories";
 import ServicePackages from "./pages/merchant/ServicePackages";
+import ServiceDetails from "./pages/ServiceDetails";
+import BookingsManagement from "./pages/BookingsManagement";
 import SheetsSettings from "./pages/SheetsSettings";
 import SheetsExport from "./pages/SheetsExport";
 import SheetsReports from "./pages/SheetsReports";
@@ -403,6 +405,18 @@ function Router() {
       <Route path="/merchant/services/:id/edit">
         <DashboardLayout>
           <ServiceForm />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/services/:id">
+        <DashboardLayout>
+          <ServiceDetails />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/bookings">
+        <DashboardLayout>
+          <BookingsManagement />
         </DashboardLayout>
       </Route>
       

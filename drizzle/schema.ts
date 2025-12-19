@@ -1105,6 +1105,95 @@ export const serviceReviews = mysqlTable("service_reviews", {
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
 
+// ============================================
+// Bookings System Tables
+// ============================================
+
+export const bookings = mysqlTable("bookings", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	serviceId: int("service_id").notNull().references(() => services.id, { onDelete: "cascade" }),
+	customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
+	customerName: varchar("customer_name", { length: 255 }),
+	customerEmail: varchar("customer_email", { length: 255 }),
+	staffId: int("staff_id").references(() => staffMembers.id, { onDelete: "set null" }),
+	// Booking Details
+	bookingDate: date("booking_date").notNull(),
+	startTime: varchar("start_time", { length: 5 }).notNull(), // HH:MM
+	endTime: varchar("end_time", { length: 5 }).notNull(), // HH:MM
+	durationMinutes: int("duration_minutes").notNull(),
+	// Status
+	status: mysqlEnum(['pending','confirmed','in_progress','completed','cancelled','no_show']).default('pending').notNull(),
+	paymentStatus: mysqlEnum("payment_status", ['unpaid','paid','refunded']).default('unpaid').notNull(),
+	// Pricing
+	basePrice: int("base_price").notNull(), // in cents
+	discountAmount: int("discount_amount").default(0).notNull(),
+	finalPrice: int("final_price").notNull(),
+	// Integration
+	googleEventId: varchar("google_event_id", { length: 255 }),
+	// Reminders
+	reminder24hSent: tinyint("reminder_24h_sent").default(0).notNull(),
+	reminder1hSent: tinyint("reminder_1h_sent").default(0).notNull(),
+	// Notes
+	notes: text(),
+	cancellationReason: text("cancellation_reason"),
+	cancelledBy: mysqlEnum("cancelled_by", ['customer','merchant','system']),
+	// Source
+	bookingSource: mysqlEnum("booking_source", ['whatsapp','website','phone','walk_in']).default('whatsapp').notNull(),
+	// Timestamps
+	confirmedAt: timestamp("confirmed_at", { mode: 'string' }),
+	completedAt: timestamp("completed_at", { mode: 'string' }),
+	cancelledAt: timestamp("cancelled_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+export const bookingTimeSlots = mysqlTable("booking_time_slots", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	serviceId: int("service_id").notNull().references(() => services.id, { onDelete: "cascade" }),
+	staffId: int("staff_id").references(() => staffMembers.id, { onDelete: "cascade" }),
+	// Time Slot
+	slotDate: date("slot_date").notNull(),
+	startTime: varchar("start_time", { length: 5 }).notNull(), // HH:MM
+	endTime: varchar("end_time", { length: 5 }).notNull(), // HH:MM
+	// Availability
+	isAvailable: tinyint("is_available").default(1).notNull(),
+	isBlocked: tinyint("is_blocked").default(0).notNull(),
+	blockReason: text("block_reason"),
+	// Capacity
+	maxBookings: int("max_bookings").default(1).notNull(),
+	currentBookings: int("current_bookings").default(0).notNull(),
+	// Timestamps
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+export const bookingReviews = mysqlTable("booking_reviews", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	bookingId: int("booking_id").notNull().references(() => bookings.id, { onDelete: "cascade" }),
+	serviceId: int("service_id").notNull().references(() => services.id, { onDelete: "cascade" }),
+	staffId: int("staff_id").references(() => staffMembers.id, { onDelete: "set null" }),
+	customerPhone: varchar("customer_phone", { length: 20 }).notNull(),
+	customerName: varchar("customer_name", { length: 255 }),
+	// Rating
+	overallRating: int("overall_rating").notNull(), // 1-5
+	serviceQuality: int("service_quality"), // 1-5
+	professionalism: int("professionalism"), // 1-5
+	valueForMoney: int("value_for_money"), // 1-5
+	// Review
+	comment: text(),
+	isPublic: tinyint("is_public").default(1).notNull(),
+	isVerified: tinyint("is_verified").default(1).notNull(),
+	// Merchant Response
+	merchantReply: text("merchant_reply"),
+	repliedAt: timestamp("replied_at", { mode: 'string' }),
+	// Timestamps
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
 export const setupWizardProgress = mysqlTable("setup_wizard_progress", {
 	id: int().autoincrement().notNull().primaryKey(),
 	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }).unique(),
@@ -1225,6 +1314,12 @@ export type Appointment = InferSelectModel<typeof appointments>;
 export type InsertAppointment = InferInsertModel<typeof appointments>;
 export type ServiceReview = InferSelectModel<typeof serviceReviews>;
 export type InsertServiceReview = InferInsertModel<typeof serviceReviews>;
+export type Booking = InferSelectModel<typeof bookings>;
+export type InsertBooking = InferInsertModel<typeof bookings>;
+export type BookingTimeSlot = InferSelectModel<typeof bookingTimeSlots>;
+export type InsertBookingTimeSlot = InferInsertModel<typeof bookingTimeSlots>;
+export type BookingReview = InferSelectModel<typeof bookingReviews>;
+export type InsertBookingReview = InferInsertModel<typeof bookingReviews>;
 export type SetupWizardProgress = InferSelectModel<typeof setupWizardProgress>;
 export type InsertSetupWizardProgress = InferInsertModel<typeof setupWizardProgress>;
 export type GoogleIntegration = InferSelectModel<typeof googleIntegrations>;

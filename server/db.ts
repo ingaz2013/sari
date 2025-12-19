@@ -117,6 +117,15 @@ import {
   serviceReviews,
   ServiceReview,
   InsertServiceReview,
+  bookings,
+  Booking,
+  InsertBooking,
+  bookingTimeSlots,
+  BookingTimeSlot,
+  InsertBookingTimeSlot,
+  bookingReviews,
+  BookingReview,
+  InsertBookingReview,
   setupWizardProgress,
   SetupWizardProgress,
   InsertSetupWizardProgress,
@@ -5737,4 +5746,486 @@ export async function getPackageServices(packageId: number) {
   } catch {
     return [];
   }
+}
+
+
+// ============================================
+// Bookings Functions
+// ============================================
+
+export async function createBooking(data: {
+  merchantId: number;
+  serviceId: number;
+  customerPhone: string;
+  customerName?: string;
+  customerEmail?: string;
+  staffId?: number;
+  bookingDate: string;
+  startTime: string;
+  endTime: string;
+  durationMinutes: number;
+  basePrice: number;
+  discountAmount?: number;
+  finalPrice: number;
+  notes?: string;
+  bookingSource?: 'whatsapp' | 'website' | 'phone' | 'walk_in';
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(bookings).values({
+    merchantId: data.merchantId,
+    serviceId: data.serviceId,
+    customerPhone: data.customerPhone,
+    customerName: data.customerName,
+    customerEmail: data.customerEmail,
+    staffId: data.staffId,
+    bookingDate: data.bookingDate,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    durationMinutes: data.durationMinutes,
+    status: 'pending',
+    paymentStatus: 'unpaid',
+    basePrice: data.basePrice,
+    discountAmount: data.discountAmount || 0,
+    finalPrice: data.finalPrice,
+    notes: data.notes,
+    bookingSource: data.bookingSource || 'whatsapp',
+  });
+  
+  return result.insertId;
+}
+
+export async function getBookingById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(bookings).where(eq(bookings.id, id));
+  return results[0];
+}
+
+export async function getBookingsByMerchant(merchantId: number, filters?: {
+  status?: string;
+  serviceId?: number;
+  staffId?: number;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select().from(bookings).where(eq(bookings.merchantId, merchantId));
+  
+  const conditions = [eq(bookings.merchantId, merchantId)];
+  
+  if (filters?.status) {
+    conditions.push(eq(bookings.status, filters.status as any));
+  }
+  if (filters?.serviceId) {
+    conditions.push(eq(bookings.serviceId, filters.serviceId));
+  }
+  if (filters?.staffId) {
+    conditions.push(eq(bookings.staffId, filters.staffId));
+  }
+  if (filters?.startDate) {
+    conditions.push(sql`${bookings.bookingDate} >= ${filters.startDate}`);
+  }
+  if (filters?.endDate) {
+    conditions.push(sql`${bookings.bookingDate} <= ${filters.endDate}`);
+  }
+  
+  const results = await db.select().from(bookings)
+    .where(and(...conditions))
+    .orderBy(desc(bookings.bookingDate), desc(bookings.startTime))
+    .limit(filters?.limit || 100);
+  
+  return results;
+}
+
+export async function getBookingsByService(serviceId: number, filters?: {
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const conditions = [eq(bookings.serviceId, serviceId)];
+  
+  if (filters?.status) {
+    conditions.push(eq(bookings.status, filters.status as any));
+  }
+  if (filters?.startDate) {
+    conditions.push(sql`${bookings.bookingDate} >= ${filters.startDate}`);
+  }
+  if (filters?.endDate) {
+    conditions.push(sql`${bookings.bookingDate} <= ${filters.endDate}`);
+  }
+  
+  return await db.select().from(bookings)
+    .where(and(...conditions))
+    .orderBy(desc(bookings.bookingDate));
+}
+
+export async function getBookingsByCustomer(merchantId: number, customerPhone: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(bookings)
+    .where(and(
+      eq(bookings.merchantId, merchantId),
+      eq(bookings.customerPhone, customerPhone)
+    ))
+    .orderBy(desc(bookings.createdAt));
+}
+
+export async function updateBooking(id: number, data: {
+  status?: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show';
+  paymentStatus?: 'unpaid' | 'paid' | 'refunded';
+  staffId?: number;
+  bookingDate?: string;
+  startTime?: string;
+  endTime?: string;
+  notes?: string;
+  cancellationReason?: string;
+  cancelledBy?: 'customer' | 'merchant' | 'system';
+  googleEventId?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const updateData: any = { ...data };
+  
+  if (data.status === 'confirmed' && !updateData.confirmedAt) {
+    updateData.confirmedAt = new Date().toISOString();
+  }
+  if (data.status === 'completed' && !updateData.completedAt) {
+    updateData.completedAt = new Date().toISOString();
+  }
+  if (data.status === 'cancelled' && !updateData.cancelledAt) {
+    updateData.cancelledAt = new Date().toISOString();
+  }
+  
+  await db.update(bookings).set(updateData).where(eq(bookings.id, id));
+}
+
+export async function deleteBooking(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(bookings).where(eq(bookings.id, id));
+}
+
+export async function getBookingStats(merchantId: number, filters?: {
+  startDate?: string;
+  endDate?: string;
+  serviceId?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const conditions = [eq(bookings.merchantId, merchantId)];
+  
+  if (filters?.startDate) {
+    conditions.push(sql`${bookings.bookingDate} >= ${filters.startDate}`);
+  }
+  if (filters?.endDate) {
+    conditions.push(sql`${bookings.bookingDate} <= ${filters.endDate}`);
+  }
+  if (filters?.serviceId) {
+    conditions.push(eq(bookings.serviceId, filters.serviceId));
+  }
+  
+  const allBookings = await db.select().from(bookings).where(and(...conditions));
+  
+  return {
+    total: allBookings.length,
+    pending: allBookings.filter(b => b.status === 'pending').length,
+    confirmed: allBookings.filter(b => b.status === 'confirmed').length,
+    inProgress: allBookings.filter(b => b.status === 'in_progress').length,
+    completed: allBookings.filter(b => b.status === 'completed').length,
+    cancelled: allBookings.filter(b => b.status === 'cancelled').length,
+    noShow: allBookings.filter(b => b.status === 'no_show').length,
+    totalRevenue: allBookings
+      .filter(b => b.status === 'completed' && b.paymentStatus === 'paid')
+      .reduce((sum, b) => sum + b.finalPrice, 0),
+  };
+}
+
+export async function checkBookingConflict(
+  serviceId: number,
+  staffId: number | null,
+  bookingDate: string,
+  startTime: string,
+  endTime: string,
+  excludeBookingId?: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const conditions = [
+    eq(bookings.serviceId, serviceId),
+    eq(bookings.bookingDate, bookingDate),
+    sql`${bookings.status} IN ('pending', 'confirmed', 'in_progress')`,
+    sql`(
+      (${bookings.startTime} < ${endTime} AND ${bookings.endTime} > ${startTime})
+    )`
+  ];
+  
+  if (staffId) {
+    conditions.push(eq(bookings.staffId, staffId));
+  }
+  
+  if (excludeBookingId) {
+    conditions.push(sql`${bookings.id} != ${excludeBookingId}`);
+  }
+  
+  const conflicts = await db.select().from(bookings).where(and(...conditions));
+  return conflicts.length > 0;
+}
+
+export async function markBookingReminderSent(bookingId: number, type: '24h' | '1h') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  if (type === '24h') {
+    await db.update(bookings)
+      .set({ reminder24hSent: 1 })
+      .where(eq(bookings.id, bookingId));
+  } else {
+    await db.update(bookings)
+      .set({ reminder1hSent: 1 })
+      .where(eq(bookings.id, bookingId));
+  }
+}
+
+export async function getUpcomingBookingsForReminders(merchantId: number, hoursAhead: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const now = new Date();
+  const targetTime = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);
+  
+  const reminderField = hoursAhead === 24 ? bookings.reminder24hSent : bookings.reminder1hSent;
+  
+  return await db.select().from(bookings)
+    .where(and(
+      eq(bookings.merchantId, merchantId),
+      eq(bookings.status, 'confirmed'),
+      eq(reminderField, 0),
+      sql`CONCAT(${bookings.bookingDate}, ' ', ${bookings.startTime}) <= ${targetTime.toISOString().slice(0, 16).replace('T', ' ')}`,
+      sql`CONCAT(${bookings.bookingDate}, ' ', ${bookings.startTime}) > ${now.toISOString().slice(0, 16).replace('T', ' ')}`
+    ));
+}
+
+// ============================================
+// Booking Time Slots Functions
+// ============================================
+
+export async function createTimeSlot(data: {
+  merchantId: number;
+  serviceId: number;
+  staffId?: number;
+  slotDate: string;
+  startTime: string;
+  endTime: string;
+  maxBookings?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(bookingTimeSlots).values({
+    merchantId: data.merchantId,
+    serviceId: data.serviceId,
+    staffId: data.staffId,
+    slotDate: data.slotDate,
+    startTime: data.startTime,
+    endTime: data.endTime,
+    isAvailable: 1,
+    isBlocked: 0,
+    maxBookings: data.maxBookings || 1,
+    currentBookings: 0,
+  });
+  
+  return result.insertId;
+}
+
+export async function getAvailableTimeSlots(
+  serviceId: number,
+  date: string,
+  staffId?: number
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const conditions = [
+    eq(bookingTimeSlots.serviceId, serviceId),
+    eq(bookingTimeSlots.slotDate, date),
+    eq(bookingTimeSlots.isAvailable, 1),
+    eq(bookingTimeSlots.isBlocked, 0),
+    sql`${bookingTimeSlots.currentBookings} < ${bookingTimeSlots.maxBookings}`
+  ];
+  
+  if (staffId) {
+    conditions.push(eq(bookingTimeSlots.staffId, staffId));
+  }
+  
+  return await db.select().from(bookingTimeSlots)
+    .where(and(...conditions))
+    .orderBy(bookingTimeSlots.startTime);
+}
+
+export async function blockTimeSlot(id: number, reason?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(bookingTimeSlots)
+    .set({ isBlocked: 1, blockReason: reason })
+    .where(eq(bookingTimeSlots.id, id));
+}
+
+export async function unblockTimeSlot(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(bookingTimeSlots)
+    .set({ isBlocked: 0, blockReason: null })
+    .where(eq(bookingTimeSlots.id, id));
+}
+
+export async function incrementSlotBookings(slotId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(bookingTimeSlots)
+    .set({ currentBookings: sql`${bookingTimeSlots.currentBookings} + 1` })
+    .where(eq(bookingTimeSlots.id, slotId));
+}
+
+export async function decrementSlotBookings(slotId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(bookingTimeSlots)
+    .set({ currentBookings: sql`${bookingTimeSlots.currentBookings} - 1` })
+    .where(eq(bookingTimeSlots.id, slotId));
+}
+
+// ============================================
+// Booking Reviews Functions
+// ============================================
+
+export async function createBookingReview(data: {
+  merchantId: number;
+  bookingId: number;
+  serviceId: number;
+  staffId?: number;
+  customerPhone: string;
+  customerName?: string;
+  overallRating: number;
+  serviceQuality?: number;
+  professionalism?: number;
+  valueForMoney?: number;
+  comment?: string;
+  isPublic?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(bookingReviews).values({
+    merchantId: data.merchantId,
+    bookingId: data.bookingId,
+    serviceId: data.serviceId,
+    staffId: data.staffId,
+    customerPhone: data.customerPhone,
+    customerName: data.customerName,
+    overallRating: data.overallRating,
+    serviceQuality: data.serviceQuality,
+    professionalism: data.professionalism,
+    valueForMoney: data.valueForMoney,
+    comment: data.comment,
+    isPublic: data.isPublic ?? 1,
+    isVerified: 1,
+  });
+  
+  return result.insertId;
+}
+
+export async function getBookingReviews(merchantId: number, filters?: {
+  serviceId?: number;
+  staffId?: number;
+  minRating?: number;
+  isPublic?: number;
+  limit?: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const conditions = [eq(bookingReviews.merchantId, merchantId)];
+  
+  if (filters?.serviceId) {
+    conditions.push(eq(bookingReviews.serviceId, filters.serviceId));
+  }
+  if (filters?.staffId) {
+    conditions.push(eq(bookingReviews.staffId, filters.staffId));
+  }
+  if (filters?.minRating) {
+    conditions.push(sql`${bookingReviews.overallRating} >= ${filters.minRating}`);
+  }
+  if (filters?.isPublic !== undefined) {
+    conditions.push(eq(bookingReviews.isPublic, filters.isPublic));
+  }
+  
+  return await db.select().from(bookingReviews)
+    .where(and(...conditions))
+    .orderBy(desc(bookingReviews.createdAt))
+    .limit(filters?.limit || 50);
+}
+
+export async function getReviewsByService(serviceId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(bookingReviews)
+    .where(and(
+      eq(bookingReviews.serviceId, serviceId),
+      eq(bookingReviews.isPublic, 1)
+    ))
+    .orderBy(desc(bookingReviews.createdAt));
+}
+
+export async function replyToReview(reviewId: number, reply: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(bookingReviews)
+    .set({ 
+      merchantReply: reply,
+      repliedAt: new Date().toISOString()
+    })
+    .where(eq(bookingReviews.id, reviewId));
+}
+
+export async function getServiceRatingStats(serviceId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const reviews = await db.select().from(bookingReviews)
+    .where(and(
+      eq(bookingReviews.serviceId, serviceId),
+      eq(bookingReviews.isPublic, 1)
+    ));
+  
+  if (reviews.length === 0) {
+    return {
+      averageRating: 0,
+      totalReviews: 0,
+      ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    };
+  }
+  
+  const totalRating = reviews.reduce((sum, r) => sum + r.overallRating, 0);
+  const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  
+  reviews.forEach(r => {
+    distribution[r.overallRating as keyof typeof distribution]++;
+  });
+  
+  return {
+    averageRating: totalRating / reviews.length,
+    totalReviews: reviews.length,
+    ratingDistribution: distribution
+  };
 }
