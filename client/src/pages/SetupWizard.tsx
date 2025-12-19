@@ -37,6 +37,8 @@ export default function SetupWizard() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [wizardData, setWizardData] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Load progress
   const { data: progress, isLoading: loadingProgress } = trpc.setupWizard.getProgress.useQuery();
@@ -57,14 +59,26 @@ export default function SetupWizard() {
 
   // Auto-save progress
   const saveProgress = async () => {
+    setIsSaving(true);
     try {
       await saveProgressMutation.mutateAsync({
         currentStep,
         completedSteps,
         wizardData,
       });
+      setLastSaved(new Date());
+      
+      // Show success toast briefly
+      toast.success('تم الحفظ ✓', {
+        duration: 1500,
+      });
     } catch (error) {
       console.error('Failed to save progress:', error);
+      toast.error('فشل حفظ التقدم', {
+        description: 'سيتم إعادة المحاولة تلقائياً',
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -188,9 +202,24 @@ export default function SetupWizard() {
             <span className="text-sm font-medium text-gray-700">
               الخطوة {currentStep} من {TOTAL_STEPS}
             </span>
-            <span className="text-sm font-medium text-gray-700">
-              {Math.round(progressPercentage)}%
-            </span>
+            <div className="flex items-center gap-3">
+              {/* Saving Indicator */}
+              {isSaving && (
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  جاري الحفظ...
+                </span>
+              )}
+              {!isSaving && lastSaved && (
+                <span className="text-xs text-green-600 flex items-center gap-1">
+                  <Check className="h-3 w-3" />
+                  تم الحفظ
+                </span>
+              )}
+              <span className="text-sm font-medium text-gray-700">
+                {Math.round(progressPercentage)}%
+              </span>
+            </div>
           </div>
           <Progress value={progressPercentage} className="h-2" />
           <div className="flex justify-between mt-2">
