@@ -10,6 +10,8 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
 import { useTranslation } from 'react-i18next';
+import SetupWizardReset from '@/components/SetupWizardReset';
+
 export default function MerchantSettings() {
   const { t } = useTranslation();
 
@@ -301,6 +303,9 @@ export default function MerchantSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Setup Wizard Reset */}
+      <SetupWizardReset />
     </div>
   );
 }

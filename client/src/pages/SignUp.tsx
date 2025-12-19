@@ -27,7 +27,8 @@ export default function SignUp() {
       if (data.user.role === 'admin') {
         setLocation('/admin/dashboard');
       } else {
-        setLocation('/merchant/dashboard');
+        // Redirect new merchants to Setup Wizard
+        setLocation('/merchant/setup-wizard');
       }
     },
     onError: (error) => {

@@ -5378,6 +5378,22 @@ export const appRouter = router({
         
         return { success: true };
       }),
+    
+    // Reset wizard (allow merchant to restart setup)
+    resetWizard: protectedProcedure.mutation(async ({ ctx }) => {
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant) throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+      
+      // Reset wizard progress to initial state
+      await db.updateSetupWizardProgress(merchant.id, {
+        currentStep: 1,
+        completedSteps: JSON.stringify([]),
+        wizardData: JSON.stringify({}),
+        isCompleted: 0,
+      });
+      
+      return { success: true };
+    }),
   }),
   
   googleAuth: googleAuthRouter,
