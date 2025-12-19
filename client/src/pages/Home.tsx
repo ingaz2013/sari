@@ -25,6 +25,8 @@ import {
   Package,
   Gift,
   Bell,
+  Check,
+  HelpCircle,
 } from 'lucide-react';
 
 export default function Home() {
@@ -142,17 +144,93 @@ export default function Home() {
     { value: '24/7', label: 'دعم متواصل' },
   ];
 
+  const pricingPlans = [
+    {
+      name: 'المجاني',
+      price: '0',
+      period: 'شهرياً',
+      description: 'للتجربة والبدء',
+      features: [
+        '100 محادثة شهرياً',
+        'رد آلي ذكي',
+        'لوحة تحكم أساسية',
+        'دعم فني عبر البريد',
+      ],
+      cta: 'ابدأ مجاناً',
+      popular: false,
+    },
+    {
+      name: 'الاحترافي',
+      price: '299',
+      period: 'شهرياً',
+      description: 'للمتاجر المتوسطة',
+      features: [
+        '1,000 محادثة شهرياً',
+        'رد آلي ذكي',
+        'طلبات تلقائية',
+        'تقارير وتحليلات',
+        'تكامل مع الدفع',
+        'دعم فني أولوية',
+      ],
+      cta: 'اشترك الآن',
+      popular: true,
+    },
+    {
+      name: 'المتقدم',
+      price: '599',
+      period: 'شهرياً',
+      description: 'للمتاجر الكبيرة',
+      features: [
+        'محادثات غير محدودة',
+        'جميع ميزات الاحترافي',
+        'حملات تسويقية',
+        'تكامل مع Google Sheets',
+        'تكامل مع Google Calendar',
+        'دعم فني مخصص 24/7',
+      ],
+      cta: 'اشترك الآن',
+      popular: false,
+    },
+  ];
+
+  const faqs = [
+    {
+      question: 'ما هو ساري؟',
+      answer: 'ساري هو مساعد مبيعات ذكي يعمل على واتساب، يرد على استفسارات عملائك تلقائياً ويحول المحادثات إلى طلبات مكتملة.',
+    },
+    {
+      question: 'كيف يعمل ساري؟',
+      answer: 'بعد ربط رقم واتساب متجرك، يستقبل ساري الرسائل ويرد عليها تلقائياً باستخدام الذكاء الاصطناعي، ويمكنه إنشاء طلبات وإرسال روابط الدفع.',
+    },
+    {
+      question: 'هل يدعم ساري اللغة العربية؟',
+      answer: 'نعم، ساري مصمم خصيصاً للسوق السعودي ويتحدث باللهجة السعودية بشكل طبيعي.',
+    },
+    {
+      question: 'هل يمكنني تجربة ساري مجاناً؟',
+      answer: 'نعم، نوفر خطة مجانية تتيح لك 100 محادثة شهرياً لتجربة الخدمة.',
+    },
+    {
+      question: 'كيف يتم الدفع؟',
+      answer: 'يمكنك الدفع شهرياً أو سنوياً عبر بطاقات الائتمان أو Apple Pay أو مدى.',
+    },
+    {
+      question: 'هل يمكنني إلغاء الاشتراك في أي وقت؟',
+      answer: 'نعم، يمكنك إلغاء الاشتراك في أي وقت دون أي رسوم إضافية.',
+    },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-background">
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-blue-50/50 to-white dark:from-primary/5 dark:via-gray-900 dark:to-background">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25" />
         <div className="container relative py-20 md:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 dark:bg-blue-900/30 text-primary dark:text-blue-300 text-sm font-medium">
+            <div className="space-y-8 animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-sm font-medium">
                 <Sparkles className="w-4 h-4" />
                 <span>مدعوم بالذكاء الاصطناعي</span>
               </div>
@@ -167,14 +245,14 @@ export default function Home() {
                 على الواتساب
               </h1>
               
-              <p className="text-xl text-muted-foreground">
+              <p className="text-xl text-muted-foreground leading-relaxed">
                 أدر مبيعاتك بالمحادثات الصوتية: فقط سجل بصوتك طلبك والعنوان والمنتج والعدد واترك الباقي على ساري. يفهم اللهجة السعودية ويحول الصوت لطلب كامل تلقائياً.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/try-sari">
                   <a>
-                    <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-lg h-14 px-8">
+                    <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-lg h-14 px-8 shadow-lg hover:shadow-xl transition-all">
                       جرب ساري الآن
                       <Sparkles className="mr-2 w-5 h-5" />
                     </Button>
@@ -182,7 +260,7 @@ export default function Home() {
                 </Link>
                 <Link href="/login">
                   <a>
-                    <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg h-14 px-8">
+                    <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg h-14 px-8 shadow-lg hover:shadow-xl transition-all">
                       ابدأ الآن مجاناً
                       <ArrowRight className="mr-2 w-5 h-5" />
                     </Button>
@@ -208,7 +286,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative animate-fade-in-up">
               <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border bg-card">
                 <div className="bg-primary p-4 flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
@@ -243,8 +321,8 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="absolute -z-10 top-10 -right-10 w-72 h-72 bg-blue-400/30 rounded-full blur-3xl" />
-              <div className="absolute -z-10 -bottom-10 -left-10 w-72 h-72 bg-purple-400/30 rounded-full blur-3xl" />
+              <div className="absolute -z-10 top-10 -right-10 w-72 h-72 bg-primary/30 rounded-full blur-3xl" />
+              <div className="absolute -z-10 -bottom-10 -left-10 w-72 h-72 bg-blue-400/30 rounded-full blur-3xl" />
             </div>
           </div>
         </div>
@@ -263,10 +341,14 @@ export default function Home() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => (
-              <Card key={feature.title} className="border-2 hover:border-primary/30 dark:hover:border-blue-800 transition-colors">
+            {features.map((feature, index) => (
+              <Card 
+                key={feature.title} 
+                className="border-2 hover:border-primary/50 dark:hover:border-primary/50 transition-all hover:shadow-lg group"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
                 <CardContent className="p-6 space-y-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
                     <feature.icon className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold">{feature.title}</h3>
@@ -295,11 +377,11 @@ export default function Home() {
               <div key={step.number} className="relative">
                 <div className="text-center space-y-4">
                   <div className="relative inline-flex">
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white">
+                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white shadow-lg">
                       {step.number}
                     </div>
                     {index < steps.length - 1 && (
-                      <div className="hidden lg:block absolute top-1/2 right-full w-full h-0.5 bg-primary -translate-y-1/2" style={{ width: 'calc(100% + 2rem)' }} />
+                      <div className="hidden lg:block absolute top-1/2 right-full w-full h-0.5 bg-primary/30 -translate-y-1/2" style={{ width: 'calc(100% + 2rem)' }} />
                     )}
                   </div>
                   <h3 className="text-xl font-semibold">{step.title}</h3>
@@ -312,7 +394,7 @@ export default function Home() {
       </section>
 
       {/* Live Stats Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-blue-50 dark:from-background dark:to-blue-950/20">
+      <section className="py-16 bg-gradient-to-b from-white to-primary/5 dark:from-background dark:to-primary/5">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -328,8 +410,77 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials Section */}
+      {/* Pricing Section */}
       <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              خطط الأسعار
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              اختر الخطة المناسبة لحجم متجرك
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan) => (
+              <Card 
+                key={plan.name} 
+                className={`relative border-2 ${
+                  plan.popular 
+                    ? 'border-primary shadow-xl scale-105' 
+                    : 'border-border hover:border-primary/30'
+                } transition-all`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">
+                    الأكثر شعبية
+                  </div>
+                )}
+                <CardContent className="p-6 space-y-6">
+                  <div>
+                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                    <p className="text-muted-foreground text-sm">{plan.description}</p>
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="text-muted-foreground">ريال</span>
+                    <span className="text-muted-foreground text-sm">/ {plan.period}</span>
+                  </div>
+
+                  <ul className="space-y-3">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link href="/login">
+                    <a>
+                      <Button 
+                        className={`w-full ${
+                          plan.popular 
+                            ? 'bg-primary hover:bg-primary/90' 
+                            : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'
+                        }`}
+                        size="lg"
+                      >
+                        {plan.cta}
+                      </Button>
+                    </a>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20">
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -342,7 +493,7 @@ export default function Home() {
 
           <div className="grid md:grid-cols-3 gap-6">
             {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className="border-2">
+              <Card key={testimonial.name} className="border-2 hover:shadow-lg transition-shadow">
                 <CardContent className="p-6 space-y-4">
                   <div className="flex gap-1">
                     {Array.from({ length: testimonial.rating }).map((_, i) => (
@@ -418,7 +569,7 @@ export default function Home() {
               <div className="pt-4">
                 <Link href="/login">
                   <a>
-                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg h-14 px-8">
+                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg h-14 px-8 shadow-lg">
                       جرب الميزة الآن
                       <ArrowRight className="mr-2 w-5 h-5" />
                     </Button>
@@ -426,6 +577,38 @@ export default function Home() {
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              الأسئلة الشائعة
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              إجابات على أكثر الأسئلة شيوعاً
+            </p>
+          </div>
+
+          <div className="max-w-3xl mx-auto space-y-4">
+            {faqs.map((faq, index) => (
+              <Card key={index} className="border-2">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <HelpCircle className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-lg mb-2">{faq.question}</h3>
+                      <p className="text-muted-foreground">{faq.answer}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
@@ -442,7 +625,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/login">
               <a>
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg h-14 px-8">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg h-14 px-8 shadow-lg hover:shadow-xl">
                   ابدأ الآن مجاناً
                   <ArrowRight className="mr-2 w-5 h-5" />
                 </Button>

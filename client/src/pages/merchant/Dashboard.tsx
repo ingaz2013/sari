@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'wouter';
 import { trpc } from '@/lib/trpc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare, Send, Users, TrendingUp, ArrowUp, ArrowDown, Package, UserPlus, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { MessageSquare, Send, Users, TrendingUp, ArrowUp, ArrowDown, Package, UserPlus, Star, Clock, CheckCircle2, XCircle, AlertCircle, ArrowRight, Activity } from 'lucide-react';
 import { OnboardingWizard } from '@/components/OnboardingWizard';
 import { DashboardSkeleton } from '@/components/DashboardSkeleton';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 export default function MerchantDashboard() {
   const { t } = useTranslation();
@@ -54,6 +56,7 @@ export default function MerchantDashboard() {
       description: 'آخر 30 يوم',
       color: 'text-primary',
       bgColor: 'bg-primary/10',
+      link: '/merchant/orders',
     },
     {
       title: 'إجمالي الإيرادات',
@@ -62,7 +65,8 @@ export default function MerchantDashboard() {
       icon: TrendingUp,
       description: 'آخر 30 يوم',
       color: 'text-green-600',
-      bgColor: 'bg-green-50',
+      bgColor: 'bg-green-50 dark:bg-green-900/20',
+      link: '/merchant/reports',
     },
     {
       title: 'متوسط قيمة الطلب',
@@ -71,16 +75,18 @@ export default function MerchantDashboard() {
       icon: MessageSquare,
       description: 'متوسط الطلب',
       color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+      link: '/merchant/analytics',
     },
     {
       title: 'الطلبات المكتملة',
       value: dashboardStats?.completedOrders || 0,
       growth: comparisonStats?.growth.completed || 0,
-      icon: Users,
+      icon: CheckCircle2,
       description: 'طلبات ناجحة',
       color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
+      bgColor: 'bg-orange-50 dark:bg-orange-900/20',
+      link: '/merchant/orders',
     },
     {
       title: 'متوسط التقييم',
@@ -89,8 +95,15 @@ export default function MerchantDashboard() {
       icon: Star,
       description: `${reviewStats?.totalReviews || 0} تقييم`,
       color: 'text-yellow-600',
-      bgColor: 'bg-yellow-50',
+      bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
+      link: '/merchant/reviews',
     },
+  ];
+
+  // Order status distribution
+  const orderStatusData = [
+    { name: 'مكتمل', value: dashboardStats?.completedOrders || 0, color: '#10b981' },
+    { name: 'قيد المعالجة', value: (dashboardStats?.totalOrders || 0) - (dashboardStats?.completedOrders || 0), color: '#f59e0b' },
   ];
 
   // Prepare chart data for orders trend
@@ -104,6 +117,14 @@ export default function MerchantDashboard() {
     date: new Date(item.date).toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' }),
     revenue: Number(item.revenue),
   })) || [];
+
+  // Recent activity data
+  const recentActivities = [
+    { type: 'order', message: 'طلب جديد من أحمد المالكي', time: 'منذ 5 دقائق', icon: Package, color: 'text-primary' },
+    { type: 'conversation', message: 'محادثة جديدة مع فاطمة', time: 'منذ 15 دقيقة', icon: MessageSquare, color: 'text-blue-600' },
+    { type: 'review', message: 'تقييم جديد 5 نجوم', time: 'منذ ساعة', icon: Star, color: 'text-yellow-600' },
+    { type: 'campaign', message: 'حملة "عروض الصيف" مكتملة', time: 'منذ ساعتين', icon: Send, color: 'text-green-600' },
+  ];
 
   // Show loading skeleton
   if (isLoading) {
@@ -120,12 +141,22 @@ export default function MerchantDashboard() {
       )}
       
       <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">مرحباً، {merchant?.businessName || 'التاجر'}</h1>
-          <p className="text-muted-foreground mt-2">
-            إليك نظرة سريعة على نشاط متجرك
-          </p>
+        {/* Header with Welcome Message */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">مرحباً، {merchant?.businessName || 'التاجر'} 👋</h1>
+            <p className="text-muted-foreground mt-2">
+              إليك نظرة سريعة على نشاط متجرك اليوم
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Link href="/merchant/campaigns/new">
+              <Button className="shadow-lg">
+                <Send className="ml-2 h-4 w-4" />
+                حملة جديدة
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Main Stats Grid with Growth */}
@@ -136,32 +167,34 @@ export default function MerchantDashboard() {
             const GrowthIcon = isPositiveGrowth ? ArrowUp : ArrowDown;
             
             return (
-              <Card key={stat.title}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    {stat.title}
-                  </CardTitle>
-                  <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                    <Icon className={`h-4 w-4 ${stat.color}`} />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{stat.value}</div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <p className="text-xs text-muted-foreground">
-                      {stat.description}
-                    </p>
-                    {stat.growth !== 0 && (
-                      <span className={`flex items-center text-xs font-medium ${
-                        isPositiveGrowth ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        <GrowthIcon className="h-3 w-3 ml-1" />
-                        {Math.abs(stat.growth).toFixed(1)}%
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <Link key={stat.title} href={stat.link}>
+                <Card className="hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+                      <Icon className={`h-4 w-4 ${stat.color}`} />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-xs text-muted-foreground">
+                        {stat.description}
+                      </p>
+                      {stat.growth !== 0 && (
+                        <span className={`flex items-center text-xs font-medium ${
+                          isPositiveGrowth ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          <GrowthIcon className="h-3 w-3 ml-1" />
+                          {Math.abs(stat.growth).toFixed(1)}%
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>
@@ -169,64 +202,101 @@ export default function MerchantDashboard() {
         {/* Charts Section */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Orders Trend Chart */}
-          <Card>
+          <Card className="border-2">
             <CardHeader>
-              <CardTitle>اتجاه الطلبات</CardTitle>
-              <CardDescription>عدد الطلبات خلال آخر 30 يوم</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>اتجاه الطلبات</CardTitle>
+                  <CardDescription>عدد الطلبات خلال آخر 30 يوم</CardDescription>
+                </div>
+                <Activity className="h-5 w-5 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
               {ordersChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={ordersChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="date" 
+                      style={{ fontSize: '12px' }}
+                    />
+                    <YAxis style={{ fontSize: '12px' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }}
+                    />
                     <Legend />
                     <Line 
                       type="monotone" 
                       dataKey="orders" 
-                      stroke="#2563eb" 
-                      strokeWidth={2}
+                      stroke="#10b981" 
+                      strokeWidth={3}
                       name="عدد الطلبات"
+                      dot={{ fill: '#10b981', r: 4 }}
+                      activeDot={{ r: 6 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  لا توجد بيانات متاحة
+                  <div className="text-center">
+                    <Package className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>لا توجد بيانات متاحة</p>
+                  </div>
                 </div>
               )}
             </CardContent>
           </Card>
 
           {/* Revenue Trend Chart */}
-          <Card>
+          <Card className="border-2">
             <CardHeader>
-              <CardTitle>اتجاه الإيرادات</CardTitle>
-              <CardDescription>الإيرادات خلال آخر 30 يوم (ريال)</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>اتجاه الإيرادات</CardTitle>
+                  <CardDescription>الإيرادات خلال آخر 30 يوم (ريال)</CardDescription>
+                </div>
+                <TrendingUp className="h-5 w-5 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
               {revenueChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={revenueChartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Line 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="#16a34a" 
-                      strokeWidth={2}
-                      name="الإيرادات (ريال)"
+                  <BarChart data={revenueChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis 
+                      dataKey="date" 
+                      style={{ fontSize: '12px' }}
                     />
-                  </LineChart>
+                    <YAxis style={{ fontSize: '12px' }} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'white', 
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Bar 
+                      dataKey="revenue" 
+                      fill="#3b82f6" 
+                      name="الإيرادات (ريال)"
+                      radius={[8, 8, 0, 0]}
+                    />
+                  </BarChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                  لا توجد بيانات متاحة
+                  <div className="text-center">
+                    <TrendingUp className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>لا توجد بيانات متاحة</p>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -236,16 +306,29 @@ export default function MerchantDashboard() {
         {/* Top Products & Recent Activity */}
         <div className="grid gap-4 md:grid-cols-2">
           {/* Top Products */}
-          <Card>
+          <Card className="border-2">
             <CardHeader>
-              <CardTitle>أفضل المنتجات مبيعاً</CardTitle>
-              <CardDescription>المنتجات الأكثر مبيعاً</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>أفضل المنتجات مبيعاً</CardTitle>
+                  <CardDescription>المنتجات الأكثر مبيعاً هذا الشهر</CardDescription>
+                </div>
+                <Link href="/merchant/products">
+                  <Button variant="ghost" size="sm">
+                    عرض الكل
+                    <ArrowRight className="mr-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </CardHeader>
             <CardContent>
               {topProducts && topProducts.length > 0 ? (
                 <div className="space-y-4">
                   {topProducts.map((product, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div key={index} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                        {index + 1}
+                      </div>
                       <div className="flex-1">
                         <p className="font-medium">{product.productName}</p>
                         <p className="text-sm text-muted-foreground">
@@ -262,32 +345,48 @@ export default function MerchantDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  لا توجد مبيعات بعد
-                </p>
+                <div className="text-center py-8">
+                  <Package className="h-12 w-12 mx-auto mb-2 opacity-50 text-muted-foreground" />
+                  <p className="text-muted-foreground">لا توجد مبيعات بعد</p>
+                  <Link href="/merchant/products">
+                    <Button variant="outline" size="sm" className="mt-4">
+                      أضف منتجات
+                    </Button>
+                  </Link>
+                </div>
               )}
             </CardContent>
           </Card>
 
-          {/* Recent Conversations */}
-          <Card>
+          {/* Recent Activity */}
+          <Card className="border-2">
             <CardHeader>
-              <CardTitle>آخر المحادثات</CardTitle>
-              <CardDescription>المحادثات الأخيرة مع العملاء</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>النشاط الأخير</CardTitle>
+                  <CardDescription>آخر التحديثات والأنشطة</CardDescription>
+                </div>
+                <Clock className="h-5 w-5 text-muted-foreground" />
+              </div>
             </CardHeader>
             <CardContent>
               {conversations && conversations.length > 0 ? (
                 <div className="space-y-4">
                   {conversations.slice(0, 5).map((conv) => (
-                    <div key={conv.id} className="flex items-center justify-between">
-                      <div>
+                    <div key={conv.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <MessageSquare className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1">
                         <p className="font-medium">{conv.customerName || conv.customerPhone}</p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(conv.lastMessageAt).toLocaleDateString('ar-SA')}
                         </p>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        conv.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        conv.status === 'active' 
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
                       }`}>
                         {conv.status === 'active' ? 'نشط' : 'مغلق'}
                       </span>
@@ -295,13 +394,55 @@ export default function MerchantDashboard() {
                   ))}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-8">
-                  لا توجد محادثات بعد
-                </p>
+                <div className="text-center py-8">
+                  <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-50 text-muted-foreground" />
+                  <p className="text-muted-foreground">لا توجد محادثات بعد</p>
+                  <Link href="/merchant/whatsapp">
+                    <Button variant="outline" size="sm" className="mt-4">
+                      اربط واتساب
+                    </Button>
+                  </Link>
+                </div>
               )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Quick Actions */}
+        <Card className="border-2 bg-gradient-to-br from-primary/5 to-blue-50 dark:from-primary/5 dark:to-background">
+          <CardHeader>
+            <CardTitle>إجراءات سريعة</CardTitle>
+            <CardDescription>الوصول السريع للميزات الأساسية</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Link href="/merchant/products">
+                <Button variant="outline" className="w-full h-24 flex flex-col gap-2">
+                  <Package className="h-6 w-6" />
+                  <span>إدارة المنتجات</span>
+                </Button>
+              </Link>
+              <Link href="/merchant/campaigns/new">
+                <Button variant="outline" className="w-full h-24 flex flex-col gap-2">
+                  <Send className="h-6 w-6" />
+                  <span>حملة جديدة</span>
+                </Button>
+              </Link>
+              <Link href="/merchant/conversations">
+                <Button variant="outline" className="w-full h-24 flex flex-col gap-2">
+                  <MessageSquare className="h-6 w-6" />
+                  <span>المحادثات</span>
+                </Button>
+              </Link>
+              <Link href="/merchant/reports">
+                <Button variant="outline" className="w-full h-24 flex flex-col gap-2">
+                  <BarChart className="h-6 w-6" />
+                  <span>التقارير</span>
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </>
   );
