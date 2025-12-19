@@ -8,6 +8,11 @@ import * as db from '../db';
 import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
 import { orders, products, campaigns, conversations, messages, discountCodes } from '../../drizzle/schema';
 
+// Helper function to format Date for MySQL timestamp comparison
+function formatDateForDB(date: Date): string {
+  return date.toISOString().slice(0, 19).replace('T', ' ');
+}
+
 export interface DateRange {
   startDate: Date;
   endDate: Date;
@@ -48,8 +53,8 @@ export async function getDashboardKPIs(merchantId: number, dateRange: DateRange)
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, dateRange.startDate),
-        lte(orders.createdAt, dateRange.endDate),
+        gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -68,8 +73,8 @@ export async function getDashboardKPIs(merchantId: number, dateRange: DateRange)
     .where(
       and(
         eq(conversations.merchantId, merchantId),
-        gte(conversations.createdAt, dateRange.startDate),
-        lte(conversations.createdAt, dateRange.endDate)
+        gte(conversations.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(conversations.createdAt, formatDateForDB(dateRange.endDate))
       )
     );
 
@@ -88,8 +93,8 @@ export async function getDashboardKPIs(merchantId: number, dateRange: DateRange)
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, previousStartDate),
-        lte(orders.createdAt, previousEndDate),
+        gte(orders.createdAt, formatDateForDB(previousStartDate)),
+        lte(orders.createdAt, formatDateForDB(previousEndDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -140,8 +145,8 @@ export async function getRevenueTrends(
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, dateRange.startDate),
-        lte(orders.createdAt, dateRange.endDate),
+        gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -204,8 +209,8 @@ export async function getTopProducts(
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, dateRange.startDate),
-        lte(orders.createdAt, dateRange.endDate),
+        gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -289,8 +294,8 @@ export async function getCampaignAnalytics(
     .where(
       and(
         eq(campaigns.merchantId, merchantId),
-        gte(campaigns.createdAt, dateRange.startDate),
-        lte(campaigns.createdAt, dateRange.endDate)
+        gte(campaigns.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(campaigns.createdAt, formatDateForDB(dateRange.endDate))
       )
     );
 
@@ -312,7 +317,7 @@ export async function getCampaignAnalytics(
       .where(
         and(
           eq(orders.merchantId, merchantId),
-          gte(orders.createdAt, campaign.createdAt),
+          gte(orders.createdAt, formatDateForDB(new Date(campaign.createdAt))),
           eq(orders.status, 'paid' as any)
         )
       );
@@ -364,8 +369,8 @@ export async function getCustomerSegments(
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, dateRange.startDate),
-        lte(orders.createdAt, dateRange.endDate),
+        gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -463,8 +468,8 @@ export async function getHourlyAnalytics(
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, dateRange.startDate),
-        lte(orders.createdAt, dateRange.endDate),
+        gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -508,8 +513,8 @@ export async function getWeekdayAnalytics(
     .where(
       and(
         eq(orders.merchantId, merchantId),
-        gte(orders.createdAt, dateRange.startDate),
-        lte(orders.createdAt, dateRange.endDate),
+        gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+        lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
         eq(orders.status, 'paid' as any)
       )
     );
@@ -570,8 +575,8 @@ export async function getDiscountCodeAnalytics(
         and(
           eq(orders.merchantId, merchantId),
           eq(orders.discountCode, code.code),
-          gte(orders.createdAt, dateRange.startDate),
-          lte(orders.createdAt, dateRange.endDate),
+          gte(orders.createdAt, formatDateForDB(dateRange.startDate)),
+          lte(orders.createdAt, formatDateForDB(dateRange.endDate)),
           eq(orders.status, 'paid' as any)
         )
       );

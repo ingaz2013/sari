@@ -37,7 +37,7 @@ export const analyticsRouter = router({
 
       return {
         conversationsCount: conversationsInRange.length,
-        messagesCount: messageStats?.count || 0,
+        messagesCount: messageStats?.total || 0,
         campaignsCount: campaignsInRange.length,
         dateRange: {
           start: startDate,
@@ -80,9 +80,9 @@ export const analyticsRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Campaign not found' });
         }
 
-        const logs = await db.getCampaignLogs(input.campaignId);
-        const successCount = logs.filter(l => l.status === 'success').length;
-        const failureCount = logs.filter(l => l.status === 'failed').length;
+        const logs = await db.getCampaignLogsByCampaignId(input.campaignId);
+        const successCount = logs.filter((l: any) => l.status === 'success').length;
+        const failureCount = logs.filter((l: any) => l.status === 'failed').length;
 
         return {
           campaignId: campaign.id,
@@ -99,8 +99,8 @@ export const analyticsRouter = router({
       const campaigns = await db.getCampaignsByMerchantId(input.merchantId);
       const campaignsPerformance = await Promise.all(
         campaigns.map(async (campaign) => {
-          const logs = await db.getCampaignLogs(campaign.id);
-          const successCount = logs.filter(l => l.status === 'success').length;
+          const logs = await db.getCampaignLogsByCampaignId(campaign.id);
+          const successCount = logs.filter((l: any) => l.status === 'success').length;
           return {
             campaignId: campaign.id,
             campaignName: campaign.name,
@@ -149,8 +149,8 @@ export const analyticsRouter = router({
         // Get top campaigns
         const topCampaigns = await Promise.all(
           campaignsInRange.slice(0, 5).map(async (campaign) => {
-            const logs = await db.getCampaignLogs(campaign.id);
-            const successCount = logs.filter(l => l.status === 'success').length;
+            const logs = await db.getCampaignLogsByCampaignId(campaign.id);
+            const successCount = logs.filter((l: any) => l.status === 'success').length;
             return {
               name: campaign.name,
               successRate: logs.length > 0 ? ((successCount / logs.length) * 100).toFixed(2) : '0',
@@ -169,16 +169,16 @@ export const analyticsRouter = router({
           },
           statistics: {
             totalConversations: conversationsInRange.length,
-            totalMessages: messageStats?.count || 0,
+            totalMessages: messageStats?.total || 0,
             successRate: 85, // يمكن حسابها من البيانات الفعلية
             averageResponseTime: 2.3, // يمكن حسابها من البيانات الفعلية
           },
           topPerformingCampaigns: topCampaigns as any,
           messageBreakdown: {
-            text: messageStats?.textCount || 0,
-            image: messageStats?.imageCount || 0,
-            voice: messageStats?.voiceCount || 0,
-            document: messageStats?.documentCount || 0,
+            text: messageStats?.text || 0,
+            image: messageStats?.image || 0,
+            voice: messageStats?.voice || 0,
+            document: 0, // Not tracked yet
           },
         });
 

@@ -1,6 +1,11 @@
 import {
   eq, and, desc, gte, lte, lt, gt, sql
 } from "drizzle-orm";
+
+// Helper function to format Date for MySQL timestamp comparison
+function formatDateForDB(date: Date): string {
+  return date.toISOString().slice(0, 19).replace('T', ' ');
+}
 import { drizzle } from "drizzle-orm/mysql2";
 import "../drizzle/relations";
 import {
@@ -100,54 +105,24 @@ import {
   WhatsAppRequest,
   InsertWhatsAppRequest,
   orderNotifications,
-  OrderNotification,
-  InsertOrderNotification,
   notificationTemplates,
-  NotificationTemplate,
-  InsertNotificationTemplate,
   testConversations,
   testMessages,
   testDeals,
   testMetricsDaily,
   botSettings,
-  BotSettings,
-  InsertBotSettings,
   sariPersonalitySettings,
-  SariPersonalitySetting,
-  InsertSariPersonalitySetting,
   quickResponses,
-  QuickResponse,
-  InsertQuickResponse,
   sentimentAnalysis,
-  SentimentAnalysis,
-  InsertSentimentAnalysis,
   keywordAnalysis,
-  KeywordAnalysis,
-  InsertKeywordAnalysis,
   weeklySentimentReports,
-  WeeklySentimentReport,
-  InsertWeeklySentimentReport,
   abTestResults,
-  ABTestResult,
-  InsertABTestResult,
   passwordResetTokens,
-  PasswordResetToken,
-  InsertPasswordResetToken,
   passwordResetAttempts,
-  PasswordResetAttempt,
-  InsertPasswordResetAttempt,
   trySariAnalytics,
-  TrySariAnalytics,
-  InsertTrySariAnalytics,
   limitedTimeOffers,
-  LimitedTimeOffer,
-  InsertLimitedTimeOffer,
   signupPromptVariants,
-  SignupPromptVariant,
-  InsertSignupPromptVariant,
   signupPromptTestResults,
-  SignupPromptTestResult,
-  InsertSignupPromptTestResult,
   seoPages,
   SeoPage,
   InsertSeoPage,
@@ -953,7 +928,7 @@ export async function getAnalyticsByMerchantId(
     return db
       .select()
       .from(analytics)
-      .where(and(eq(analytics.merchantId, merchantId), gte(analytics.date, startDate), lte(analytics.date, endDate)))
+      .where(and(eq(analytics.merchantId, merchantId), gte(analytics.date, formatDateForDB(startDate)), lte(analytics.date, formatDateForDB(endDate))))
       .orderBy(desc(analytics.date));
   }
 
@@ -2599,8 +2574,8 @@ export async function getMessageStats(merchantId: number, startDate?: Date, endD
   let dateFilter = sql`1=1`;
   if (startDate && endDate) {
     dateFilter = and(
-      gte(messages.createdAt, startDate),
-      lte(messages.createdAt, endDate)
+      gte(messages.createdAt, formatDateForDB(startDate)),
+      lte(messages.createdAt, formatDateForDB(endDate))
     ) || sql`1=1`;
   }
 
@@ -2661,8 +2636,8 @@ export async function getPeakHours(merchantId: number, startDate?: Date, endDate
   let dateFilter = sql`1=1`;
   if (startDate && endDate) {
     dateFilter = and(
-      gte(messages.createdAt, startDate),
-      lte(messages.createdAt, endDate)
+      gte(messages.createdAt, formatDateForDB(startDate)),
+      lte(messages.createdAt, formatDateForDB(endDate))
     ) || sql`1=1`;
   }
 
@@ -2767,8 +2742,8 @@ export async function getConversionRate(merchantId: number, startDate?: Date, en
   let dateFilter = sql`1=1`;
   if (startDate && endDate) {
     dateFilter = and(
-      gte(conversations.createdAt, startDate),
-      lte(conversations.createdAt, endDate)
+      gte(conversations.createdAt, formatDateForDB(startDate)),
+      lte(conversations.createdAt, formatDateForDB(endDate))
     ) || sql`1=1`;
   }
 
@@ -2850,7 +2825,7 @@ export async function getDailyMessageCount(merchantId: number, days: number = 30
     .where(
       and(
         sql`${messages.conversationId} IN (${sql.join(conversationIds.map(id => sql`${id}`), sql`, `)})`,
-        gte(messages.createdAt, startDate)
+        gte(messages.createdAt, formatDateForDB(startDate))
       )
     )
     .groupBy(sql`DATE(${messages.createdAt})`)
@@ -3864,7 +3839,7 @@ export async function getMerchantSentimentStats(merchantId: number, days: number
     .where(
       and(
         sql`${sentimentAnalysis.conversationId} IN (${sql.join(conversationIds.map(id => sql`${id}`), sql`, `)})`,
-        gte(sentimentAnalysis.createdAt, startDate)
+        gte(sentimentAnalysis.createdAt, formatDateForDB(startDate))
       )
     );
 
@@ -4663,7 +4638,7 @@ export async function getTrySariAnalyticsStats(days: number = 30) {
     const sessions = await db
       .select()
       .from(trySariAnalytics)
-      .where(gte(trySariAnalytics.createdAt, startDate));
+      .where(gte(trySariAnalytics.createdAt, formatDateForDB(startDate)));
 
     // Calculate stats
     const totalSessions = sessions.length;
@@ -4714,7 +4689,7 @@ export async function getTrySariDailyData(days: number = 30) {
     const sessions = await db
       .select()
       .from(trySariAnalytics)
-      .where(gte(trySariAnalytics.createdAt, startDate))
+      .where(gte(trySariAnalytics.createdAt, formatDateForDB(startDate)))
       .orderBy(trySariAnalytics.createdAt);
 
     // Group by date
@@ -4893,7 +4868,7 @@ export async function getSignupPromptTestStats(days: number = 30) {
     const results = await db
       .select()
       .from(signupPromptTestResults)
-      .where(gte(signupPromptTestResults.createdAt, startDate));
+      .where(gte(signupPromptTestResults.createdAt, formatDateForDB(startDate)));
 
     // Group by variant
     const stats: Record<string, {
