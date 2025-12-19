@@ -222,11 +222,13 @@
 - [x] Export المخزون إلى Sheets
 - [ ] تنبيهات نفاد المخزون - مستقبلاً
 
-### Frontend Pages
+### Frontend Pages ✅
 - [x] صفحة إعدادات Google Sheets (/merchant/sheets/settings)
-- [ ] صفحة تصدير المحادثات (/merchant/sheets/export)
-- [ ] صفحة التقارير (/merchant/sheets/reports)
-- [ ] صفحة مزامنة المخزون (/merchant/sheets/inventory)
+- [x] صفحة تصدير المحادثات (/merchant/sheets/export)
+- [x] صفحة التقارير (/merchant/sheets/reports)
+- [x] صفحة مزامنة المخزون (/merchant/sheets/inventory)
+- [x] إضافة routes في App.tsx
+- [x] OAuth callback handlers
 
 ### Backend APIs ✅
 - [x] sheets.getAuthUrl - رابط التفويض

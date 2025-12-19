@@ -5,11 +5,10 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Loader2, CheckCircle2, XCircle, ExternalLink, FileSpreadsheet, Settings, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import DashboardLayout from '@/components/DashboardLayout';
 
 export default function SheetsSettings() {
-  const { toast } = useToast();
   const [isConnecting, setIsConnecting] = useState(false);
 
   // الحصول على حالة الاتصال

@@ -74,6 +74,10 @@ import SetupWizard from "./pages/SetupWizard";
 import CalendarSettings from "./pages/CalendarSettings";
 import CalendarPage from "./pages/CalendarPage";
 import StaffManagement from "./pages/StaffManagement";
+import SheetsSettings from "./pages/SheetsSettings";
+import SheetsExport from "./pages/SheetsExport";
+import SheetsReports from "./pages/SheetsReports";
+import SheetsInventory from "./pages/SheetsInventory";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -363,6 +367,22 @@ function Router() {
         <DashboardLayout>
           <StaffManagement />
         </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/sheets/settings">
+        <SheetsSettings />
+      </Route>
+      
+      <Route path="/merchant/sheets/export">
+        <SheetsExport />
+      </Route>
+      
+      <Route path="/merchant/sheets/reports">
+        <SheetsReports />
+      </Route>
+      
+      <Route path="/merchant/sheets/inventory">
+        <SheetsInventory />
       </Route>
       
       <Route path="/merchant/reports">

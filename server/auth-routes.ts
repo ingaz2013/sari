@@ -101,3 +101,59 @@ router.post('/verify', async (req, res) => {
 });
 
 export default router;
+
+// Google Calendar OAuth Callback
+router.get('/oauth/google/calendar/callback', async (req, res) => {
+  const { code, state } = req.query;
+
+  if (!code || !state) {
+    return res.status(400).send('Missing code or state parameter');
+  }
+
+  const merchantId = parseInt(state as string);
+  if (isNaN(merchantId)) {
+    return res.status(400).send('Invalid merchant ID');
+  }
+
+  try {
+    const googleCalendar = await import('./_core/googleCalendar');
+    const result = await googleCalendar.handleOAuthCallback(code as string, merchantId);
+
+    if (result.success) {
+      res.redirect('/merchant/calendar/settings?success=true');
+    } else {
+      res.redirect(`/merchant/calendar/settings?error=${encodeURIComponent(result.message)}`);
+    }
+  } catch (error: any) {
+    console.error('[OAuth Callback] Error:', error);
+    res.redirect(`/merchant/calendar/settings?error=${encodeURIComponent(error.message || 'حدث خطأ')}`);
+  }
+});
+
+// Google Sheets OAuth Callback
+router.get('/oauth/google/sheets/callback', async (req, res) => {
+  const { code, state } = req.query;
+
+  if (!code || !state) {
+    return res.status(400).send('Missing code or state parameter');
+  }
+
+  const merchantId = parseInt(state as string);
+  if (isNaN(merchantId)) {
+    return res.status(400).send('Invalid merchant ID');
+  }
+
+  try {
+    const googleSheets = await import('./_core/googleSheets');
+    const result = await googleSheets.handleOAuthCallback(code as string, merchantId);
+
+    if (result.success) {
+      res.redirect('/merchant/sheets/settings?success=true');
+    } else {
+      res.redirect(`/merchant/sheets/settings?error=${encodeURIComponent(result.message)}`);
+    }
+  } catch (error: any) {
+    console.error('[OAuth Callback] Error:', error);
+    res.redirect(`/merchant/sheets/settings?error=${encodeURIComponent(error.message || 'حدث خطأ')}`);
+  }
+});
