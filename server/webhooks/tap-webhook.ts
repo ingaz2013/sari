@@ -258,7 +258,7 @@ async function handleBookingPayment(
 
     if (status === 'CAPTURED') {
       // دفع ناجح
-      await db.updateBookingStatus(bookingId, 'confirmed');
+      await db.updateBooking(bookingId, { status: 'confirmed', paymentStatus: 'paid' });
       
       const successMessage = `✅ *تم تأكيد حجزك!*
 
@@ -277,7 +277,7 @@ async function handleBookingPayment(
 
     } else if (status === 'FAILED' || status === 'DECLINED') {
       // دفع فاشل
-      await db.updateBookingStatus(bookingId, 'cancelled');
+      await db.updateBooking(bookingId, { status: 'cancelled', paymentStatus: 'unpaid' });
       
       const failureMessage = `❌ *فشلت عملية الدفع*
 
