@@ -74,7 +74,12 @@ export async function callGPT4(
     const data: ChatCompletionResponse = await response.json();
     return data.choices[0]?.message?.content || '';
   } catch (error: any) {
-    console.error('Error calling GPT-4:', error);
+    console.error('[OpenAI] Error calling GPT-4:', {
+      message: error.message,
+      stack: error.stack,
+      model,
+      messagesCount: messages.length,
+    });
     throw new Error(`Failed to call GPT-4: ${error.message}`);
   }
 }
