@@ -100,7 +100,7 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@sari.sa"
+                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
