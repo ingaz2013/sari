@@ -100,13 +100,13 @@ export default function Login() {
               <Input
                 id="email"
                 type="email"
-                placeholder=""
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
                 dir="ltr"
                 className="text-left"
+                autoComplete="off"
               />
             </div>
             <div className="space-y-2">
