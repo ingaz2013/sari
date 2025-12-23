@@ -26,40 +26,52 @@
       "title": "Neden Sari?",
       "subtitle": "WhatsApp'ta satışlarınızı yönetmek için ihtiyacınız olan her şey",
       "voiceOrder": {
-        "title": "Sesli Siparişler",
-        "description": "Sesli mesajları otomatik olarak metne dönüştürür ve siparişleri işler"
+        "title": "Sesli Mesaj Siparişleri",
+        "description": "Müşterileriniz sadece sesleriyle sipariş verir: ürün, miktar ve adres - Sari gerisini halleder"
       },
       "smartReply": {
-        "title": "Akıllı Yanıtlar",
-        "description": "Müşteri sorularını anlar ve Suudi lehçesinde doğal şekilde yanıt verir"
+        "title": "Akıllı Otomatik Yanıt",
+        "description": "Sari, müşterilerinizin sorularına Suudi lehçesinde 7/24 yanıt verir"
       },
       "autoOrders": {
         "title": "Otomatik Siparişler",
-        "description": "Siparişleri otomatik olarak işler ve onay gönderir"
+        "description": "Konuşmaları otomatik olarak ödeme bağlantısıyla tam siparişlere dönüştürür"
       },
-      "ai": {
-        "title": "Gelişmiş Yapay Zeka",
-        "description": "Müşteri taleplerinizi anlar ve Suudi lehçesinde doğal şekilde yanıt verir"
+      "abandonedCarts": {
+        "title": "Terk Edilmiş Sepetler",
+        "description": "Siparişlerini tamamlamayan müşteriler için otomatik hatırlatmalar, dönüşüm oranını artırmak için"
       },
-      "products": {
-        "title": "Ürün Yönetimi",
-        "description": "Ürünlerinizi ekleyin ve Sari onları müşterilere otomatik olarak göstersin"
+      "invoices": {
+        "title": "WhatsApp Faturaları",
+        "description": "Profesyonel faturaları doğrudan WhatsApp üzerinden ödeme bağlantısıyla gönderin"
       },
-      "orders": {
+      "tracking": {
         "title": "Sipariş Takibi",
-        "description": "Müşterilere otomatik bildirimlerle tam sipariş yönetimi"
+        "description": "Müşterilere sipariş durumları hakkında onaydan teslimata kadar otomatik güncellemeler"
+      },
+      "gifts": {
+        "title": "Hediyeler ve Kutlamalar",
+        "description": "Müşterilere özel günler ve tatillerde özel tekliflerle otomatik mesajlar"
+      },
+      "notifications": {
+        "title": "Akıllı Bildirimler",
+        "description": "Yeni siparişler veya önemli sorular geldiğinde satıcı için anlık uyarılar"
       },
       "analytics": {
-        "title": "Akıllı Analizler",
-        "description": "Satışlar ve konuşmalar hakkında detaylı raporlar"
+        "title": "Raporlar ve Analizler",
+        "description": "Mağaza performansınızı iyileştirmek için satışlar ve konuşmalar hakkında detaylı raporlar"
       },
-      "campaigns": {
-        "title": "Pazarlama Kampanyaları",
-        "description": "Müşterilerinize toplu mesajlar ve özel teklifler gönderin"
+      "sales": {
+        "title": "Satışları Artırın",
+        "description": "Soruları daha yüksek dönüşüm oranıyla satışlara dönüştürün"
       },
-      "support": {
-        "title": "7/24 Destek",
-        "description": "Size yardımcı olmak için her zaman hazır destek ekibi"
+      "available": {
+        "title": "7/24 Erişilebilir",
+        "description": "Müşterilerinize çalışma saatleri dışında bile her zaman hizmet verin"
+      },
+      "secure": {
+        "title": "Güvenli ve Güvenilir",
+        "description": "Müşterilerinizin verileri ve konuşmaları için tam koruma"
       }
     },
     "howItWorks": {

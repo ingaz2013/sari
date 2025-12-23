@@ -27,39 +27,51 @@
       "subtitle": "Tout ce dont vous avez besoin pour gérer vos ventes sur WhatsApp",
       "voiceOrder": {
         "title": "Commandes vocales",
-        "description": "Convertit automatiquement les messages vocaux en texte et traite les commandes"
+        "description": "Vos clients commandent avec leur voix uniquement : produit, quantité et adresse - Sari gère le reste"
       },
       "smartReply": {
-        "title": "Réponses intelligentes",
-        "description": "Comprend les questions des clients et répond naturellement en dialecte saoudien"
+        "title": "Réponse automatique intelligente",
+        "description": "Sari répond aux demandes de vos clients en dialecte saoudien 24/7"
       },
       "autoOrders": {
         "title": "Commandes automatiques",
-        "description": "Traite les commandes automatiquement et envoie des confirmations"
+        "description": "Convertir les conversations en commandes complètes avec lien de paiement automatiquement"
       },
-      "ai": {
-        "title": "IA avancée",
-        "description": "Comprend les demandes des clients et répond naturellement en dialecte saoudien"
+      "abandonedCarts": {
+        "title": "Paniers abandonnés",
+        "description": "Rappels automatiques pour les clients qui n'ont pas terminé leurs commandes pour augmenter le taux de conversion"
       },
-      "products": {
-        "title": "Gestion des produits",
-        "description": "Ajoutez vos produits et Sari les présentera automatiquement aux clients"
+      "invoices": {
+        "title": "Factures WhatsApp",
+        "description": "Envoyer des factures professionnelles directement via WhatsApp avec lien de paiement"
       },
-      "orders": {
+      "tracking": {
         "title": "Suivi des commandes",
-        "description": "Gestion complète des commandes avec notifications automatiques aux clients"
+        "description": "Mises à jour automatiques pour les clients sur l'état de leur commande de la confirmation à la livraison"
+      },
+      "gifts": {
+        "title": "Cadeaux et salutations",
+        "description": "Messages automatiques aux clients lors d'occasions et de vacances avec des offres spéciales"
+      },
+      "notifications": {
+        "title": "Notifications intelligentes",
+        "description": "Alertes instantanées pour le commerçant lorsque de nouvelles commandes ou demandes importantes arrivent"
       },
       "analytics": {
-        "title": "Analyses intelligentes",
-        "description": "Rapports détaillés sur les ventes et les conversations"
+        "title": "Rapports et analyses",
+        "description": "Rapports détaillés sur les ventes et les conversations pour améliorer les performances de votre magasin"
       },
-      "campaigns": {
-        "title": "Campagnes marketing",
-        "description": "Envoyez des messages groupés et des offres spéciales à vos clients"
+      "sales": {
+        "title": "Augmenter les ventes",
+        "description": "Convertir les demandes en ventes avec un taux de conversion plus élevé"
       },
-      "support": {
-        "title": "Support 24/7",
-        "description": "Équipe de support toujours disponible pour vous aider"
+      "available": {
+        "title": "Disponible 24/7",
+        "description": "Servez vos clients à tout moment, même en dehors des heures d'ouverture"
+      },
+      "secure": {
+        "title": "Sûr et fiable",
+        "description": "Protection complète des données et conversations de vos clients"
       }
     },
     "howItWorks": {

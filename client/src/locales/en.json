@@ -26,29 +26,53 @@
     "features": {
       "title": "Why Sari?",
       "subtitle": "Everything you need to manage your WhatsApp sales",
-      "ai": {
-        "title": "Advanced AI",
-        "description": "Understands customer inquiries and responds naturally in Saudi dialect"
+      "voiceOrder": {
+        "title": "Voice Message Orders",
+        "description": "Your customers order with their voice only: product, quantity, and address - Sari handles the rest"
       },
-      "products": {
-        "title": "Product Management",
-        "description": "Add your products and Sari will showcase them to customers automatically"
+      "smartReply": {
+        "title": "Smart Auto-Reply",
+        "description": "Sari responds to your customers' inquiries in Saudi dialect 24/7"
       },
-      "orders": {
+      "autoOrders": {
+        "title": "Automatic Orders",
+        "description": "Convert conversations to complete orders with payment link automatically"
+      },
+      "abandonedCarts": {
+        "title": "Abandoned Carts",
+        "description": "Automatic reminders for customers who didn't complete their orders to increase conversion rate"
+      },
+      "invoices": {
+        "title": "WhatsApp Invoices",
+        "description": "Send professional invoices directly via WhatsApp with payment link"
+      },
+      "tracking": {
         "title": "Order Tracking",
-        "description": "Complete order management with automatic customer notifications"
+        "description": "Automatic updates for customers about their order status from confirmation to delivery"
+      },
+      "gifts": {
+        "title": "Gifts & Greetings",
+        "description": "Automatic messages to customers on occasions and holidays with special offers"
+      },
+      "notifications": {
+        "title": "Smart Notifications",
+        "description": "Instant alerts for merchant when new orders or important inquiries arrive"
       },
       "analytics": {
-        "title": "Smart Analytics",
-        "description": "Detailed reports on sales and conversations"
+        "title": "Reports & Analytics",
+        "description": "Detailed reports on sales and conversations to improve your store performance"
       },
-      "campaigns": {
-        "title": "Marketing Campaigns",
-        "description": "Send bulk messages and special offers to your customers"
+      "sales": {
+        "title": "Increase Sales",
+        "description": "Convert inquiries to sales with higher conversion rate"
       },
-      "support": {
-        "title": "24/7 Support",
-        "description": "Support team always available to help you"
+      "available": {
+        "title": "Available 24/7",
+        "description": "Serve your customers anytime even outside business hours"
+      },
+      "secure": {
+        "title": "Safe & Reliable",
+        "description": "Complete protection for your customers' data and conversations"
       }
     },
     "pricing": {
@@ -103,56 +127,6 @@
       "description": "Join thousands of merchants using Sari to improve customer service and increase sales",
       "button": "Start Free Now",
       "contact": "Contact Us"
-    },
-    "features": {
-      "voiceOrder": {
-        "title": "Voice Message Orders",
-        "description": "Your customers order with their voice only: product, quantity, and address - Sari handles the rest"
-      },
-      "smartReply": {
-        "title": "Smart Auto-Reply",
-        "description": "Sari responds to your customers' inquiries in Saudi dialect 24/7"
-      },
-      "autoOrders": {
-        "title": "Automatic Orders",
-        "description": "Convert conversations to complete orders with payment link automatically"
-      },
-      "abandonedCarts": {
-        "title": "Abandoned Carts",
-        "description": "Automatic reminders for customers who didn't complete their orders to increase conversion rate"
-      },
-      "invoices": {
-        "title": "WhatsApp Invoices",
-        "description": "Send professional invoices directly via WhatsApp with payment link"
-      },
-      "tracking": {
-        "title": "Order Tracking",
-        "description": "Automatic updates for customers about their order status from confirmation to delivery"
-      },
-      "gifts": {
-        "title": "Gifts & Greetings",
-        "description": "Automatic messages to customers on occasions and holidays with special offers"
-      },
-      "notifications": {
-        "title": "Smart Notifications",
-        "description": "Instant alerts for merchant when new orders or important inquiries arrive"
-      },
-      "analytics": {
-        "title": "Reports & Analytics",
-        "description": "Detailed reports on sales and conversations to improve your store performance"
-      },
-      "sales": {
-        "title": "Increase Sales",
-        "description": "Convert inquiries to sales with higher conversion rate"
-      },
-      "available": {
-        "title": "Available 24/7",
-        "description": "Serve your customers anytime even outside business hours"
-      },
-      "secure": {
-        "title": "Safe & Reliable",
-        "description": "Complete protection for your customers' data and conversations"
-      }
     },
     "steps": {
       "title": "How to Get Started?",
