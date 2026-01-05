@@ -3,6 +3,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { insightsRouter } from "./routers-insights";
 import { offersRouter } from "./routers-offers";
+import { performanceRouter } from "./routers-performance";
 import { googleAuthRouter } from "./routers-google-auth";
 import { sheetsRouter } from "./routers-sheets";
 import { loyaltyRouter } from "./routers-loyalty";
@@ -5075,6 +5076,9 @@ export const appRouter = router({
 
   // Insights router
   insights: insightsRouter,
+
+  // Performance Metrics
+  performance: performanceRouter,
   
   // Offers and AB Testing
   offers: offersRouter.offers,
