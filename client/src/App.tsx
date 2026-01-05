@@ -102,6 +102,8 @@ import IntegrationsDashboard from "./pages/IntegrationsDashboard";
 import NotificationSettings from "./pages/NotificationSettings";
 import ScheduledReports from "./pages/ScheduledReports";
 import WhatsAppAutoNotifications from "./pages/WhatsAppAutoNotifications";
+import CustomersManagement from "./pages/CustomersManagement";
+import CustomerDetails from "./pages/CustomerDetails";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -566,6 +568,18 @@ function Router() {
 
       <Route path="/merchant/payment/cancel">
         <PaymentCancel />
+      </Route>
+      
+      <Route path="/merchant/customers">
+        <DashboardLayout>
+          <CustomersManagement />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/customers/:phone">
+        <DashboardLayout>
+          <CustomerDetails />
+        </DashboardLayout>
       </Route>
       
       {/* Admin Routes */}

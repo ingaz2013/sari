@@ -57,7 +57,31 @@ import {
   Zap,
   Search,
   Key,
-  Database
+  Database,
+  FileText,
+  Star,
+  CalendarDays,
+  UsersRound,
+  Briefcase,
+  BookOpen,
+  FileSpreadsheet,
+  Download,
+  Warehouse,
+  Wallet,
+  Link,
+  Gift,
+  Award,
+  Crown,
+  Heart,
+  Plug,
+  BellRing,
+  Clock,
+  MessageCircle,
+  TrendingUp,
+  Activity,
+  Gauge,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -68,34 +92,107 @@ import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import { useTranslation } from 'react-i18next';
 
+// Menu item type with optional group
+type MenuItem = {
+  icon: any;
+  label: string;
+  path: string;
+  group?: string;
+};
+
+// Menu groups for merchant
+const merchantMenuGroups = [
+  { id: 'main', label: 'الرئيسية', icon: LayoutDashboard },
+  { id: 'sales', label: 'المبيعات والطلبات', icon: ShoppingCart },
+  { id: 'marketing', label: 'التسويق والحملات', icon: Megaphone },
+  { id: 'sari', label: 'ساري AI', icon: Bot },
+  { id: 'whatsapp', label: 'واتساب', icon: Smartphone },
+  { id: 'calendar', label: 'المواعيد والخدمات', icon: CalendarDays },
+  { id: 'analytics', label: 'التحليلات والتقارير', icon: BarChart3 },
+  { id: 'integrations', label: 'التكاملات', icon: Plug },
+  { id: 'loyalty', label: 'برنامج الولاء', icon: Heart },
+  { id: 'payments', label: 'المدفوعات', icon: Wallet },
+  { id: 'settings', label: 'الإعدادات', icon: Settings },
+];
+
 // Menu items based on user role
-const getMerchantMenuItems = (t: any) => [
-  { icon: LayoutDashboard, label: t('sidebar.merchant.dashboard'), path: "/merchant/dashboard" },
-  { icon: Megaphone, label: t('sidebar.merchant.campaigns'), path: "/merchant/campaigns" },
-  { icon: Package, label: t('sidebar.merchant.products'), path: "/merchant/products" },
-  { icon: ShoppingCart, label: t('sidebar.merchant.chatOrders'), path: "/merchant/chat-orders" },
-  { icon: MessageSquare, label: t('sidebar.merchant.conversations'), path: "/merchant/conversations" },
-  { icon: Ticket, label: t('sidebar.merchant.discounts'), path: "/merchant/discounts" },
-  { icon: UserPlus, label: t('sidebar.merchant.referrals'), path: "/merchant/referrals" },
-  { icon: ShoppingBag, label: t('sidebar.merchant.abandonedCarts'), path: "/merchant/abandoned-carts" },
-  { icon: PartyPopper, label: t('sidebar.merchant.occasionCampaigns'), path: "/merchant/occasion-campaigns" },
-  { icon: BarChart3, label: t('sidebar.merchant.analytics'), path: "/merchant/analytics" },
-  { icon: CreditCard, label: t('sidebar.merchant.subscriptions'), path: "/merchant/subscriptions" },
-  { icon: CreditCard, label: 'إعدادات الدفع', path: "/merchant/payment-settings" },
-  { icon: Smartphone, label: t('sidebar.merchant.whatsapp'), path: "/merchant/whatsapp" },
-  { icon: Smartphone, label: t('sidebar.merchant.whatsappInstances'), path: "/merchant/whatsapp-instances" },
-  { icon: MessageSquare, label: 'اختبار ساري AI', path: "/merchant/test-sari" },
-  { icon: Bot, label: 'ملعب ساري AI', path: "/merchant/sari-playground" },
-  { icon: BarChart3, label: 'إحصائيات ساري AI', path: "/merchant/sari-analytics" },
-  { icon: Bell, label: t('sidebar.merchant.orderNotifications'), path: "/merchant/order-notifications" },
-  { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla" },
-  { icon: Bot, label: t('sidebar.merchant.botSettings'), path: "/merchant/bot-settings" },
-  { icon: Calendar, label: t('sidebar.merchant.scheduledMessages'), path: "/merchant/scheduled-messages" },
-  { icon: Sparkles, label: 'إعدادات شخصية ساري', path: "/merchant/sari-personality" },
-  { icon: Zap, label: 'الردود السريعة', path: "/merchant/quick-responses" },
-  { icon: BarChart3, label: 'التحليلات المتقدمة', path: "/merchant/advanced-analytics" },
-  { icon: Database, label: 'مزامنة البيانات', path: "/merchant/data-sync" },
-  { icon: Settings, label: t('sidebar.merchant.settings'), path: "/merchant/settings" },
+const getMerchantMenuItems = (t: any): MenuItem[] => [
+  // الرئيسية
+  { icon: LayoutDashboard, label: t('sidebar.merchant.dashboard'), path: "/merchant/dashboard", group: 'main' },
+  
+  // المبيعات والطلبات
+  { icon: Package, label: t('sidebar.merchant.products'), path: "/merchant/products", group: 'sales' },
+  { icon: ShoppingCart, label: t('sidebar.merchant.chatOrders'), path: "/merchant/chat-orders", group: 'sales' },
+  { icon: FileText, label: 'الطلبات', path: "/merchant/orders", group: 'sales' },
+  { icon: Ticket, label: t('sidebar.merchant.discounts'), path: "/merchant/discounts", group: 'sales' },
+  { icon: ShoppingBag, label: t('sidebar.merchant.abandonedCarts'), path: "/merchant/abandoned-carts", group: 'sales' },
+  { icon: Star, label: 'التقييمات', path: "/merchant/reviews", group: 'sales' },
+  
+  // التسويق والحملات
+  { icon: Megaphone, label: t('sidebar.merchant.campaigns'), path: "/merchant/campaigns", group: 'marketing' },
+  { icon: PartyPopper, label: t('sidebar.merchant.occasionCampaigns'), path: "/merchant/occasion-campaigns", group: 'marketing' },
+  { icon: UserPlus, label: t('sidebar.merchant.referrals'), path: "/merchant/referrals", group: 'marketing' },
+  
+  // ساري AI
+  { icon: MessageSquare, label: t('sidebar.merchant.conversations'), path: "/merchant/conversations", group: 'sari' },
+  { icon: Bot, label: 'اختبار ساري AI', path: "/merchant/test-sari", group: 'sari' },
+  { icon: Sparkles, label: 'ملعب ساري AI', path: "/merchant/sari-playground", group: 'sari' },
+  { icon: BarChart3, label: 'إحصائيات ساري AI', path: "/merchant/sari-analytics", group: 'sari' },
+  { icon: Bot, label: t('sidebar.merchant.botSettings'), path: "/merchant/bot-settings", group: 'sari' },
+  { icon: Sparkles, label: 'إعدادات شخصية ساري', path: "/merchant/sari-personality", group: 'sari' },
+  { icon: Zap, label: 'الردود السريعة', path: "/merchant/quick-responses", group: 'sari' },
+  
+  // واتساب
+  { icon: Smartphone, label: t('sidebar.merchant.whatsapp'), path: "/merchant/whatsapp", group: 'whatsapp' },
+  { icon: Smartphone, label: t('sidebar.merchant.whatsappInstances'), path: "/merchant/whatsapp-instances", group: 'whatsapp' },
+  { icon: Bell, label: t('sidebar.merchant.orderNotifications'), path: "/merchant/order-notifications", group: 'whatsapp' },
+  { icon: Calendar, label: t('sidebar.merchant.scheduledMessages'), path: "/merchant/scheduled-messages", group: 'whatsapp' },
+  { icon: BellRing, label: 'إشعارات واتساب التلقائية', path: "/merchant/whatsapp-auto-notifications", group: 'whatsapp' },
+  
+  // المواعيد والخدمات
+  { icon: CalendarDays, label: 'التقويم والمواعيد', path: "/merchant/calendar", group: 'calendar' },
+  { icon: Settings, label: 'إعدادات التقويم', path: "/merchant/calendar/settings", group: 'calendar' },
+  { icon: UsersRound, label: 'إدارة الموظفين', path: "/merchant/staff", group: 'calendar' },
+  { icon: Briefcase, label: 'إدارة الخدمات', path: "/merchant/services", group: 'calendar' },
+  { icon: BookOpen, label: 'إدارة الحجوزات', path: "/merchant/bookings", group: 'calendar' },
+  { icon: Package, label: 'تصنيفات الخدمات', path: "/merchant/service-categories", group: 'calendar' },
+  { icon: Gift, label: 'باقات الخدمات', path: "/merchant/service-packages", group: 'calendar' },
+  
+  // التحليلات والتقارير
+  { icon: BarChart3, label: t('sidebar.merchant.analytics'), path: "/merchant/analytics", group: 'analytics' },
+  { icon: TrendingUp, label: 'التحليلات المتقدمة', path: "/merchant/advanced-analytics", group: 'analytics' },
+  { icon: Activity, label: 'لوحة الرؤى', path: "/merchant/insights", group: 'analytics' },
+  { icon: Gauge, label: 'مقاييس الأداء', path: "/merchant/performance-metrics", group: 'analytics' },
+  { icon: FileText, label: 'التقارير', path: "/merchant/reports", group: 'analytics' },
+  { icon: Clock, label: 'التقارير المجدولة', path: "/merchant/scheduled-reports", group: 'analytics' },
+  { icon: MessageCircle, label: 'استخدام الرسائل', path: "/merchant/usage", group: 'analytics' },
+  
+  // التكاملات
+  { icon: Plug, label: 'لوحة التكاملات', path: "/merchant/integrations-dashboard", group: 'integrations' },
+  { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla", group: 'integrations' },
+  { icon: Store, label: 'تكامل زد', path: "/merchant/integrations/zid", group: 'integrations' },
+  { icon: Calendar, label: 'تكامل Calendly', path: "/merchant/integrations/calendly", group: 'integrations' },
+  { icon: FileSpreadsheet, label: 'إعدادات Google Sheets', path: "/merchant/sheets/settings", group: 'integrations' },
+  { icon: Download, label: 'تصدير البيانات', path: "/merchant/sheets/export", group: 'integrations' },
+  { icon: FileText, label: 'تقارير Sheets', path: "/merchant/sheets/reports", group: 'integrations' },
+  { icon: Warehouse, label: 'مزامنة المخزون', path: "/merchant/sheets/inventory", group: 'integrations' },
+  { icon: Database, label: 'مزامنة البيانات', path: "/merchant/data-sync", group: 'integrations' },
+  
+  // برنامج الولاء
+  { icon: Heart, label: 'إعدادات الولاء', path: "/merchant/loyalty/settings", group: 'loyalty' },
+  { icon: Crown, label: 'مستويات الولاء', path: "/merchant/loyalty/tiers", group: 'loyalty' },
+  { icon: Gift, label: 'مكافآت الولاء', path: "/merchant/loyalty/rewards", group: 'loyalty' },
+  { icon: Users, label: 'عملاء الولاء', path: "/merchant/loyalty/customers", group: 'loyalty' },
+  
+  // المدفوعات
+  { icon: Wallet, label: 'المدفوعات', path: "/merchant/payments", group: 'payments' },
+  { icon: Link, label: 'روابط الدفع', path: "/merchant/payment-links", group: 'payments' },
+  { icon: CreditCard, label: 'إعدادات الدفع', path: "/merchant/payment-settings", group: 'payments' },
+  { icon: CreditCard, label: t('sidebar.merchant.subscriptions'), path: "/merchant/subscriptions", group: 'payments' },
+  
+  // الإعدادات
+  { icon: Settings, label: t('sidebar.merchant.settings'), path: "/merchant/settings", group: 'settings' },
+  { icon: BellRing, label: 'إعدادات الإشعارات', path: "/merchant/notification-settings", group: 'settings' },
 ];
 
 const getAdminMenuItems = (t: any) => [
@@ -200,6 +297,7 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(['main']);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
@@ -212,9 +310,32 @@ function DashboardLayoutContent({
     logout();
   };
   
+  const toggleGroup = (groupId: string) => {
+    setExpandedGroups(prev => 
+      prev.includes(groupId) 
+        ? prev.filter(id => id !== groupId)
+        : [...prev, groupId]
+    );
+  };
+  
   // Get menu items based on user role
   const menuItems = user?.role === 'admin' ? getAdminMenuItems(t) : getMerchantMenuItems(t);
   const activeMenuItem = menuItems.find(item => item.path === location);
+  
+  // Group menu items by group
+  const groupedMenuItems = menuItems.reduce((acc, item) => {
+    const group = item.group || 'other';
+    if (!acc[group]) acc[group] = [];
+    acc[group].push(item);
+    return acc;
+  }, {} as Record<string, MenuItem[]>);
+  
+  // Auto-expand group containing active item
+  useEffect(() => {
+    if (activeMenuItem?.group && !expandedGroups.includes(activeMenuItem.group)) {
+      setExpandedGroups(prev => [...prev, activeMenuItem.group!]);
+    }
+  }, [location]);
 
   useEffect(() => {
     if (isCollapsed) {
@@ -279,26 +400,87 @@ function DashboardLayoutContent({
             </div>
           </SidebarHeader>
 
-          <SidebarContent className="gap-0">
+          <SidebarContent className="gap-0 overflow-y-auto">
             <SidebarMenu className="px-2 py-1">
-              {menuItems.map((item) => {
-                const isActive = location === item.path;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => setLocation(item.path)}
-                      tooltip={item.label}
-                      className={`h-10 transition-all font-normal`}
-                    >
-                      <item.icon
-                        className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
-                      />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {user?.role === 'admin' ? (
+                // Admin: flat list
+                menuItems.map((item) => {
+                  const isActive = location === item.path;
+                  return (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        isActive={isActive}
+                        onClick={() => setLocation(item.path)}
+                        tooltip={item.label}
+                        className={`h-10 transition-all font-normal`}
+                      >
+                        <item.icon
+                          className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                        />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })
+              ) : (
+                // Merchant: grouped with collapsible sections
+                merchantMenuGroups.map((group) => {
+                  const groupItems = groupedMenuItems[group.id] || [];
+                  if (groupItems.length === 0) return null;
+                  
+                  const isExpanded = expandedGroups.includes(group.id);
+                  const hasActiveItem = groupItems.some(item => item.path === location);
+                  const GroupIcon = group.icon;
+                  
+                  return (
+                    <div key={group.id} className="mb-1">
+                      {/* Group Header */}
+                      <button
+                        onClick={() => toggleGroup(group.id)}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors hover:bg-accent/50 ${
+                          hasActiveItem ? 'text-primary bg-accent/30' : 'text-muted-foreground'
+                        } ${isCollapsed ? 'justify-center' : ''}`}
+                      >
+                        <GroupIcon className="h-4 w-4 shrink-0" />
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 text-right truncate">{group.label}</span>
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4 shrink-0" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 shrink-0" />
+                            )}
+                          </>
+                        )}
+                      </button>
+                      
+                      {/* Group Items */}
+                      {(isExpanded || isCollapsed) && (
+                        <div className={`${!isCollapsed ? 'mr-2 border-r border-border/50' : ''}`}>
+                          {groupItems.map((item) => {
+                            const isActive = location === item.path;
+                            return (
+                              <SidebarMenuItem key={item.path}>
+                                <SidebarMenuButton
+                                  isActive={isActive}
+                                  onClick={() => setLocation(item.path)}
+                                  tooltip={item.label}
+                                  className={`h-9 transition-all font-normal ${!isCollapsed ? 'mr-2' : ''}`}
+                                >
+                                  <item.icon
+                                    className={`h-4 w-4 ${isActive ? "text-primary" : ""}`}
+                                  />
+                                  <span className="truncate">{item.label}</span>
+                                </SidebarMenuButton>
+                              </SidebarMenuItem>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </SidebarMenu>
           </SidebarContent>
 

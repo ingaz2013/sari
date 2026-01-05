@@ -187,6 +187,21 @@ import {
   platformIntegrations,
   PlatformIntegration,
   InsertPlatformIntegration,
+  loyaltyPoints,
+  LoyaltyPoints,
+  InsertLoyaltyPoints,
+  loyaltySettings,
+  LoyaltySettings,
+  InsertLoyaltySettings,
+  loyaltyTiers,
+  LoyaltyTier,
+  InsertLoyaltyTier,
+  loyaltyTransactions,
+  LoyaltyTransaction,
+  InsertLoyaltyTransaction,
+  loyaltyRewards,
+  LoyaltyReward,
+  InsertLoyaltyReward,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -6693,7 +6708,7 @@ export async function getCustomerCountByMerchant(merchantId: number): Promise<nu
   if (!db) return 0;
 
   // Count unique customers from conversations
-  const result = await db.select({ count: sql<number>`count(distinct customer_phone)` })
+  const result = await db.select({ count: sql<number>`count(distinct ${conversations.customerPhone})` })
     .from(conversations)
     .where(eq(conversations.merchantId, merchantId));
 
@@ -6718,3 +6733,213 @@ export async function getSyncLogsByMerchant(merchantId: number, typePrefix: stri
 }
 
 
+
+// ============================================
+// Customer Management Functions
+// ============================================
+
+/**
+ * Get all customers for a merchant with their stats
+ */
+export async function getCustomersByMerchant(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  // Get unique customers from conversations with their latest interaction
+  const customersData = await db
+    .select({
+      customerPhone: conversations.customerPhone,
+      customerName: conversations.customerName,
+      lastMessageAt: sql<Date>`MAX(${conversations.lastMessageAt})`,
+      totalMessages: sql<number>`COUNT(DISTINCT ${conversations.id})`,
+    })
+    .from(conversations)
+    .where(eq(conversations.merchantId, merchantId))
+    .groupBy(conversations.customerPhone, conversations.customerName);
+
+  // Enrich with order data
+  const enrichedCustomers = await Promise.all(
+    customersData.map(async (customer) => {
+      // Get orders count and total spent
+      const orderStats = await db
+        .select({
+          orderCount: sql<number>`COUNT(*)`,
+          totalSpent: sql<number>`COALESCE(SUM(${orders.totalAmount}), 0)`,
+        })
+        .from(orders)
+        .where(
+          and(
+            eq(orders.merchantId, merchantId),
+            eq(orders.customerPhone, customer.customerPhone)
+          )
+        );
+
+      // Get loyalty points
+      const loyaltyData = await db
+        .select()
+        .from(loyaltyPoints)
+        .where(
+          and(
+            eq(loyaltyPoints.merchantId, merchantId),
+            eq(loyaltyPoints.customerPhone, customer.customerPhone)
+          )
+        )
+        .limit(1);
+
+      return {
+        ...customer,
+        orderCount: Number(orderStats[0]?.orderCount) || 0,
+        totalSpent: Number(orderStats[0]?.totalSpent) || 0,
+        loyaltyPoints: loyaltyData[0]?.points || 0,
+        status: determineCustomerStatus(customer.lastMessageAt),
+      };
+    })
+  );
+
+  return enrichedCustomers.sort((a, b) => 
+    new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+  );
+}
+
+/**
+ * Determine customer status based on last interaction
+ */
+function determineCustomerStatus(lastMessageAt: Date): 'active' | 'inactive' | 'new' {
+  const now = new Date();
+  const daysSinceLastMessage = Math.floor(
+    (now.getTime() - new Date(lastMessageAt).getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (daysSinceLastMessage <= 7) return 'active';
+  if (daysSinceLastMessage <= 30) return 'new';
+  return 'inactive';
+}
+
+/**
+ * Get customer by phone for a merchant
+ */
+export async function getCustomerByPhone(merchantId: number, customerPhone: string): Promise<any | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  // Get customer basic info from conversations
+  const customerConv = await db
+    .select({
+      customerPhone: conversations.customerPhone,
+      customerName: conversations.customerName,
+      lastMessageAt: sql<Date>`MAX(${conversations.lastMessageAt})`,
+      firstMessageAt: sql<Date>`MIN(${conversations.createdAt})`,
+    })
+    .from(conversations)
+    .where(
+      and(
+        eq(conversations.merchantId, merchantId),
+        eq(conversations.customerPhone, customerPhone)
+      )
+    )
+    .groupBy(conversations.customerPhone, conversations.customerName)
+    .limit(1);
+
+  if (!customerConv[0]) return null;
+
+  // Get orders
+  const customerOrders = await db
+    .select()
+    .from(orders)
+    .where(
+      and(
+        eq(orders.merchantId, merchantId),
+        eq(orders.customerPhone, customerPhone)
+      )
+    )
+    .orderBy(desc(orders.createdAt));
+
+  // Get order stats
+  const orderStats = await db
+    .select({
+      orderCount: sql<number>`COUNT(*)`,
+      totalSpent: sql<number>`COALESCE(SUM(${orders.totalAmount}), 0)`,
+    })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.merchantId, merchantId),
+        eq(orders.customerPhone, customerPhone)
+      )
+    );
+
+  // Get loyalty points
+  const loyaltyData = await db
+    .select()
+    .from(loyaltyPoints)
+    .where(
+      and(
+        eq(loyaltyPoints.merchantId, merchantId),
+        eq(loyaltyPoints.customerPhone, customerPhone)
+      )
+    )
+    .limit(1);
+
+  // Get conversations
+  const customerConversations = await db
+    .select()
+    .from(conversations)
+    .where(
+      and(
+        eq(conversations.merchantId, merchantId),
+        eq(conversations.customerPhone, customerPhone)
+      )
+    )
+    .orderBy(desc(conversations.lastMessageAt));
+
+  return {
+    ...customerConv[0],
+    orderCount: Number(orderStats[0]?.orderCount) || 0,
+    totalSpent: Number(orderStats[0]?.totalSpent) || 0,
+    loyaltyPoints: loyaltyData[0]?.points || 0,
+    status: determineCustomerStatus(customerConv[0].lastMessageAt),
+    orders: customerOrders,
+    conversations: customerConversations,
+  };
+}
+
+/**
+ * Get customer statistics for a merchant
+ */
+export async function getCustomerStats(merchantId: number): Promise<{
+  total: number;
+  active: number;
+  new: number;
+  inactive: number;
+}> {
+  const db = await getDb();
+  if (!db) return { total: 0, active: 0, new: 0, inactive: 0 };
+
+  const customers = await getCustomersByMerchant(merchantId);
+
+  return {
+    total: customers.length,
+    active: customers.filter(c => c.status === 'active').length,
+    new: customers.filter(c => c.status === 'new').length,
+    inactive: customers.filter(c => c.status === 'inactive').length,
+  };
+}
+
+/**
+ * Search customers by name or phone
+ */
+export async function searchCustomers(
+  merchantId: number,
+  query: string
+): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const allCustomers = await getCustomersByMerchant(merchantId);
+
+  return allCustomers.filter(
+    (customer) =>
+      customer.customerName?.toLowerCase().includes(query.toLowerCase()) ||
+      customer.customerPhone.includes(query)
+  );
+}
