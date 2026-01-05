@@ -466,21 +466,11 @@ export async function chatWithSari(params: {
 
     return response.trim();
   } catch (error: any) {
-    console.error('[chatWithSari] Error occurred:', {
-      message: error.message,
-      stack: error.stack,
-      merchantId: params.merchantId,
-      customerPhone: params.customerPhone,
-      errorType: error.constructor.name,
-    });
+    console.error('Error in chatWithSari:', error);
     
     // Intelligent fallback based on error type
     if (error.message?.includes('rate limit')) {
       return 'عذراً، الضغط كبير شوي الحين 😅 ممكن تعيد رسالتك بعد ثواني؟';
-    }
-    
-    if (error.message?.includes('Merchant not found')) {
-      return 'عذراً، حصل خطأ في النظام. يرجى التواصل مع الدعم الفني.';
     }
     
     return 'عذراً، حصل خطأ مؤقت. ممكن تعيد رسالتك مرة ثانية؟ 🙏';

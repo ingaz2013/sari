@@ -13,7 +13,10 @@ export const loyaltyRouter = router({
       throw new TRPCError({ code: "NOT_FOUND", message: "Merchant not found" });
     }
 
-    let settings = await loyaltyDb.getOrCreateLoyaltySettings(merchant.id);
+    let settings = await loyaltyDb.getLoyaltySettings(merchant.id);
+    if (!settings) {
+      settings = await loyaltyDb.initializeLoyaltySettings(merchant.id);
+    }
 
     return settings;
   }),
