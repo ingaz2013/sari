@@ -184,6 +184,9 @@ import {
   merchantPaymentSettings,
   MerchantPaymentSettings,
   InsertMerchantPaymentSettings,
+  platformIntegrations,
+  PlatformIntegration,
+  InsertPlatformIntegration,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -6342,3 +6345,376 @@ export async function hasMerchantValidTapConfig(merchantId: number): Promise<boo
   
   return true;
 }
+
+
+// ============================================
+// Platform Integrations (Zid, Calendly, etc.)
+// ============================================
+
+/**
+ * Get integration by type for a merchant
+ */
+export async function getIntegrationByType(merchantId: number, type: 'zid' | 'calendly' | 'shopify' | 'woocommerce'): Promise<PlatformIntegration | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select()
+    .from(platformIntegrations)
+    .where(and(
+      eq(platformIntegrations.merchantId, merchantId),
+      eq(platformIntegrations.platformType, type)
+    ))
+    .limit(1);
+
+  return result[0];
+}
+
+/**
+ * Create a new integration
+ */
+export async function createIntegration(data: {
+  merchantId: number;
+  type: 'zid' | 'calendly' | 'shopify' | 'woocommerce';
+  storeName?: string;
+  storeUrl?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  isActive?: boolean;
+  settings?: string;
+}): Promise<PlatformIntegration | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  // Delete existing integration of same type
+  await deleteIntegrationByType(data.merchantId, data.type);
+
+  const result = await db.insert(platformIntegrations).values({
+    merchantId: data.merchantId,
+    platformType: data.type,
+    storeName: data.storeName,
+    storeUrl: data.storeUrl,
+    accessToken: data.accessToken,
+    refreshToken: data.refreshToken,
+    isActive: data.isActive !== false ? 1 : 0,
+    settings: data.settings,
+  });
+
+  return getIntegrationByType(data.merchantId, data.type);
+}
+
+/**
+ * Delete integration by type
+ */
+export async function deleteIntegrationByType(merchantId: number, type: 'zid' | 'calendly' | 'shopify' | 'woocommerce'): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.delete(platformIntegrations)
+    .where(and(
+      eq(platformIntegrations.merchantId, merchantId),
+      eq(platformIntegrations.platformType, type)
+    ));
+}
+
+/**
+ * Update integration last sync time
+ */
+export async function updateIntegrationLastSync(integrationId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(platformIntegrations)
+    .set({ lastSyncAt: new Date().toISOString().slice(0, 19).replace('T', ' ') })
+    .where(eq(platformIntegrations.id, integrationId));
+}
+
+/**
+ * Update integration settings
+ */
+export async function updateIntegrationSettings(integrationId: number, settings: Record<string, any>): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(platformIntegrations)
+    .set({ settings: JSON.stringify(settings) })
+    .where(eq(platformIntegrations.id, integrationId));
+}
+
+/**
+ * Get all integrations for a merchant
+ */
+export async function getIntegrationsByMerchant(merchantId: number): Promise<PlatformIntegration[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select()
+    .from(platformIntegrations)
+    .where(eq(platformIntegrations.merchantId, merchantId));
+}
+
+/**
+ * Upsert product from Zid
+ */
+export async function upsertProductFromZid(merchantId: number, zidProduct: any): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  // Check if product exists by external ID
+  const existing = await db.select()
+    .from(products)
+    .where(and(
+      eq(products.merchantId, merchantId),
+      eq(products.externalId, String(zidProduct.id))
+    ))
+    .limit(1);
+
+  const productData = {
+    merchantId,
+    externalId: String(zidProduct.id),
+    name: zidProduct.name || zidProduct.title,
+    description: zidProduct.description,
+    price: Math.round((zidProduct.price || 0) * 100), // Convert to cents
+    stock: zidProduct.quantity || zidProduct.stock || 0,
+    imageUrl: zidProduct.image?.url || zidProduct.images?.[0]?.url,
+    category: zidProduct.category?.name,
+    isActive: zidProduct.is_active !== false ? 1 : 0,
+    source: 'zid' as const,
+  };
+
+  if (existing[0]) {
+    await db.update(products)
+      .set(productData)
+      .where(eq(products.id, existing[0].id));
+  } else {
+    await db.insert(products).values(productData);
+  }
+}
+
+/**
+ * Upsert order from Zid
+ */
+export async function upsertOrderFromZid(merchantId: number, zidOrder: any): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  // Check if order exists by external ID
+  const existing = await db.select()
+    .from(orders)
+    .where(and(
+      eq(orders.merchantId, merchantId),
+      eq(orders.externalId, String(zidOrder.id))
+    ))
+    .limit(1);
+
+  const orderData = {
+    merchantId,
+    externalId: String(zidOrder.id),
+    customerPhone: zidOrder.customer?.phone || zidOrder.phone,
+    customerName: zidOrder.customer?.name || zidOrder.name,
+    totalAmount: Math.round((zidOrder.total || 0) * 100),
+    status: mapZidOrderStatus(zidOrder.status),
+    items: JSON.stringify(zidOrder.items || zidOrder.products || []),
+    source: 'zid',
+  };
+
+  if (existing[0]) {
+    await db.update(orders)
+      .set(orderData)
+      .where(eq(orders.id, existing[0].id));
+  } else {
+    await db.insert(orders).values(orderData);
+  }
+}
+
+/**
+ * Update product inventory from Zid
+ */
+export async function updateProductInventoryFromZid(merchantId: number, payload: any): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(products)
+    .set({ stock: payload.quantity || payload.stock || 0 })
+    .where(and(
+      eq(products.merchantId, merchantId),
+      eq(products.externalId, String(payload.product_id))
+    ));
+}
+
+/**
+ * Map Zid order status to internal status
+ */
+function mapZidOrderStatus(status: string): string {
+  const statusMap: Record<string, string> = {
+    'pending': 'pending',
+    'processing': 'processing',
+    'shipped': 'shipped',
+    'delivered': 'delivered',
+    'cancelled': 'cancelled',
+    'refunded': 'refunded',
+  };
+  return statusMap[status?.toLowerCase()] || 'pending';
+}
+
+/**
+ * Upsert appointment from Calendly
+ */
+export async function upsertAppointmentFromCalendly(merchantId: number, calendlyEvent: any): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const eventUri = calendlyEvent.uri || calendlyEvent.payload?.event?.uri;
+  
+  // Check if appointment exists by external ID
+  const existing = await db.select()
+    .from(appointments)
+    .where(and(
+      eq(appointments.merchantId, merchantId),
+      eq(appointments.externalId, eventUri)
+    ))
+    .limit(1);
+
+  const event = calendlyEvent.payload?.event || calendlyEvent;
+  const invitee = calendlyEvent.payload?.invitee;
+
+  const appointmentData = {
+    merchantId,
+    externalId: eventUri,
+    customerPhone: invitee?.phone_number || '',
+    customerName: invitee?.name || event.name,
+    customerEmail: invitee?.email,
+    startTime: event.start_time,
+    endTime: event.end_time,
+    status: 'confirmed',
+    notes: event.location?.location || '',
+    source: 'calendly',
+  };
+
+  if (existing[0]) {
+    await db.update(appointments)
+      .set(appointmentData)
+      .where(eq(appointments.id, existing[0].id));
+  } else {
+    await db.insert(appointments).values(appointmentData);
+  }
+}
+
+/**
+ * Cancel appointment from Calendly
+ */
+export async function cancelAppointmentFromCalendly(merchantId: number, payload: any): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const eventUri = payload.payload?.event?.uri;
+  
+  await db.update(appointments)
+    .set({ status: 'cancelled' })
+    .where(and(
+      eq(appointments.merchantId, merchantId),
+      eq(appointments.externalId, eventUri)
+    ));
+}
+
+/**
+ * Get appointment stats by merchant
+ */
+export async function getAppointmentStatsByMerchant(merchantId: number): Promise<{
+  total: number;
+  upcoming: number;
+  eventTypes: number;
+  remindersSent: number;
+}> {
+  const db = await getDb();
+  if (!db) return { total: 0, upcoming: 0, eventTypes: 0, remindersSent: 0 };
+
+  const now = new Date().toISOString();
+
+  const totalResult = await db.select({ count: sql<number>`count(*)` })
+    .from(appointments)
+    .where(eq(appointments.merchantId, merchantId));
+
+  const upcomingResult = await db.select({ count: sql<number>`count(*)` })
+    .from(appointments)
+    .where(and(
+      eq(appointments.merchantId, merchantId),
+      gte(appointments.startTime, now),
+      eq(appointments.status, 'confirmed')
+    ));
+
+  const reminderResult = await db.select({ count: sql<number>`count(*)` })
+    .from(appointments)
+    .where(and(
+      eq(appointments.merchantId, merchantId),
+      eq(appointments.reminder24hSent, 1)
+    ));
+
+  return {
+    total: Number(totalResult[0]?.count) || 0,
+    upcoming: Number(upcomingResult[0]?.count) || 0,
+    eventTypes: 0, // This would need to be fetched from Calendly API
+    remindersSent: Number(reminderResult[0]?.count) || 0,
+  };
+}
+
+/**
+ * Get product count by merchant
+ */
+export async function getProductCountByMerchant(merchantId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(products)
+    .where(eq(products.merchantId, merchantId));
+
+  return Number(result[0]?.count) || 0;
+}
+
+/**
+ * Get order count by merchant
+ */
+export async function getOrderCountByMerchant(merchantId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  const result = await db.select({ count: sql<number>`count(*)` })
+    .from(orders)
+    .where(eq(orders.merchantId, merchantId));
+
+  return Number(result[0]?.count) || 0;
+}
+
+/**
+ * Get customer count by merchant
+ */
+export async function getCustomerCountByMerchant(merchantId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+
+  // Count unique customers from conversations
+  const result = await db.select({ count: sql<number>`count(distinct customer_phone)` })
+    .from(conversations)
+    .where(eq(conversations.merchantId, merchantId));
+
+  return Number(result[0]?.count) || 0;
+}
+
+/**
+ * Get sync logs by merchant and type
+ */
+export async function getSyncLogsByMerchant(merchantId: number, typePrefix: string, limit: number = 10): Promise<SyncLog[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select()
+    .from(syncLogs)
+    .where(and(
+      eq(syncLogs.merchantId, merchantId),
+      sql`${syncLogs.type} LIKE ${typePrefix + '%'}`
+    ))
+    .orderBy(desc(syncLogs.createdAt))
+    .limit(limit);
+}
+
+

@@ -1206,6 +1206,22 @@ export const setupWizardProgress = mysqlTable("setup_wizard_progress", {
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 });
 
+// Platform Integrations (Zid, Calendly, etc.)
+export const platformIntegrations = mysqlTable("platform_integrations", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	platformType: mysqlEnum("platform_type", ['zid', 'calendly', 'shopify', 'woocommerce']).notNull(),
+	storeName: varchar("store_name", { length: 255 }),
+	storeUrl: varchar("store_url", { length: 500 }),
+	accessToken: text("access_token"), // encrypted
+	refreshToken: text("refresh_token"), // encrypted
+	isActive: tinyint("is_active").default(1).notNull(),
+	settings: text(), // JSON settings
+	lastSyncAt: timestamp("last_sync_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
 export const googleIntegrations = mysqlTable("google_integrations", {
 	id: int().autoincrement().notNull().primaryKey(),
 	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
@@ -1324,6 +1340,8 @@ export type SetupWizardProgress = InferSelectModel<typeof setupWizardProgress>;
 export type InsertSetupWizardProgress = InferInsertModel<typeof setupWizardProgress>;
 export type GoogleIntegration = InferSelectModel<typeof googleIntegrations>;
 export type InsertGoogleIntegration = InferInsertModel<typeof googleIntegrations>;
+export type PlatformIntegration = InferSelectModel<typeof platformIntegrations>;
+export type InsertPlatformIntegration = InferInsertModel<typeof platformIntegrations>;
 
 // ============================================
 // Payment System Tables - Tap Payments Integration

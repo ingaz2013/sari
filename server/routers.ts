@@ -8,6 +8,8 @@ import { googleAuthRouter } from "./routers-google-auth";
 import { sheetsRouter } from "./routers-sheets";
 import { loyaltyRouter } from "./routers-loyalty";
 import { aiSuggestionsRouter } from "./routers-ai-suggestions";
+import { zidRouter } from "./integrations/zid";
+import { calendlyRouter } from "./integrations/calendly";
 import { syncGreenAPIData } from "./data-sync/green-api-sync";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from '@trpc/server';
@@ -5859,6 +5861,10 @@ export const appRouter = router({
   sheets: sheetsRouter,
   
   loyalty: loyaltyRouter,
+  
+  // Platform Integrations
+  zid: zidRouter,
+  calendly: calendlyRouter,
   
   // ============================================
   // Services Management

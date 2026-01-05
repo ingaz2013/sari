@@ -4,7 +4,8 @@ import { Card } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowRight, Smile, Briefcase, Coffee, MessageSquare, Globe } from 'lucide-react';
+import { ArrowRight, Smile, Briefcase, Coffee, MessageSquare, Globe, Eye } from 'lucide-react';
+import PreviewChat from '@/components/PreviewChat';
 
 interface PersonalityStepProps {
   wizardData: Record<string, any>;
@@ -182,20 +183,25 @@ export default function PersonalityStep({
         </p>
       </div>
 
-      {/* Preview */}
-      <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-dashed border-primary/30">
-        <div className="p-5">
-          <h4 className="font-semibold text-gray-900 mb-3 flex items-center space-x-2 space-x-reverse">
-            <MessageSquare className="h-4 w-4 text-primary" />
-            <span>معاينة الرسالة</span>
-          </h4>
-          <div className="bg-white rounded-lg p-4 shadow-sm">
-            <p className="text-sm text-gray-800">
-              {welcomeMessage || selectedTone?.example || 'أهلاً وسهلاً! كيف يمكنني مساعدتك؟'}
-            </p>
-          </div>
-        </div>
-      </Card>
+      {/* Interactive Preview */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold flex items-center space-x-2 space-x-reverse">
+          <Eye className="h-5 w-5 text-primary" />
+          <span>معاينة تفاعلية</span>
+        </Label>
+        <p className="text-sm text-gray-600 mb-4">
+          جرب كيف سيتفاعل ساري مع عملائك بناءً على الإعدادات التي اخترتها
+        </p>
+        <PreviewChat
+          businessName={wizardData.businessName || 'متجرك'}
+          botTone={botTone as 'friendly' | 'professional' | 'casual'}
+          botLanguage={botLanguage as 'ar' | 'en' | 'both'}
+          products={wizardData.products || []}
+          services={wizardData.services || []}
+          welcomeMessage={welcomeMessage}
+          className="max-w-md mx-auto"
+        />
+      </div>
 
       {/* Next Button */}
       <div className="flex justify-center pt-4">

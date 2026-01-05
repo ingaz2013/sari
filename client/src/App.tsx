@@ -73,6 +73,8 @@ import AdvancedAnalytics from "./pages/merchant/AdvancedAnalytics";
 import AdvancedAnalyticsDashboard from "./pages/merchant/AdvancedAnalyticsDashboard";
 import DataSync from "./pages/merchant/DataSync";
 import PerformanceMetrics from "./pages/merchant/PerformanceMetrics";
+import ZidIntegration from "./pages/merchant/ZidIntegration";
+import CalendlyIntegration from "./pages/merchant/CalendlyIntegration";
 import SetupWizard from "./pages/SetupWizard";
 import CalendarSettings from "./pages/CalendarSettings";
 import CalendarPage from "./pages/CalendarPage";
@@ -205,6 +207,18 @@ function Router() {
       <Route path="/merchant/salla">
         <DashboardLayout>
           <SallaIntegration />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/integrations/zid">
+        <DashboardLayout>
+          <ZidIntegration />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/integrations/calendly">
+        <DashboardLayout>
+          <CalendlyIntegration />
         </DashboardLayout>
       </Route>
       

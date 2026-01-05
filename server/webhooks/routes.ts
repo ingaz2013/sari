@@ -3,6 +3,9 @@ import { handleTapWebhook, verifyTapSignature } from './tap';
 import { handlePayPalWebhook, verifyPayPalSignature } from './paypal';
 import { handleGreenAPIWebhook } from './greenapi';
 import { handleSallaWebhook } from './salla';
+import { handleZidWebhook } from '../integrations/zid';
+import { handleCalendlyWebhook } from '../integrations/calendly';
+import * as db from '../db';
 import { getPaymentGatewayByName } from '../db';
 import { ENV } from '../_core/env';
 
@@ -116,6 +119,113 @@ router.post('/salla', async (req: Request, res: Response) => {
     await handleSallaWebhook(req, res);
   } catch (error) {
     console.error('[Salla Webhook] Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Zid Webhook Endpoint
+ * POST /api/webhooks/zid/:merchantId
+ */
+router.post('/zid/:merchantId', async (req: Request, res: Response) => {
+  try {
+    const merchantId = parseInt(req.params.merchantId);
+    
+    if (isNaN(merchantId)) {
+      return res.status(400).json({ error: 'Invalid merchant ID' });
+    }
+
+    console.log(`[Zid Webhook] Merchant ${merchantId} - Received:`, JSON.stringify(req.body, null, 2));
+    
+    // Verify webhook signature (if Zid provides one)
+    const signature = req.headers['x-zid-signature'] as string;
+    // TODO: Implement signature verification when Zid provides documentation
+    
+    // Extract event type from payload
+    const event = req.body.event || req.body.type || 'unknown';
+    const payload = req.body.data || req.body.payload || req.body;
+
+    // Process webhook
+    await handleZidWebhook(merchantId, event, payload);
+    
+    return res.status(200).json({ message: 'Webhook processed successfully' });
+  } catch (error) {
+    console.error('[Zid Webhook] Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Calendly Webhook Endpoint
+ * POST /api/webhooks/calendly/:merchantId
+ */
+router.post('/calendly/:merchantId', async (req: Request, res: Response) => {
+  try {
+    const merchantId = parseInt(req.params.merchantId);
+    
+    if (isNaN(merchantId)) {
+      return res.status(400).json({ error: 'Invalid merchant ID' });
+    }
+
+    console.log(`[Calendly Webhook] Merchant ${merchantId} - Received:`, JSON.stringify(req.body, null, 2));
+    
+    // Verify webhook signature
+    const signature = req.headers['calendly-webhook-signature'] as string;
+    // TODO: Implement signature verification
+    // Calendly uses HMAC-SHA256 with the webhook signing key
+    
+    // Extract event type from payload
+    const event = req.body.event || 'unknown';
+    const payload = req.body;
+
+    // Process webhook
+    await handleCalendlyWebhook(merchantId, event, payload);
+    
+    return res.status(200).json({ message: 'Webhook processed successfully' });
+  } catch (error) {
+    console.error('[Calendly Webhook] Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * Generic Integration Webhook Status
+ * GET /api/webhooks/status/:platform/:merchantId
+ */
+router.get('/status/:platform/:merchantId', async (req: Request, res: Response) => {
+  try {
+    const { platform, merchantId } = req.params;
+    const parsedMerchantId = parseInt(merchantId);
+    
+    if (isNaN(parsedMerchantId)) {
+      return res.status(400).json({ error: 'Invalid merchant ID' });
+    }
+
+    const validPlatforms = ['zid', 'calendly', 'salla'];
+    if (!validPlatforms.includes(platform)) {
+      return res.status(400).json({ error: 'Invalid platform' });
+    }
+
+    // Get integration status
+    const integration = await db.getIntegrationByType(
+      parsedMerchantId, 
+      platform as 'zid' | 'calendly' | 'shopify' | 'woocommerce'
+    );
+
+    if (!integration) {
+      return res.status(404).json({ 
+        connected: false,
+        message: 'Integration not found' 
+      });
+    }
+
+    return res.status(200).json({
+      connected: !!integration.isActive,
+      lastSync: integration.lastSyncAt,
+      webhookUrl: `${req.protocol}://${req.get('host')}/api/webhooks/${platform}/${merchantId}`,
+    });
+  } catch (error) {
+    console.error('[Webhook Status] Error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
