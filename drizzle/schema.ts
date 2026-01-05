@@ -227,6 +227,11 @@ export const merchants = mysqlTable("merchants", {
 	description: text(),
 	workingHoursType: mysqlEnum(['24_7','weekdays','custom']).default('weekdays'),
 	workingHours: text(), // JSON: {"saturday": {"start": "09:00", "end": "18:00"}}
+	// Smart Website Analysis fields
+	websiteUrl: varchar("website_url", { length: 500 }),
+	platformType: mysqlEnum("platform_type", ['salla', 'zid', 'shopify', 'woocommerce', 'custom', 'unknown']),
+	lastAnalysisDate: timestamp("last_analysis_date", { mode: 'string' }),
+	analysisStatus: mysqlEnum("analysis_status", ['pending', 'analyzing', 'completed', 'failed']).default('pending'),
 });
 
 export const messages = mysqlTable("messages", {
@@ -1844,3 +1849,67 @@ export const competitorProducts = mysqlTable("competitor_products", {
 	index("competitor_products_competitor_id_idx").on(table.competitorId),
 	index("competitor_products_merchant_id_idx").on(table.merchantId),
 ]);
+
+// ============================================
+// Smart Website Analysis Tables
+// ============================================
+
+export const discoveredPages = mysqlTable("discovered_pages", {
+	id: int().autoincrement().notNull(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	
+	// Page Information
+	pageType: mysqlEnum("page_type", ['about', 'shipping', 'returns', 'faq', 'contact', 'privacy', 'terms', 'other']).notNull(),
+	title: varchar({ length: 500 }),
+	url: varchar({ length: 1000 }).notNull(),
+	content: text(), // Extracted text content
+	
+	// Metadata
+	isActive: tinyint("is_active").default(1).notNull(),
+	useInBot: tinyint("use_in_bot").default(1).notNull(), // Whether to use this page in bot responses
+	
+	// Timestamps
+	discoveredAt: timestamp("discovered_at", { mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("discovered_pages_merchant_id_idx").on(table.merchantId),
+	index("discovered_pages_page_type_idx").on(table.pageType),
+]);
+
+export const extractedFaqs = mysqlTable("extracted_faqs", {
+	id: int().autoincrement().notNull(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	pageId: int("page_id").references(() => discoveredPages.id, { onDelete: "set null" }), // Source page
+	
+	// FAQ Content
+	question: text().notNull(),
+	answer: text().notNull(),
+	category: varchar({ length: 255 }), // e.g., "shipping", "returns", "payment"
+	
+	// Metadata
+	isActive: tinyint("is_active").default(1).notNull(),
+	useInBot: tinyint("use_in_bot").default(1).notNull(), // Whether to use this FAQ in bot responses
+	priority: int().default(0).notNull(), // Higher priority FAQs shown first
+	
+	// Usage Stats
+	usageCount: int("usage_count").default(0).notNull(), // How many times this FAQ was used in bot responses
+	lastUsedAt: timestamp("last_used_at", { mode: 'string' }),
+	
+	// Timestamps
+	extractedAt: timestamp("extracted_at", { mode: 'string' }).defaultNow().notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("extracted_faqs_merchant_id_idx").on(table.merchantId),
+	index("extracted_faqs_category_idx").on(table.category),
+	index("extracted_faqs_page_id_idx").on(table.pageId),
+]);
+
+// Type exports for the new tables
+export type DiscoveredPage = InferSelectModel<typeof discoveredPages>;
+export type NewDiscoveredPage = InferInsertModel<typeof discoveredPages>;
+export type ExtractedFaq = InferSelectModel<typeof extractedFaqs>;
+export type NewExtractedFaq = InferInsertModel<typeof extractedFaqs>;

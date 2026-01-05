@@ -7117,5 +7117,8 @@ export const appRouter = router({
 
   // Website Analysis
   websiteAnalysis: websiteAnalysisRouter,
+
+  // Smart Website Analysis
+  analysis: require('./routers/analysis').analysisRouter,
 });
 export type AppRouter = typeof appRouter;

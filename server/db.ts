@@ -207,6 +207,8 @@ import {
   extractedProducts,
   competitorAnalyses,
   competitorProducts,
+  discoveredPages,
+  extractedFaqs,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -7487,4 +7489,440 @@ export async function getCompetitorProductsByCompetitorId(competitorId: number):
     price: product.price ? parseFloat(product.price) : null,
     priceDifference: product.priceDifference ? parseFloat(product.priceDifference) : null,
   }));
+}
+
+
+// ============================================
+// Smart Website Analysis Functions
+// ============================================
+
+/**
+ * Update merchant website analysis info
+ */
+export async function updateMerchantWebsiteInfo(data: {
+  merchantId: number;
+  websiteUrl?: string;
+  platformType?: 'salla' | 'zid' | 'shopify' | 'woocommerce' | 'custom' | 'unknown';
+  analysisStatus?: 'pending' | 'analyzing' | 'completed' | 'failed';
+  lastAnalysisDate?: Date;
+}): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const updateData: any = {};
+  if (data.websiteUrl !== undefined) updateData.websiteUrl = data.websiteUrl;
+  if (data.platformType !== undefined) updateData.platformType = data.platformType;
+  if (data.analysisStatus !== undefined) updateData.analysisStatus = data.analysisStatus;
+  if (data.lastAnalysisDate !== undefined) updateData.lastAnalysisDate = data.lastAnalysisDate.toISOString();
+
+  await db
+    .update(merchants)
+    .set(updateData)
+    .where(eq(merchants.id, data.merchantId));
+}
+
+/**
+ * Get merchant website analysis info
+ */
+export async function getMerchantWebsiteInfo(merchantId: number): Promise<{
+  websiteUrl: string | null;
+  platformType: string | null;
+  analysisStatus: string | null;
+  lastAnalysisDate: string | null;
+} | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db
+    .select({
+      websiteUrl: merchants.websiteUrl,
+      platformType: merchants.platformType,
+      analysisStatus: merchants.analysisStatus,
+      lastAnalysisDate: merchants.lastAnalysisDate,
+    })
+    .from(merchants)
+    .where(eq(merchants.id, merchantId))
+    .limit(1);
+
+  return result[0] || null;
+}
+
+/**
+ * Create discovered page
+ */
+export async function createDiscoveredPage(data: {
+  merchantId: number;
+  pageType: 'about' | 'shipping' | 'returns' | 'faq' | 'contact' | 'privacy' | 'terms' | 'other';
+  title?: string;
+  url: string;
+  content?: string;
+  isActive?: boolean;
+  useInBot?: boolean;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(discoveredPages).values({
+    merchantId: data.merchantId,
+    pageType: data.pageType,
+    title: data.title,
+    url: data.url,
+    content: data.content,
+    isActive: data.isActive !== undefined ? (data.isActive ? 1 : 0) : 1,
+    useInBot: data.useInBot !== undefined ? (data.useInBot ? 1 : 0) : 1,
+    discoveredAt: new Date().toISOString(),
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Get discovered pages by merchant ID
+ */
+export async function getDiscoveredPagesByMerchantId(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(discoveredPages)
+    .where(eq(discoveredPages.merchantId, merchantId))
+    .orderBy(discoveredPages.pageType);
+
+  return result.map(page => ({
+    ...page,
+    isActive: page.isActive === 1,
+    useInBot: page.useInBot === 1,
+  }));
+}
+
+/**
+ * Get discovered pages by type
+ */
+export async function getDiscoveredPagesByType(
+  merchantId: number,
+  pageType: 'about' | 'shipping' | 'returns' | 'faq' | 'contact' | 'privacy' | 'terms' | 'other'
+): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(discoveredPages)
+    .where(
+      and(
+        eq(discoveredPages.merchantId, merchantId),
+        eq(discoveredPages.pageType, pageType)
+      )
+    );
+
+  return result.map(page => ({
+    ...page,
+    isActive: page.isActive === 1,
+    useInBot: page.useInBot === 1,
+  }));
+}
+
+/**
+ * Update discovered page
+ */
+export async function updateDiscoveredPage(
+  pageId: number,
+  data: {
+    title?: string;
+    url?: string;
+    content?: string;
+    isActive?: boolean;
+    useInBot?: boolean;
+  }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const updateData: any = {};
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.url !== undefined) updateData.url = data.url;
+  if (data.content !== undefined) updateData.content = data.content;
+  if (data.isActive !== undefined) updateData.isActive = data.isActive ? 1 : 0;
+  if (data.useInBot !== undefined) updateData.useInBot = data.useInBot ? 1 : 0;
+
+  await db
+    .update(discoveredPages)
+    .set(updateData)
+    .where(eq(discoveredPages.id, pageId));
+}
+
+/**
+ * Delete discovered page
+ */
+export async function deleteDiscoveredPage(pageId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db.delete(discoveredPages).where(eq(discoveredPages.id, pageId));
+}
+
+/**
+ * Delete all discovered pages for merchant
+ */
+export async function deleteAllDiscoveredPages(merchantId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db.delete(discoveredPages).where(eq(discoveredPages.merchantId, merchantId));
+}
+
+/**
+ * Create extracted FAQ
+ */
+export async function createExtractedFaq(data: {
+  merchantId: number;
+  pageId?: number;
+  question: string;
+  answer: string;
+  category?: string;
+  isActive?: boolean;
+  useInBot?: boolean;
+  priority?: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(extractedFaqs).values({
+    merchantId: data.merchantId,
+    pageId: data.pageId,
+    question: data.question,
+    answer: data.answer,
+    category: data.category,
+    isActive: data.isActive !== undefined ? (data.isActive ? 1 : 0) : 1,
+    useInBot: data.useInBot !== undefined ? (data.useInBot ? 1 : 0) : 1,
+    priority: data.priority || 0,
+    usageCount: 0,
+    extractedAt: new Date().toISOString(),
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Get extracted FAQs by merchant ID
+ */
+export async function getExtractedFaqsByMerchantId(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(extractedFaqs)
+    .where(eq(extractedFaqs.merchantId, merchantId))
+    .orderBy(extractedFaqs.priority, extractedFaqs.category);
+
+  return result.map(faq => ({
+    ...faq,
+    isActive: faq.isActive === 1,
+    useInBot: faq.useInBot === 1,
+  }));
+}
+
+/**
+ * Get extracted FAQs by category
+ */
+export async function getExtractedFaqsByCategory(
+  merchantId: number,
+  category: string
+): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(extractedFaqs)
+    .where(
+      and(
+        eq(extractedFaqs.merchantId, merchantId),
+        eq(extractedFaqs.category, category)
+      )
+    )
+    .orderBy(extractedFaqs.priority);
+
+  return result.map(faq => ({
+    ...faq,
+    isActive: faq.isActive === 1,
+    useInBot: faq.useInBot === 1,
+  }));
+}
+
+/**
+ * Get active FAQs for bot (useInBot = true, isActive = true)
+ */
+export async function getActiveFaqsForBot(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(extractedFaqs)
+    .where(
+      and(
+        eq(extractedFaqs.merchantId, merchantId),
+        eq(extractedFaqs.isActive, 1),
+        eq(extractedFaqs.useInBot, 1)
+      )
+    )
+    .orderBy(extractedFaqs.priority);
+
+  return result.map(faq => ({
+    ...faq,
+    isActive: faq.isActive === 1,
+    useInBot: faq.useInBot === 1,
+  }));
+}
+
+/**
+ * Update extracted FAQ
+ */
+export async function updateExtractedFaq(
+  faqId: number,
+  data: {
+    question?: string;
+    answer?: string;
+    category?: string;
+    isActive?: boolean;
+    useInBot?: boolean;
+    priority?: number;
+  }
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const updateData: any = {};
+  if (data.question !== undefined) updateData.question = data.question;
+  if (data.answer !== undefined) updateData.answer = data.answer;
+  if (data.category !== undefined) updateData.category = data.category;
+  if (data.isActive !== undefined) updateData.isActive = data.isActive ? 1 : 0;
+  if (data.useInBot !== undefined) updateData.useInBot = data.useInBot ? 1 : 0;
+  if (data.priority !== undefined) updateData.priority = data.priority;
+
+  await db
+    .update(extractedFaqs)
+    .set(updateData)
+    .where(eq(extractedFaqs.id, faqId));
+}
+
+/**
+ * Increment FAQ usage count
+ */
+export async function incrementFaqUsageCount(faqId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db
+    .update(extractedFaqs)
+    .set({
+      usageCount: sql`${extractedFaqs.usageCount} + 1`,
+      lastUsedAt: new Date().toISOString(),
+    })
+    .where(eq(extractedFaqs.id, faqId));
+}
+
+/**
+ * Delete extracted FAQ
+ */
+export async function deleteExtractedFaq(faqId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db.delete(extractedFaqs).where(eq(extractedFaqs.id, faqId));
+}
+
+/**
+ * Delete all extracted FAQs for merchant
+ */
+export async function deleteAllExtractedFaqs(merchantId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db.delete(extractedFaqs).where(eq(extractedFaqs.merchantId, merchantId));
+}
+
+/**
+ * Search FAQs by question text
+ */
+export async function searchFaqsByQuestion(
+  merchantId: number,
+  searchQuery: string
+): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(extractedFaqs)
+    .where(
+      and(
+        eq(extractedFaqs.merchantId, merchantId),
+        eq(extractedFaqs.isActive, 1),
+        sql`${extractedFaqs.question} LIKE ${`%${searchQuery}%`}`
+      )
+    )
+    .orderBy(extractedFaqs.priority)
+    .limit(10);
+
+  return result.map(faq => ({
+    ...faq,
+    isActive: faq.isActive === 1,
+    useInBot: faq.useInBot === 1,
+  }));
+}
+
+/**
+ * Get analysis statistics
+ */
+export async function getAnalysisStats(merchantId: number): Promise<{
+  totalPages: number;
+  totalFaqs: number;
+  pagesByType: Record<string, number>;
+  faqsByCategory: Record<string, number>;
+}> {
+  const db = await getDb();
+  if (!db) {
+    return {
+      totalPages: 0,
+      totalFaqs: 0,
+      pagesByType: {},
+      faqsByCategory: {},
+    };
+  }
+
+  // Get total pages
+  const pages = await db
+    .select()
+    .from(discoveredPages)
+    .where(eq(discoveredPages.merchantId, merchantId));
+
+  // Get total FAQs
+  const faqs = await db
+    .select()
+    .from(extractedFaqs)
+    .where(eq(extractedFaqs.merchantId, merchantId));
+
+  // Count pages by type
+  const pagesByType: Record<string, number> = {};
+  pages.forEach(page => {
+    pagesByType[page.pageType] = (pagesByType[page.pageType] || 0) + 1;
+  });
+
+  // Count FAQs by category
+  const faqsByCategory: Record<string, number> = {};
+  faqs.forEach(faq => {
+    const category = faq.category || 'general';
+    faqsByCategory[category] = (faqsByCategory[category] || 0) + 1;
+  });
+
+  return {
+    totalPages: pages.length,
+    totalFaqs: faqs.length,
+    pagesByType,
+    faqsByCategory,
+  };
 }

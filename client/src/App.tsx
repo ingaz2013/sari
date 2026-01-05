@@ -106,6 +106,7 @@ import CustomersManagement from "./pages/CustomersManagement";
 import CustomerDetails from "./pages/CustomerDetails";
 import WebsiteAnalysis from "./pages/WebsiteAnalysis";
 import CompetitorAnalysis from "./pages/CompetitorAnalysis";
+import SmartAnalysis from "./pages/SmartAnalysis";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -574,6 +575,12 @@ function Router() {
       <Route path="/merchant/website-analysis">
         <DashboardLayout>
           <WebsiteAnalysis />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/smart-analysis">
+        <DashboardLayout>
+          <SmartAnalysis />
         </DashboardLayout>
       </Route>
       
