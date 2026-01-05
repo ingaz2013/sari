@@ -125,7 +125,6 @@ export default function TestSari() {
 
   useEffect(() => {
     createConversationMutation.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const saveMessageMutation = trpc.testSari.saveMessage.useMutation();

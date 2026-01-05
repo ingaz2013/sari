@@ -2,14 +2,12 @@ import { type Express } from "express";
 import express from "express";
 import fs from "fs";
 import { type Server } from "http";
+import { nanoid } from "nanoid";
 import path from "path";
+import { createServer as createViteServer } from "vite";
+import viteConfig from "../../vite.config";
 
 export async function setupVite(app: Express, server: Server) {
-  // Dynamic import of Vite only in development mode
-  const { createServer: createViteServer } = await import("vite");
-  const viteConfig = await import("../../vite.config");
-  const { nanoid } = await import("nanoid");
-  
   const serverOptions = {
     middlewareMode: true,
     hmr: { server },
@@ -17,7 +15,7 @@ export async function setupVite(app: Express, server: Server) {
   };
 
   const vite = await createViteServer({
-    ...viteConfig.default,
+    ...viteConfig,
     configFile: false,
     server: serverOptions,
     appType: "custom",
@@ -58,7 +56,7 @@ export async function setupVite(app: Express, server: Server) {
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}`
+        `src="/src/main.tsx?v=${nanoid()}"`
       );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
