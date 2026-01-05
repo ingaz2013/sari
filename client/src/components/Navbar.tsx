@@ -222,6 +222,20 @@ export default function Navbar() {
                 <span className="ml-2">🇬🇧</span>
                 English
               </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => changeLanguage('fr')}
+                className={currentLang === 'fr' ? 'bg-accent' : ''}
+              >
+                <span className="ml-2">🇫🇷</span>
+                Français
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => changeLanguage('tr')}
+                className={currentLang === 'tr' ? 'bg-accent' : ''}
+              >
+                <span className="ml-2">🇹🇷</span>
+                Türkçe
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           
