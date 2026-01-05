@@ -202,6 +202,11 @@ import {
   loyaltyRewards,
   LoyaltyReward,
   InsertLoyaltyReward,
+  websiteAnalyses,
+  websiteInsights,
+  extractedProducts,
+  competitorAnalyses,
+  competitorProducts,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -6942,4 +6947,544 @@ export async function searchCustomers(
       customer.customerName?.toLowerCase().includes(query.toLowerCase()) ||
       customer.customerPhone.includes(query)
   );
+}
+
+// ============================================
+// Website Analysis Functions
+// ============================================
+
+/**
+ * Create a new website analysis
+ */
+export async function createWebsiteAnalysis(data: {
+  merchantId: number;
+  url: string;
+  title?: string;
+  description?: string;
+  industry?: string;
+  language?: string;
+  seoScore?: number;
+  seoIssues?: string[];
+  metaTags?: any;
+  performanceScore?: number;
+  loadTime?: number;
+  pageSize?: number;
+  uxScore?: number;
+  mobileOptimized?: boolean;
+  hasContactInfo?: boolean;
+  hasWhatsapp?: boolean;
+  contentQuality?: number;
+  wordCount?: number;
+  imageCount?: number;
+  videoCount?: number;
+  overallScore?: number;
+  status?: 'pending' | 'analyzing' | 'completed' | 'failed';
+  errorMessage?: string;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(websiteAnalyses).values({
+    merchantId: data.merchantId,
+    url: data.url,
+    title: data.title,
+    description: data.description,
+    industry: data.industry,
+    language: data.language,
+    seoScore: data.seoScore || 0,
+    seoIssues: data.seoIssues ? JSON.stringify(data.seoIssues) : null,
+    metaTags: data.metaTags ? JSON.stringify(data.metaTags) : null,
+    performanceScore: data.performanceScore || 0,
+    loadTime: data.loadTime,
+    pageSize: data.pageSize,
+    uxScore: data.uxScore || 0,
+    mobileOptimized: data.mobileOptimized ? 1 : 0,
+    hasContactInfo: data.hasContactInfo ? 1 : 0,
+    hasWhatsapp: data.hasWhatsapp ? 1 : 0,
+    contentQuality: data.contentQuality || 0,
+    wordCount: data.wordCount || 0,
+    imageCount: data.imageCount || 0,
+    videoCount: data.videoCount || 0,
+    overallScore: data.overallScore || 0,
+    status: data.status || 'pending',
+    errorMessage: data.errorMessage,
+    analyzedAt: data.status === 'completed' ? new Date().toISOString().slice(0, 19).replace('T', ' ') : null,
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Update website analysis
+ */
+export async function updateWebsiteAnalysis(
+  id: number,
+  data: Partial<{
+    title: string;
+    description: string;
+    industry: string;
+    language: string;
+    seoScore: number;
+    seoIssues: string[];
+    metaTags: any;
+    performanceScore: number;
+    loadTime: number;
+    pageSize: number;
+    uxScore: number;
+    mobileOptimized: boolean;
+    hasContactInfo: boolean;
+    hasWhatsapp: boolean;
+    contentQuality: number;
+    wordCount: number;
+    imageCount: number;
+    videoCount: number;
+    overallScore: number;
+    status: 'pending' | 'analyzing' | 'completed' | 'failed';
+    errorMessage: string;
+  }>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const updateData: any = {};
+  
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.industry !== undefined) updateData.industry = data.industry;
+  if (data.language !== undefined) updateData.language = data.language;
+  if (data.seoScore !== undefined) updateData.seoScore = data.seoScore;
+  if (data.seoIssues !== undefined) updateData.seoIssues = JSON.stringify(data.seoIssues);
+  if (data.metaTags !== undefined) updateData.metaTags = JSON.stringify(data.metaTags);
+  if (data.performanceScore !== undefined) updateData.performanceScore = data.performanceScore;
+  if (data.loadTime !== undefined) updateData.loadTime = data.loadTime;
+  if (data.pageSize !== undefined) updateData.pageSize = data.pageSize;
+  if (data.uxScore !== undefined) updateData.uxScore = data.uxScore;
+  if (data.mobileOptimized !== undefined) updateData.mobileOptimized = data.mobileOptimized ? 1 : 0;
+  if (data.hasContactInfo !== undefined) updateData.hasContactInfo = data.hasContactInfo ? 1 : 0;
+  if (data.hasWhatsapp !== undefined) updateData.hasWhatsapp = data.hasWhatsapp ? 1 : 0;
+  if (data.contentQuality !== undefined) updateData.contentQuality = data.contentQuality;
+  if (data.wordCount !== undefined) updateData.wordCount = data.wordCount;
+  if (data.imageCount !== undefined) updateData.imageCount = data.imageCount;
+  if (data.videoCount !== undefined) updateData.videoCount = data.videoCount;
+  if (data.overallScore !== undefined) updateData.overallScore = data.overallScore;
+  if (data.status !== undefined) {
+    updateData.status = data.status;
+    if (data.status === 'completed') {
+      updateData.analyzedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    }
+  }
+  if (data.errorMessage !== undefined) updateData.errorMessage = data.errorMessage;
+
+  await db.update(websiteAnalyses).set(updateData).where(eq(websiteAnalyses.id, id));
+}
+
+/**
+ * Get website analysis by ID
+ */
+export async function getWebsiteAnalysisById(id: number): Promise<any | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(websiteAnalyses).where(eq(websiteAnalyses.id, id));
+  
+  if (result.length === 0) return null;
+
+  const analysis = result[0];
+  return {
+    ...analysis,
+    seoIssues: analysis.seoIssues ? JSON.parse(analysis.seoIssues) : [],
+    metaTags: analysis.metaTags ? JSON.parse(analysis.metaTags) : {},
+    mobileOptimized: !!analysis.mobileOptimized,
+    hasContactInfo: !!analysis.hasContactInfo,
+    hasWhatsapp: !!analysis.hasWhatsapp,
+  };
+}
+
+/**
+ * Get all website analyses for a merchant
+ */
+export async function getWebsiteAnalysesByMerchant(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(websiteAnalyses)
+    .where(eq(websiteAnalyses.merchantId, merchantId))
+    .orderBy(desc(websiteAnalyses.createdAt));
+
+  return result.map(analysis => ({
+    ...analysis,
+    seoIssues: analysis.seoIssues ? JSON.parse(analysis.seoIssues) : [],
+    metaTags: analysis.metaTags ? JSON.parse(analysis.metaTags) : {},
+    mobileOptimized: !!analysis.mobileOptimized,
+    hasContactInfo: !!analysis.hasContactInfo,
+    hasWhatsapp: !!analysis.hasWhatsapp,
+  }));
+}
+
+/**
+ * Delete website analysis
+ */
+export async function deleteWebsiteAnalysis(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db.delete(websiteAnalyses).where(eq(websiteAnalyses.id, id));
+}
+
+// ============================================
+// Website Insights Functions
+// ============================================
+
+/**
+ * Create website insight
+ */
+export async function createWebsiteInsight(data: {
+  analysisId: number;
+  merchantId: number;
+  category: 'seo' | 'performance' | 'ux' | 'content' | 'marketing' | 'security';
+  type: 'strength' | 'weakness' | 'opportunity' | 'threat' | 'recommendation';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  title: string;
+  description: string;
+  recommendation?: string;
+  impact?: string;
+  confidence: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(websiteInsights).values({
+    analysisId: data.analysisId,
+    merchantId: data.merchantId,
+    category: data.category,
+    type: data.type,
+    priority: data.priority,
+    title: data.title,
+    description: data.description,
+    recommendation: data.recommendation,
+    impact: data.impact,
+    aiGenerated: 1,
+    confidence: data.confidence,
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Get insights by analysis ID
+ */
+export async function getInsightsByAnalysisId(analysisId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(websiteInsights)
+    .where(eq(websiteInsights.analysisId, analysisId))
+    .orderBy(desc(websiteInsights.priority), desc(websiteInsights.confidence));
+}
+
+/**
+ * Get insights by merchant ID
+ */
+export async function getInsightsByMerchantId(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(websiteInsights)
+    .where(eq(websiteInsights.merchantId, merchantId))
+    .orderBy(desc(websiteInsights.createdAt));
+}
+
+// ============================================
+// Extracted Products Functions
+// ============================================
+
+/**
+ * Create extracted product
+ */
+export async function createExtractedProduct(data: {
+  analysisId: number;
+  merchantId: number;
+  name: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  imageUrl?: string;
+  productUrl?: string;
+  category?: string;
+  tags?: string[];
+  inStock?: boolean;
+  stockQuantity?: number;
+  confidence: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(extractedProducts).values({
+    analysisId: data.analysisId,
+    merchantId: data.merchantId,
+    name: data.name,
+    description: data.description,
+    price: data.price?.toString(),
+    currency: data.currency || 'SAR',
+    imageUrl: data.imageUrl,
+    productUrl: data.productUrl,
+    category: data.category,
+    tags: data.tags ? JSON.stringify(data.tags) : null,
+    inStock: data.inStock !== false ? 1 : 0,
+    stockQuantity: data.stockQuantity,
+    aiExtracted: 1,
+    confidence: data.confidence,
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Get extracted products by analysis ID
+ */
+export async function getExtractedProductsByAnalysisId(analysisId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(extractedProducts)
+    .where(eq(extractedProducts.analysisId, analysisId))
+    .orderBy(desc(extractedProducts.confidence));
+
+  return result.map(product => ({
+    ...product,
+    price: product.price ? parseFloat(product.price) : null,
+    tags: product.tags ? JSON.parse(product.tags) : [],
+    inStock: !!product.inStock,
+  }));
+}
+
+// ============================================
+// Competitor Analysis Functions
+// ============================================
+
+/**
+ * Create competitor analysis
+ */
+export async function createCompetitorAnalysis(data: {
+  merchantId: number;
+  name: string;
+  url: string;
+  industry?: string;
+  overallScore?: number;
+  seoScore?: number;
+  performanceScore?: number;
+  uxScore?: number;
+  contentScore?: number;
+  avgPrice?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  currency?: string;
+  productCount?: number;
+  strengths?: string[];
+  weaknesses?: string[];
+  opportunities?: string[];
+  status?: 'pending' | 'analyzing' | 'completed' | 'failed';
+  errorMessage?: string;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(competitorAnalyses).values({
+    merchantId: data.merchantId,
+    name: data.name,
+    url: data.url,
+    industry: data.industry,
+    overallScore: data.overallScore || 0,
+    seoScore: data.seoScore || 0,
+    performanceScore: data.performanceScore || 0,
+    uxScore: data.uxScore || 0,
+    contentScore: data.contentScore || 0,
+    avgPrice: data.avgPrice?.toString(),
+    minPrice: data.minPrice?.toString(),
+    maxPrice: data.maxPrice?.toString(),
+    currency: data.currency || 'SAR',
+    productCount: data.productCount || 0,
+    strengths: data.strengths ? JSON.stringify(data.strengths) : null,
+    weaknesses: data.weaknesses ? JSON.stringify(data.weaknesses) : null,
+    opportunities: data.opportunities ? JSON.stringify(data.opportunities) : null,
+    status: data.status || 'pending',
+    errorMessage: data.errorMessage,
+    analyzedAt: data.status === 'completed' ? new Date().toISOString().slice(0, 19).replace('T', ' ') : null,
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Update competitor analysis
+ */
+export async function updateCompetitorAnalysis(
+  id: number,
+  data: Partial<{
+    overallScore: number;
+    seoScore: number;
+    performanceScore: number;
+    uxScore: number;
+    contentScore: number;
+    avgPrice: number;
+    minPrice: number;
+    maxPrice: number;
+    productCount: number;
+    strengths: string[];
+    weaknesses: string[];
+    opportunities: string[];
+    status: 'pending' | 'analyzing' | 'completed' | 'failed';
+    errorMessage: string;
+  }>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const updateData: any = {};
+  
+  if (data.overallScore !== undefined) updateData.overallScore = data.overallScore;
+  if (data.seoScore !== undefined) updateData.seoScore = data.seoScore;
+  if (data.performanceScore !== undefined) updateData.performanceScore = data.performanceScore;
+  if (data.uxScore !== undefined) updateData.uxScore = data.uxScore;
+  if (data.contentScore !== undefined) updateData.contentScore = data.contentScore;
+  if (data.avgPrice !== undefined) updateData.avgPrice = data.avgPrice.toString();
+  if (data.minPrice !== undefined) updateData.minPrice = data.minPrice.toString();
+  if (data.maxPrice !== undefined) updateData.maxPrice = data.maxPrice.toString();
+  if (data.productCount !== undefined) updateData.productCount = data.productCount;
+  if (data.strengths !== undefined) updateData.strengths = JSON.stringify(data.strengths);
+  if (data.weaknesses !== undefined) updateData.weaknesses = JSON.stringify(data.weaknesses);
+  if (data.opportunities !== undefined) updateData.opportunities = JSON.stringify(data.opportunities);
+  if (data.status !== undefined) {
+    updateData.status = data.status;
+    if (data.status === 'completed') {
+      updateData.analyzedAt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    }
+  }
+  if (data.errorMessage !== undefined) updateData.errorMessage = data.errorMessage;
+
+  await db.update(competitorAnalyses).set(updateData).where(eq(competitorAnalyses.id, id));
+}
+
+/**
+ * Get competitor analysis by ID
+ */
+export async function getCompetitorAnalysisById(id: number): Promise<any | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const result = await db.select().from(competitorAnalyses).where(eq(competitorAnalyses.id, id));
+  
+  if (result.length === 0) return null;
+
+  const competitor = result[0];
+  return {
+    ...competitor,
+    avgPrice: competitor.avgPrice ? parseFloat(competitor.avgPrice) : null,
+    minPrice: competitor.minPrice ? parseFloat(competitor.minPrice) : null,
+    maxPrice: competitor.maxPrice ? parseFloat(competitor.maxPrice) : null,
+    strengths: competitor.strengths ? JSON.parse(competitor.strengths) : [],
+    weaknesses: competitor.weaknesses ? JSON.parse(competitor.weaknesses) : [],
+    opportunities: competitor.opportunities ? JSON.parse(competitor.opportunities) : [],
+  };
+}
+
+/**
+ * Get all competitor analyses for a merchant
+ */
+export async function getCompetitorAnalysesByMerchant(merchantId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(competitorAnalyses)
+    .where(eq(competitorAnalyses.merchantId, merchantId))
+    .orderBy(desc(competitorAnalyses.createdAt));
+
+  return result.map(competitor => ({
+    ...competitor,
+    avgPrice: competitor.avgPrice ? parseFloat(competitor.avgPrice) : null,
+    minPrice: competitor.minPrice ? parseFloat(competitor.minPrice) : null,
+    maxPrice: competitor.maxPrice ? parseFloat(competitor.maxPrice) : null,
+    strengths: competitor.strengths ? JSON.parse(competitor.strengths) : [],
+    weaknesses: competitor.weaknesses ? JSON.parse(competitor.weaknesses) : [],
+    opportunities: competitor.opportunities ? JSON.parse(competitor.opportunities) : [],
+  }));
+}
+
+/**
+ * Delete competitor analysis
+ */
+export async function deleteCompetitorAnalysis(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  await db.delete(competitorAnalyses).where(eq(competitorAnalyses.id, id));
+}
+
+// ============================================
+// Competitor Products Functions
+// ============================================
+
+/**
+ * Create competitor product
+ */
+export async function createCompetitorProduct(data: {
+  competitorId: number;
+  merchantId: number;
+  name: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+  imageUrl?: string;
+  productUrl?: string;
+  category?: string;
+  similarToMerchantProduct?: number;
+  priceDifference?: number;
+}): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error('Database connection failed');
+
+  const result = await db.insert(competitorProducts).values({
+    competitorId: data.competitorId,
+    merchantId: data.merchantId,
+    name: data.name,
+    description: data.description,
+    price: data.price?.toString(),
+    currency: data.currency || 'SAR',
+    imageUrl: data.imageUrl,
+    productUrl: data.productUrl,
+    category: data.category,
+    similarToMerchantProduct: data.similarToMerchantProduct,
+    priceDifference: data.priceDifference?.toString(),
+  });
+
+  return result[0].insertId;
+}
+
+/**
+ * Get competitor products by competitor ID
+ */
+export async function getCompetitorProductsByCompetitorId(competitorId: number): Promise<any[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(competitorProducts)
+    .where(eq(competitorProducts.competitorId, competitorId));
+
+  return result.map(product => ({
+    ...product,
+    price: product.price ? parseFloat(product.price) : null,
+    priceDifference: product.priceDifference ? parseFloat(product.priceDifference) : null,
+  }));
 }

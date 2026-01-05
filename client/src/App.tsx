@@ -104,6 +104,8 @@ import ScheduledReports from "./pages/ScheduledReports";
 import WhatsAppAutoNotifications from "./pages/WhatsAppAutoNotifications";
 import CustomersManagement from "./pages/CustomersManagement";
 import CustomerDetails from "./pages/CustomerDetails";
+import WebsiteAnalysis from "./pages/WebsiteAnalysis";
+import CompetitorAnalysis from "./pages/CompetitorAnalysis";
 
 // Admin pages
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -566,6 +568,18 @@ function Router() {
       <Route path="/merchant/customers">
         <DashboardLayout>
           <CustomersManagement />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/website-analysis">
+        <DashboardLayout>
+          <WebsiteAnalysis />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/competitor-analysis">
+        <DashboardLayout>
+          <CompetitorAnalysis />
         </DashboardLayout>
       </Route>
       

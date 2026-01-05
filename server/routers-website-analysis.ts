@@ -1,0 +1,493 @@
+/**
+ * Website Analysis Router
+ * 
+ * APIs للتحليل الذكي للمواقع
+ */
+
+import { router, protectedProcedure } from './_core/trpc';
+import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
+import * as db from './db';
+import * as analyzer from './_core/websiteAnalyzer';
+
+export const websiteAnalysisRouter = router({
+  /**
+   * تحليل موقع جديد
+   */
+  analyze: protectedProcedure
+    .input(z.object({
+      url: z.string().url(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get merchant ID
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        // Create analysis record with pending status
+        const analysisId = await db.createWebsiteAnalysis({
+          merchantId: merchant.id,
+          url: input.url,
+          status: 'analyzing',
+        });
+
+        // Start analysis in background
+        (async () => {
+          try {
+            // Analyze website
+            const result = await analyzer.analyzeWebsite(input.url);
+
+            // Update analysis with results
+            await db.updateWebsiteAnalysis(analysisId, {
+              title: result.title,
+              description: result.description,
+              industry: result.industry,
+              language: result.language,
+              seoScore: result.seoScore,
+              seoIssues: result.seoIssues,
+              metaTags: result.metaTags,
+              performanceScore: result.performanceScore,
+              loadTime: result.loadTime,
+              pageSize: result.pageSize,
+              uxScore: result.uxScore,
+              mobileOptimized: result.mobileOptimized,
+              hasContactInfo: result.hasContactInfo,
+              hasWhatsapp: result.hasWhatsapp,
+              contentQuality: result.contentQuality,
+              wordCount: result.wordCount,
+              imageCount: result.imageCount,
+              videoCount: result.videoCount,
+              overallScore: result.overallScore,
+              status: 'completed',
+            });
+
+            // Extract products
+            const { html, text } = await analyzer.scrapeWebsite(input.url);
+            const products = await analyzer.extractProducts(input.url, html, text);
+            
+            for (const product of products) {
+              await db.createExtractedProduct({
+                analysisId,
+                merchantId: merchant.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                currency: product.currency,
+                imageUrl: product.imageUrl,
+                productUrl: product.productUrl,
+                category: product.category,
+                tags: product.tags,
+                inStock: product.inStock,
+                confidence: product.confidence,
+              });
+            }
+
+            // Generate insights
+            const insights = await analyzer.generateInsights(result);
+            
+            for (const insight of insights) {
+              await db.createWebsiteInsight({
+                analysisId,
+                merchantId: merchant.id,
+                category: insight.category,
+                type: insight.type,
+                priority: insight.priority,
+                title: insight.title,
+                description: insight.description,
+                recommendation: insight.recommendation,
+                impact: insight.impact,
+                confidence: insight.confidence,
+              });
+            }
+
+            console.log('[WebsiteAnalysis] Analysis completed:', analysisId);
+          } catch (error) {
+            console.error('[WebsiteAnalysis] Analysis failed:', error);
+            await db.updateWebsiteAnalysis(analysisId, {
+              status: 'failed',
+              errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            });
+          }
+        })();
+
+        return { analysisId, status: 'analyzing' };
+      } catch (error) {
+        console.error('[WebsiteAnalysis] Error starting analysis:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to start analysis',
+        });
+      }
+    }),
+
+  /**
+   * الحصول على تحليل محفوظ
+   */
+  getAnalysis: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const analysis = await db.getWebsiteAnalysisById(input.id);
+      
+      if (!analysis) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found' });
+      }
+
+      // Verify ownership
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || analysis.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      return analysis;
+    }),
+
+  /**
+   * قائمة التحليلات
+   */
+  listAnalyses: protectedProcedure.query(async ({ ctx }) => {
+    const merchant = await db.getMerchantByUserId(ctx.user.id);
+    if (!merchant) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+    }
+
+    return await db.getWebsiteAnalysesByMerchant(merchant.id);
+  }),
+
+  /**
+   * الحصول على المنتجات المستخرجة
+   */
+  getExtractedProducts: protectedProcedure
+    .input(z.object({
+      analysisId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Verify ownership
+      const analysis = await db.getWebsiteAnalysisById(input.analysisId);
+      if (!analysis) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found' });
+      }
+
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || analysis.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      return await db.getExtractedProductsByAnalysisId(input.analysisId);
+    }),
+
+  /**
+   * الحصول على الرؤى الذكية
+   */
+  getInsights: protectedProcedure
+    .input(z.object({
+      analysisId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Verify ownership
+      const analysis = await db.getWebsiteAnalysisById(input.analysisId);
+      if (!analysis) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found' });
+      }
+
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || analysis.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      return await db.getInsightsByAnalysisId(input.analysisId);
+    }),
+
+  /**
+   * حذف تحليل
+   */
+  deleteAnalysis: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership
+      const analysis = await db.getWebsiteAnalysisById(input.id);
+      if (!analysis) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found' });
+      }
+
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || analysis.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      await db.deleteWebsiteAnalysis(input.id);
+      return { success: true };
+    }),
+
+  /**
+   * إضافة منافس
+   */
+  addCompetitor: protectedProcedure
+    .input(z.object({
+      name: z.string(),
+      url: z.string().url(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const merchant = await db.getMerchantByUserId(ctx.user.id);
+        if (!merchant) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+        }
+
+        // Create competitor record
+        const competitorId = await db.createCompetitorAnalysis({
+          merchantId: merchant.id,
+          name: input.name,
+          url: input.url,
+          status: 'analyzing',
+        });
+
+        // Start analysis in background
+        (async () => {
+          try {
+            // Analyze competitor website
+            const result = await analyzer.analyzeWebsite(input.url);
+
+            // Update competitor with results
+            await db.updateCompetitorAnalysis(competitorId, {
+              overallScore: result.overallScore,
+              seoScore: result.seoScore,
+              performanceScore: result.performanceScore,
+              uxScore: result.uxScore,
+              contentScore: result.contentQuality,
+              status: 'completed',
+            });
+
+            // Extract competitor products
+            const { html, text } = await analyzer.scrapeWebsite(input.url);
+            const products = await analyzer.extractProducts(input.url, html, text);
+            
+            let totalPrice = 0;
+            let minPrice = Infinity;
+            let maxPrice = 0;
+            let productCount = 0;
+
+            for (const product of products) {
+              if (product.price) {
+                totalPrice += product.price;
+                minPrice = Math.min(minPrice, product.price);
+                maxPrice = Math.max(maxPrice, product.price);
+                productCount++;
+              }
+
+              await db.createCompetitorProduct({
+                competitorId,
+                merchantId: merchant.id,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                currency: product.currency,
+                imageUrl: product.imageUrl,
+                productUrl: product.productUrl,
+                category: product.category,
+              });
+            }
+
+            // Update pricing stats
+            if (productCount > 0) {
+              await db.updateCompetitorAnalysis(competitorId, {
+                avgPrice: totalPrice / productCount,
+                minPrice: minPrice === Infinity ? 0 : minPrice,
+                maxPrice,
+                productCount,
+              });
+            }
+
+            console.log('[CompetitorAnalysis] Analysis completed:', competitorId);
+          } catch (error) {
+            console.error('[CompetitorAnalysis] Analysis failed:', error);
+            await db.updateCompetitorAnalysis(competitorId, {
+              status: 'failed',
+              errorMessage: error instanceof Error ? error.message : 'Unknown error',
+            });
+          }
+        })();
+
+        return { competitorId, status: 'analyzing' };
+      } catch (error) {
+        console.error('[CompetitorAnalysis] Error starting analysis:', error);
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error instanceof Error ? error.message : 'Failed to start analysis',
+        });
+      }
+    }),
+
+  /**
+   * قائمة المنافسين
+   */
+  listCompetitors: protectedProcedure.query(async ({ ctx }) => {
+    const merchant = await db.getMerchantByUserId(ctx.user.id);
+    if (!merchant) {
+      throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
+    }
+
+    return await db.getCompetitorAnalysesByMerchant(merchant.id);
+  }),
+
+  /**
+   * الحصول على تحليل منافس
+   */
+  getCompetitor: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const competitor = await db.getCompetitorAnalysisById(input.id);
+      
+      if (!competitor) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Competitor not found' });
+      }
+
+      // Verify ownership
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || competitor.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      return competitor;
+    }),
+
+  /**
+   * الحصول على منتجات المنافس
+   */
+  getCompetitorProducts: protectedProcedure
+    .input(z.object({
+      competitorId: z.number(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Verify ownership
+      const competitor = await db.getCompetitorAnalysisById(input.competitorId);
+      if (!competitor) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Competitor not found' });
+      }
+
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || competitor.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      return await db.getCompetitorProductsByCompetitorId(input.competitorId);
+    }),
+
+  /**
+   * مقارنة مع المنافسين
+   */
+  compareWithCompetitors: protectedProcedure
+    .input(z.object({
+      analysisId: z.number(),
+      competitorIds: z.array(z.number()),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Verify ownership
+      const analysis = await db.getWebsiteAnalysisById(input.analysisId);
+      if (!analysis) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Analysis not found' });
+      }
+
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || analysis.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      // Get competitor analyses
+      const competitors = await Promise.all(
+        input.competitorIds.map(id => db.getCompetitorAnalysisById(id))
+      );
+
+      // Filter out null values and verify ownership
+      const validCompetitors = competitors.filter(
+        c => c && c.merchantId === merchant.id
+      );
+
+      if (validCompetitors.length === 0) {
+        return { strengths: [], weaknesses: [], opportunities: [] };
+      }
+
+      // Convert to WebsiteAnalysisResult format
+      const merchantAnalysis: analyzer.WebsiteAnalysisResult = {
+        title: analysis.title || '',
+        description: analysis.description || '',
+        industry: analysis.industry || '',
+        language: analysis.language || '',
+        seoScore: analysis.seoScore,
+        seoIssues: analysis.seoIssues || [],
+        metaTags: analysis.metaTags || {},
+        performanceScore: analysis.performanceScore,
+        loadTime: analysis.loadTime || 0,
+        pageSize: analysis.pageSize || 0,
+        uxScore: analysis.uxScore,
+        mobileOptimized: analysis.mobileOptimized,
+        hasContactInfo: analysis.hasContactInfo,
+        hasWhatsapp: analysis.hasWhatsapp,
+        contentQuality: analysis.contentQuality,
+        wordCount: analysis.wordCount,
+        imageCount: analysis.imageCount,
+        videoCount: analysis.videoCount,
+        overallScore: analysis.overallScore,
+      };
+
+      const competitorAnalyses: analyzer.WebsiteAnalysisResult[] = validCompetitors.map(c => ({
+        title: c.name,
+        description: '',
+        industry: c.industry || '',
+        language: '',
+        seoScore: c.seoScore,
+        seoIssues: [],
+        metaTags: {},
+        performanceScore: c.performanceScore,
+        loadTime: 0,
+        pageSize: 0,
+        uxScore: c.uxScore,
+        mobileOptimized: false,
+        hasContactInfo: false,
+        hasWhatsapp: false,
+        contentQuality: c.contentScore,
+        wordCount: 0,
+        imageCount: 0,
+        videoCount: 0,
+        overallScore: c.overallScore,
+      }));
+
+      // Compare
+      const comparison = await analyzer.compareWithCompetitors(
+        merchantAnalysis,
+        competitorAnalyses
+      );
+
+      return comparison;
+    }),
+
+  /**
+   * حذف منافس
+   */
+  deleteCompetitor: protectedProcedure
+    .input(z.object({
+      id: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership
+      const competitor = await db.getCompetitorAnalysisById(input.id);
+      if (!competitor) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Competitor not found' });
+      }
+
+      const merchant = await db.getMerchantByUserId(ctx.user.id);
+      if (!merchant || competitor.merchantId !== merchant.id) {
+        throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
+      }
+
+      await db.deleteCompetitorAnalysis(input.id);
+      return { success: true };
+    }),
+});

@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, foreignKey, int, varchar, text, mysqlEnum, timestamp, index, date, tinyint, InferSelectModel, InferInsertModel } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, foreignKey, int, varchar, text, mysqlEnum, timestamp, index, date, tinyint, decimal, InferSelectModel, InferInsertModel } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 
 export const abTestResults = mysqlTable("ab_test_results", {
@@ -1656,3 +1656,191 @@ export const merchantPaymentSettings = mysqlTable("merchant_payment_settings", {
 // Type exports for Merchant Payment Settings
 export type MerchantPaymentSettings = InferSelectModel<typeof merchantPaymentSettings>;
 export type InsertMerchantPaymentSettings = InferInsertModel<typeof merchantPaymentSettings>;
+
+// ============================================
+// Website Analysis Tables
+// ============================================
+
+export const websiteAnalyses = mysqlTable("website_analyses", {
+	id: int().autoincrement().notNull(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	url: varchar({ length: 500 }).notNull(),
+	title: varchar({ length: 500 }),
+	description: text(),
+	industry: varchar({ length: 100 }),
+	language: varchar({ length: 10 }),
+	
+	// SEO Analysis
+	seoScore: int("seo_score").default(0).notNull(),
+	seoIssues: text("seo_issues"), // JSON array
+	metaTags: text("meta_tags"), // JSON object
+	
+	// Performance Analysis
+	performanceScore: int("performance_score").default(0).notNull(),
+	loadTime: int("load_time"), // milliseconds
+	pageSize: int("page_size"), // bytes
+	
+	// UX Analysis
+	uxScore: int("ux_score").default(0).notNull(),
+	mobileOptimized: tinyint("mobile_optimized").default(0).notNull(),
+	hasContactInfo: tinyint("has_contact_info").default(0).notNull(),
+	hasWhatsapp: tinyint("has_whatsapp").default(0).notNull(),
+	
+	// Content Analysis
+	contentQuality: int("content_quality").default(0).notNull(),
+	wordCount: int("word_count").default(0).notNull(),
+	imageCount: int("image_count").default(0).notNull(),
+	videoCount: int("video_count").default(0).notNull(),
+	
+	// Overall Score
+	overallScore: int("overall_score").default(0).notNull(),
+	
+	// Status
+	status: mysqlEnum(['pending', 'analyzing', 'completed', 'failed']).default('pending').notNull(),
+	errorMessage: text("error_message"),
+	
+	// Timestamps
+	analyzedAt: timestamp("analyzed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("website_analyses_merchant_id_idx").on(table.merchantId),
+	index("website_analyses_url_idx").on(table.url),
+]);
+
+export const websiteInsights = mysqlTable("website_insights", {
+	id: int().autoincrement().notNull(),
+	analysisId: int("analysis_id").notNull().references(() => websiteAnalyses.id, { onDelete: "cascade" }),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	
+	// Insight Details
+	category: mysqlEnum(['seo', 'performance', 'ux', 'content', 'marketing', 'security']).notNull(),
+	type: mysqlEnum(['strength', 'weakness', 'opportunity', 'threat', 'recommendation']).notNull(),
+	priority: mysqlEnum(['low', 'medium', 'high', 'critical']).default('medium').notNull(),
+	
+	title: varchar({ length: 500 }).notNull(),
+	description: text().notNull(),
+	recommendation: text(),
+	impact: text(), // Expected impact of implementing the recommendation
+	
+	// AI Generated
+	aiGenerated: tinyint("ai_generated").default(1).notNull(),
+	confidence: int().default(0).notNull(), // 0-100
+	
+	// Timestamps
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("website_insights_analysis_id_idx").on(table.analysisId),
+	index("website_insights_merchant_id_idx").on(table.merchantId),
+	index("website_insights_category_idx").on(table.category),
+]);
+
+export const extractedProducts = mysqlTable("extracted_products", {
+	id: int().autoincrement().notNull(),
+	analysisId: int("analysis_id").notNull().references(() => websiteAnalyses.id, { onDelete: "cascade" }),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	
+	// Product Details
+	name: varchar({ length: 500 }).notNull(),
+	description: text(),
+	price: decimal({ precision: 10, scale: 2 }),
+	currency: varchar({ length: 10 }).default('SAR'),
+	imageUrl: varchar("image_url", { length: 500 }),
+	productUrl: varchar("product_url", { length: 500 }),
+	
+	// Categories
+	category: varchar({ length: 255 }),
+	tags: text(), // JSON array
+	
+	// Availability
+	inStock: tinyint("in_stock").default(1).notNull(),
+	stockQuantity: int("stock_quantity"),
+	
+	// AI Extracted
+	aiExtracted: tinyint("ai_extracted").default(1).notNull(),
+	confidence: int().default(0).notNull(), // 0-100
+	
+	// Timestamps
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("extracted_products_analysis_id_idx").on(table.analysisId),
+	index("extracted_products_merchant_id_idx").on(table.merchantId),
+]);
+
+export const competitorAnalyses = mysqlTable("competitor_analyses", {
+	id: int().autoincrement().notNull(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	
+	// Competitor Details
+	name: varchar({ length: 255 }).notNull(),
+	url: varchar({ length: 500 }).notNull(),
+	industry: varchar({ length: 100 }),
+	
+	// Analysis Scores
+	overallScore: int("overall_score").default(0).notNull(),
+	seoScore: int("seo_score").default(0).notNull(),
+	performanceScore: int("performance_score").default(0).notNull(),
+	uxScore: int("ux_score").default(0).notNull(),
+	contentScore: int("content_score").default(0).notNull(),
+	
+	// Pricing Analysis
+	avgPrice: decimal("avg_price", { precision: 10, scale: 2 }),
+	minPrice: decimal("min_price", { precision: 10, scale: 2 }),
+	maxPrice: decimal("max_price", { precision: 10, scale: 2 }),
+	currency: varchar({ length: 10 }).default('SAR'),
+	
+	// Product Count
+	productCount: int("product_count").default(0).notNull(),
+	
+	// Strengths & Weaknesses
+	strengths: text(), // JSON array
+	weaknesses: text(), // JSON array
+	opportunities: text(), // JSON array
+	
+	// Status
+	status: mysqlEnum(['pending', 'analyzing', 'completed', 'failed']).default('pending').notNull(),
+	errorMessage: text("error_message"),
+	
+	// Timestamps
+	analyzedAt: timestamp("analyzed_at", { mode: 'string' }),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("competitor_analyses_merchant_id_idx").on(table.merchantId),
+	index("competitor_analyses_url_idx").on(table.url),
+]);
+
+export const competitorProducts = mysqlTable("competitor_products", {
+	id: int().autoincrement().notNull(),
+	competitorId: int("competitor_id").notNull().references(() => competitorAnalyses.id, { onDelete: "cascade" }),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+	
+	// Product Details
+	name: varchar({ length: 500 }).notNull(),
+	description: text(),
+	price: decimal({ precision: 10, scale: 2 }),
+	currency: varchar({ length: 10 }).default('SAR'),
+	imageUrl: varchar("image_url", { length: 500 }),
+	productUrl: varchar("product_url", { length: 500 }),
+	
+	// Categories
+	category: varchar({ length: 255 }),
+	
+	// Comparison with merchant's products
+	similarToMerchantProduct: int("similar_to_merchant_product").references(() => products.id, { onDelete: "set null" }),
+	priceDifference: decimal("price_difference", { precision: 10, scale: 2 }), // Positive = competitor more expensive
+	
+	// Timestamps
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("competitor_products_competitor_id_idx").on(table.competitorId),
+	index("competitor_products_merchant_id_idx").on(table.merchantId),
+]);
