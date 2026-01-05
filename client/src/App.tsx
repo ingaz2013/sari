@@ -70,6 +70,7 @@ import SariPersonality from "./pages/merchant/SariPersonality";
 import QuickResponses from "./pages/merchant/QuickResponses";
 import InsightsDashboard from "./pages/merchant/InsightsDashboard";
 import AdvancedAnalytics from "./pages/merchant/AdvancedAnalytics";
+import AdvancedAnalyticsDashboard from "./pages/merchant/AdvancedAnalyticsDashboard";
 import DataSync from "./pages/merchant/DataSync";
 import PerformanceMetrics from "./pages/merchant/PerformanceMetrics";
 import SetupWizard from "./pages/SetupWizard";
@@ -348,6 +349,12 @@ function Router() {
       <Route path="/merchant/advanced-analytics">
         <DashboardLayout>
           <AdvancedAnalytics />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/analytics-dashboard">
+        <DashboardLayout>
+          <AdvancedAnalyticsDashboard />
         </DashboardLayout>
       </Route>
       
@@ -670,7 +677,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="light">
+      <ThemeProvider defaultTheme="light" switchable={true}>
         <TooltipProvider>
           <Toaster />
           <Router />

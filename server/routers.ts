@@ -7,6 +7,7 @@ import { performanceRouter } from "./routers-performance";
 import { googleAuthRouter } from "./routers-google-auth";
 import { sheetsRouter } from "./routers-sheets";
 import { loyaltyRouter } from "./routers-loyalty";
+import { aiSuggestionsRouter } from "./routers-ai-suggestions";
 import { syncGreenAPIData } from "./data-sync/green-api-sync";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { TRPCError } from '@trpc/server';
@@ -7044,5 +7045,8 @@ export const appRouter = router({
         }
       }),
   }),
+
+  // AI Suggestions Router
+  aiSuggestions: aiSuggestionsRouter,
 });
 export type AppRouter = typeof appRouter;

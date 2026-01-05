@@ -13,6 +13,9 @@ import { ar } from 'date-fns/locale';
 import { Input } from '@/components/ui/input';
 import { ConversationsSkeleton } from '@/components/ConversationsSkeleton';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
+import { ConversationPreviewMode } from '@/components/ConversationPreviewMode';
+import { AISuggestions } from '@/components/AISuggestions';
+import { QuickActionsBar } from '@/components/QuickActions';
 import { toast } from 'sonner';
 
 export default function Conversations() {
@@ -193,19 +196,29 @@ export default function Conversations() {
                       <CardDescription>{selectedConversation.customerPhone}</CardDescription>
                     </div>
                   </div>
-                  <Badge
-                    variant={
-                      selectedConversation.status === 'active'
-                        ? 'default'
-                        : selectedConversation.status === 'closed'
-                        ? 'secondary'
-                        : 'outline'
-                    }
-                  >
-                    {selectedConversation.status === 'active' && 'نشط'}
-                    {selectedConversation.status === 'closed' && 'مغلق'}
-                    {selectedConversation.status === 'archived' && 'مؤرشف'}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {messages && messages.length > 0 && (
+                      <ConversationPreviewMode
+                        messages={messages}
+                        customerName={selectedConversation.customerName || 'عميل'}
+                        customerPhone={selectedConversation.customerPhone}
+                        isOnline={selectedConversation.status === 'active'}
+                      />
+                    )}
+                    <Badge
+                      variant={
+                        selectedConversation.status === 'active'
+                          ? 'default'
+                          : selectedConversation.status === 'closed'
+                          ? 'secondary'
+                          : 'outline'
+                      }
+                    >
+                      {selectedConversation.status === 'active' && 'نشط'}
+                      {selectedConversation.status === 'closed' && 'مغلق'}
+                      {selectedConversation.status === 'archived' && 'مؤرشف'}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <Separator />
@@ -286,6 +299,38 @@ export default function Conversations() {
                   )}
                 </ScrollArea>
               </CardContent>
+              {/* AI Suggestions */}
+              <Separator />
+              <CardContent className="p-3">
+                {messages && messages.length > 0 && (
+                  <AISuggestions
+                    conversationId={selectedConversationId!}
+                    messages={messages.map(m => ({
+                      content: m.content,
+                      direction: m.direction,
+                    }))}
+                    customerName={selectedConversation.customerName || undefined}
+                    onSelectSuggestion={(text) => {
+                      // يمكن إضافة النص إلى حقل الإدخال أو إرساله مباشرة
+                      toast.success(`تم اختيار: ${text.substring(0, 30)}...`);
+                    }}
+                    compact
+                  />
+                )}
+              </CardContent>
+
+              {/* Quick Actions */}
+              <Separator />
+              <CardContent className="p-3">
+                <QuickActionsBar
+                  conversationId={selectedConversationId!}
+                  customerPhone={selectedConversation.customerPhone}
+                  onActionComplete={(action, data) => {
+                    toast.success(`تم تنفيذ: ${action}`);
+                  }}
+                />
+              </CardContent>
+
               {/* Voice Recorder */}
               <Separator />
               <CardContent className="p-4">
