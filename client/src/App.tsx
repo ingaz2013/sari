@@ -88,6 +88,7 @@ import SheetsReports from "./pages/SheetsReports";
 import SheetsInventory from "./pages/SheetsInventory";
 import Payments from "./pages/merchant/Payments";
 import PaymentLinks from "./pages/merchant/PaymentLinks";
+import PaymentSettings from "./pages/merchant/PaymentSettings";
 import PaymentDetails from "./pages/PaymentDetails";
 import LoyaltySettings from "./pages/LoyaltySettings";
 import LoyaltyTiers from "./pages/LoyaltyTiers";
@@ -466,6 +467,10 @@ function Router() {
       
       <Route path="/merchant/payment-links">
         <DashboardLayout><PaymentLinks /></DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/payment-settings">
+        <DashboardLayout><PaymentSettings /></DashboardLayout>
       </Route>
       
       {/* Loyalty System Routes */}

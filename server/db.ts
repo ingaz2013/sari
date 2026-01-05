@@ -181,6 +181,9 @@ import {
   emailVerificationTokens,
   EmailVerificationToken,
   InsertEmailVerificationToken,
+  merchantPaymentSettings,
+  MerchantPaymentSettings,
+  InsertMerchantPaymentSettings,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -6228,4 +6231,114 @@ export async function getServiceRatingStats(serviceId: number) {
     totalReviews: reviews.length,
     ratingDistribution: distribution
   };
+}
+
+
+// ==================== Merchant Payment Settings ====================
+
+/**
+ * Get merchant payment settings
+ */
+export async function getMerchantPaymentSettings(merchantId: number): Promise<MerchantPaymentSettings | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const results = await db.select()
+    .from(merchantPaymentSettings)
+    .where(eq(merchantPaymentSettings.merchantId, merchantId))
+    .limit(1);
+
+  return results[0] || null;
+}
+
+/**
+ * Create or update merchant payment settings
+ */
+export async function upsertMerchantPaymentSettings(
+  merchantId: number,
+  data: Partial<Omit<InsertMerchantPaymentSettings, 'merchantId' | 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<MerchantPaymentSettings | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const existing = await getMerchantPaymentSettings(merchantId);
+
+  if (existing) {
+    // Update existing
+    await db.update(merchantPaymentSettings)
+      .set(data)
+      .where(eq(merchantPaymentSettings.merchantId, merchantId));
+  } else {
+    // Insert new
+    await db.insert(merchantPaymentSettings).values({
+      merchantId,
+      ...data,
+    });
+  }
+
+  return getMerchantPaymentSettings(merchantId);
+}
+
+/**
+ * Enable/disable Tap payments for merchant
+ */
+export async function setMerchantTapEnabled(merchantId: number, enabled: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await upsertMerchantPaymentSettings(merchantId, { tapEnabled: enabled ? 1 : 0 });
+}
+
+/**
+ * Update Tap API keys for merchant
+ */
+export async function updateMerchantTapKeys(
+  merchantId: number,
+  publicKey: string,
+  secretKey: string,
+  testMode: boolean = true
+): Promise<MerchantPaymentSettings | null> {
+  return upsertMerchantPaymentSettings(merchantId, {
+    tapPublicKey: publicKey,
+    tapSecretKey: secretKey,
+    tapTestMode: testMode ? 1 : 0,
+  });
+}
+
+/**
+ * Set merchant payment settings as verified
+ */
+export async function setMerchantPaymentVerified(merchantId: number, verified: boolean): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await upsertMerchantPaymentSettings(merchantId, {
+    isVerified: verified ? 1 : 0,
+    lastVerifiedAt: verified ? new Date().toISOString().slice(0, 19).replace('T', ' ') : null,
+  });
+}
+
+/**
+ * Get all merchants with Tap enabled
+ */
+export async function getMerchantsWithTapEnabled(): Promise<MerchantPaymentSettings[]> {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db.select()
+    .from(merchantPaymentSettings)
+    .where(eq(merchantPaymentSettings.tapEnabled, 1));
+}
+
+/**
+ * Check if merchant has valid Tap configuration
+ */
+export async function hasMerchantValidTapConfig(merchantId: number): Promise<boolean> {
+  const settings = await getMerchantPaymentSettings(merchantId);
+  
+  if (!settings) return false;
+  if (!settings.tapEnabled) return false;
+  if (!settings.tapPublicKey || !settings.tapSecretKey) return false;
+  
+  return true;
 }

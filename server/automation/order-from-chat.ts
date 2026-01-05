@@ -264,54 +264,76 @@ export async function createOrderFromChat(
       throw new Error('Failed to save order in database');
     }
 
-    // إنشاء رابط دفع Tap
+    // إنشاء رابط دفع Tap باستخدام مفاتيح التاجر
     let tapPaymentUrl: string | null = null;
     try {
-      // TODO: إعادة تفعيل بعد إصلاح createPaymentLink
-      /*
-      const paymentLink = await createPaymentLink({
-        merchantId,
-        amount: finalAmount,
-        currency: 'SAR',
-        customerName,
-        customerPhone,
-        description: `طلب رقم ${order.orderNumber}`,
-        metadata: {
-          orderId: order.id.toString(),
-          orderNumber: order.orderNumber || '',
-          type: 'order'
-        }
-      });
-
-      if (paymentLink && paymentLink.url) {
-        tapPaymentUrl = paymentLink.url;
+      // جلب إعدادات الدفع للتاجر
+      const paymentSettings = await db.getMerchantPaymentSettings(merchantId);
+      
+      if (paymentSettings?.tapEnabled && paymentSettings?.tapSecretKey) {
+        const baseUrl = 'https://api.tap.company/v2';
+        const merchant = await db.getMerchantById(merchantId);
         
-        // حفظ رابط الدفع في قاعدة البيانات
-        await dbPayments.createPaymentLink({
-          merchantId,
-          orderId: order.id,
-          amount: finalAmount,
-          currency: 'SAR',
-          tapChargeId: paymentLink.id,
-          paymentUrl: paymentLink.url,
-          status: 'active',
-          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 ساعة
+        const chargeData = {
+          amount: finalAmount / 100, // تحويل من الهللات إلى ريال
+          currency: paymentSettings.defaultCurrency || 'SAR',
+          customer: {
+            first_name: customerName || 'Customer',
+            phone: {
+              country_code: '966',
+              number: customerPhone.replace(/^\+?966/, '').replace(/^0/, ''),
+            },
+          },
+          source: { id: 'src_all' },
+          redirect: {
+            url: `${process.env.VITE_APP_URL || 'https://sari.manus.space'}/payment/callback`,
+          },
+          description: `طلب رقم ${order.orderNumber} من ${merchant?.businessName || 'المتجر'}`,
+          metadata: {
+            merchantId: merchantId.toString(),
+            orderId: order.id.toString(),
+            orderNumber: order.orderNumber || '',
+            type: 'order'
+          },
+        };
+
+        const response = await fetch(`${baseUrl}/charges`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${paymentSettings.tapSecretKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(chargeData),
         });
 
-        // إرسال رابط الدفع عبر واتساب
-        const merchant = await db.getMerchantById(merchantId);
-        if (merchant) {
-          const paymentMessage = generatePaymentLinkMessage(
-            order.orderNumber || '',
-            finalAmount,
-            tapPaymentUrl
-          );
+        const result = await response.json();
+
+        if (response.ok && (result.transaction?.url || result.redirect?.url)) {
+          tapPaymentUrl = result.transaction?.url || result.redirect?.url;
           
-          // TODO: إرسال رسالة الدفع عبر واتساب
-          console.log('[OrderFromChat] Payment link created:', paymentLink.paymentUrl);
+          // حفظ رابط الدفع في قاعدة البيانات
+          await dbPayments.createOrderPayment({
+            merchantId,
+            orderId: order.id,
+            bookingId: null,
+            customerPhone,
+            customerName,
+            amount: finalAmount,
+            currency: paymentSettings.defaultCurrency || 'SAR',
+            tapChargeId: result.id,
+            tapPaymentUrl: tapPaymentUrl,
+            status: 'pending',
+            description: `طلب رقم ${order.orderNumber}`,
+          });
+
+          // تحديث رابط الدفع في الطلب
+          await db.updateOrder(order.id, { paymentUrl: tapPaymentUrl });
+
+          console.log('[OrderFromChat] Tap payment link created:', tapPaymentUrl);
+        } else {
+          console.warn('[OrderFromChat] Tap API error:', result);
         }
       }
-      */
     } catch (error) {
       console.error('[OrderFromChat] Error creating Tap payment link:', error);
       // نستمر حتى لو فشل إنشاء رابط Tap، سنستخدم رابط Salla

@@ -1602,3 +1602,39 @@ export type LoyaltyReward = InferSelectModel<typeof loyaltyRewards>;
 export type InsertLoyaltyReward = InferInsertModel<typeof loyaltyRewards>;
 export type LoyaltyRedemption = InferSelectModel<typeof loyaltyRedemptions>;
 export type InsertLoyaltyRedemption = InferInsertModel<typeof loyaltyRedemptions>;
+
+
+// ==================== Merchant Payment Settings ====================
+
+export const merchantPaymentSettings = mysqlTable("merchant_payment_settings", {
+	id: int().autoincrement().notNull().primaryKey(),
+	merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }).unique(),
+	
+	// Tap Payment Settings
+	tapEnabled: tinyint("tap_enabled").default(0).notNull(),
+	tapPublicKey: text("tap_public_key"),
+	tapSecretKey: text("tap_secret_key"),
+	tapTestMode: tinyint("tap_test_mode").default(1).notNull(), // 1 = sandbox, 0 = live
+	
+	// Payment Preferences
+	autoSendPaymentLink: tinyint("auto_send_payment_link").default(1).notNull(), // إرسال رابط الدفع تلقائياً مع الطلبات
+	paymentLinkMessage: text("payment_link_message"), // رسالة مخصصة مع رابط الدفع
+	
+	// Currency Settings
+	defaultCurrency: varchar("default_currency", { length: 3 }).default('SAR').notNull(),
+	
+	// Webhook Settings
+	tapWebhookSecret: text("tap_webhook_secret"),
+	webhookUrl: text("webhook_url"), // URL لاستقبال تأكيدات الدفع
+	
+	// Status
+	isVerified: tinyint("is_verified").default(0).notNull(), // تم التحقق من صلاحية المفاتيح
+	lastVerifiedAt: timestamp("last_verified_at", { mode: 'string' }),
+	
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+});
+
+// Type exports for Merchant Payment Settings
+export type MerchantPaymentSettings = InferSelectModel<typeof merchantPaymentSettings>;
+export type InsertMerchantPaymentSettings = InferInsertModel<typeof merchantPaymentSettings>;

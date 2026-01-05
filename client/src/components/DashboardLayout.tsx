@@ -79,6 +79,7 @@ const getMerchantMenuItems = (t: any) => [
   { icon: PartyPopper, label: t('sidebar.merchant.occasionCampaigns'), path: "/merchant/occasion-campaigns" },
   { icon: BarChart3, label: t('sidebar.merchant.analytics'), path: "/merchant/analytics" },
   { icon: CreditCard, label: t('sidebar.merchant.subscriptions'), path: "/merchant/subscriptions" },
+  { icon: CreditCard, label: 'إعدادات الدفع', path: "/merchant/payment-settings" },
   { icon: Smartphone, label: t('sidebar.merchant.whatsapp'), path: "/merchant/whatsapp" },
   { icon: Smartphone, label: t('sidebar.merchant.whatsappInstances'), path: "/merchant/whatsapp-instances" },
   { icon: MessageSquare, label: 'اختبار ساري AI', path: "/merchant/test-sari" },
