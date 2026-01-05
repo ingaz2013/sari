@@ -4,57 +4,81 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'wouter';
 import { CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 export default function Pricing() {
-  const { t } = useTranslation();
-
   const plans = [
     {
-      name: t('pricing.plans.basic.name'),
+      name: 'الباقة الأساسية',
       nameEn: 'Starter',
       price: 90,
-      period: t('pricing.plans.basic.period'),
-      description: t('pricing.plans.basic.description'),
-      features: (t('pricing.plans.basic.features', { returnObjects: true }) as string[]) || [],
+      period: 'شهرياً',
+      description: 'مثالية للمتاجر الصغيرة والناشئة',
+      features: [
+        '150 محادثة شهرياً',
+        '50 رسالة صوتية',
+        'رد آلي ذكي',
+        'إدارة المنتجات',
+        'تقارير أساسية',
+        'دعم فني عبر البريد',
+      ],
       popular: false,
     },
     {
-      name: t('pricing.plans.growth.name'),
+      name: 'باقة النمو',
       nameEn: 'Growth',
       price: 230,
-      period: t('pricing.plans.growth.period'),
-      description: t('pricing.plans.growth.description'),
-      features: (t('pricing.plans.growth.features', { returnObjects: true }) as string[]) || [],
+      period: 'شهرياً',
+      description: 'الأنسب للمتاجر المتوسطة',
+      features: [
+        '600 محادثة شهرياً',
+        'رسائل صوتية غير محدودة',
+        'رد آلي ذكي',
+        'إدارة المنتجات',
+        'حملات تسويقية',
+        'تقارير متقدمة',
+        'دعم فني عبر الواتساب',
+        'أولوية في الدعم',
+      ],
       popular: true,
     },
     {
-      name: t('pricing.plans.professional.name'),
+      name: 'الباقة الاحترافية',
       nameEn: 'Professional',
       price: 845,
-      period: t('pricing.plans.professional.period'),
-      description: t('pricing.plans.professional.description'),
-      features: (t('pricing.plans.professional.features', { returnObjects: true }) as string[]) || [],
+      period: 'شهرياً',
+      description: 'للمتاجر الكبيرة والمؤسسات',
+      features: [
+        '2000 محادثة شهرياً',
+        'رسائل صوتية غير محدودة',
+        'رد آلي ذكي',
+        'إدارة المنتجات',
+        'حملات تسويقية متقدمة',
+        'تقارير وتحليلات شاملة',
+        'دعم فني مخصص 24/7',
+        'مدير حساب مخصص',
+        'تكامل مع الأنظمة الأخرى',
+        'تدريب مجاني',
+      ],
       popular: false,
     },
   ];
 
   const faqs = [
     {
-      question: t('pricing.faqs.0.question'),
-      answer: t('pricing.faqs.0.answer'),
+      question: 'هل يمكنني تغيير الباقة لاحقاً؟',
+      answer: 'نعم، يمكنك الترقية أو التخفيض في أي وقت. سيتم احتساب الفرق في السعر بشكل تناسبي.',
     },
     {
-      question: t('pricing.faqs.1.question'),
-      answer: t('pricing.faqs.1.answer'),
+      question: 'ماذا يحدث إذا تجاوزت حد المحادثات؟',
+      answer: 'سيتم إيقاف الرد الآلي مؤقتاً حتى الشهر التالي، أو يمكنك الترقية للباقة الأعلى فوراً.',
     },
     {
-      question: t('pricing.faqs.2.question'),
-      answer: t('pricing.faqs.2.answer'),
+      question: 'هل هناك فترة تجريبية مجانية؟',
+      answer: 'نعم، نوفر فترة تجريبية مجانية لمدة 7 أيام لجميع الباقات بدون الحاجة لبطاقة ائتمانية.',
     },
     {
-      question: t('pricing.faqs.3.question'),
-      answer: t('pricing.faqs.3.answer'),
+      question: 'هل يمكنني إلغاء الاشتراك في أي وقت؟',
+      answer: 'نعم، يمكنك إلغاء الاشتراك في أي وقت دون أي رسوم إضافية. ستستمر الخدمة حتى نهاية الفترة المدفوعة.',
     },
   ];
 
@@ -68,12 +92,12 @@ export default function Pricing() {
         <div className="container relative py-20 md:py-32">
           <div className="text-center max-w-3xl mx-auto space-y-6">
             <h1 className="text-4xl md:text-6xl font-bold">
-              <span className="text-primary">
-                {t('pricing.hero.title')}
+                <span className="text-primary">
+                خطط تسعير واضحة
               </span>
             </h1>
             <p className="text-xl text-muted-foreground">
-              {t('pricing.hero.subtitle')}
+              اختر الباقة المناسبة لحجم متجرك. جميع الباقات تشمل فترة تجريبية مجانية 7 أيام
             </p>
           </div>
         </div>
@@ -96,7 +120,7 @@ export default function Pricing() {
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <div className="bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold flex items-center gap-1">
                       <Sparkles className="w-4 h-4" />
-                      {t('pricing.popular')}
+                      الأكثر شعبية
                     </div>
                   </div>
                 )}
@@ -109,7 +133,7 @@ export default function Pricing() {
                   <div>
                     <div className="flex items-baseline justify-center gap-2">
                       <span className="text-5xl font-bold">{plan.price}</span>
-                      <span className="text-muted-foreground">{t('pricing.currency')}</span>
+                      <span className="text-muted-foreground">ريال</span>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">{plan.period}</p>
                   </div>
@@ -137,7 +161,7 @@ export default function Pricing() {
                         variant={plan.popular ? 'default' : 'outline'}
                         size="lg"
                       >
-                        {t('pricing.startNow')}
+                        ابدأ الآن
                         <ArrowRight className="mr-2 w-4 h-4" />
                       </Button>
                     </a>
@@ -149,7 +173,7 @@ export default function Pricing() {
 
           <div className="text-center mt-12">
             <p className="text-muted-foreground">
-              {t('pricing.vatNote')}
+              جميع الأسعار بالريال السعودي ولا تشمل ضريبة القيمة المضافة (15%)
             </p>
           </div>
         </div>
@@ -160,10 +184,10 @@ export default function Pricing() {
         <div className="container">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              {t('pricing.faq.title')}
+              الأسئلة الشائعة
             </h2>
             <p className="text-lg text-muted-foreground">
-              {t('pricing.faq.subtitle')}
+              إجابات على أكثر الأسئلة شيوعاً حول التسعير
             </p>
           </div>
 
@@ -184,15 +208,15 @@ export default function Pricing() {
       <section className="py-20 bg-primary text-white">
         <div className="container text-center space-y-8">
           <h2 className="text-3xl md:text-5xl font-bold">
-            {t('pricing.cta.title')}
+            جاهز للبدء؟
           </h2>
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            {t('pricing.cta.subtitle')}
+            ابدأ فترتك التجريبية المجانية الآن ولا تحتاج لبطاقة ائتمانية
           </p>
           <Link href="/login">
             <a>
               <Button size="lg" variant="secondary" className="text-lg h-14 px-8">
-                {t('pricing.cta.button')}
+                ابدأ الآن مجاناً
                 <ArrowRight className="mr-2 w-5 h-5" />
               </Button>
             </a>
