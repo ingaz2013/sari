@@ -42,6 +42,7 @@ import ChatOrders from "./pages/ChatOrders";
 import DiscountCodes from "./pages/DiscountCodes";
 import Referrals from "./pages/merchant/Referrals";
 import MerchantSettings from "./pages/merchant/Settings";
+import LanguageSettings from "./pages/merchant/LanguageSettings";
 import Reports from "./pages/Reports";
 import Subscriptions from "./pages/merchant/Subscriptions";
 import Usage from "./pages/merchant/Usage";
@@ -466,6 +467,12 @@ function Router() {
       <Route path="/merchant/settings">
         <DashboardLayout>
           <MerchantSettings />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/language-settings">
+        <DashboardLayout>
+          <LanguageSettings />
         </DashboardLayout>
       </Route>
       

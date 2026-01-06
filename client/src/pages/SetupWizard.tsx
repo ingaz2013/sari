@@ -15,9 +15,10 @@ import BasicInfoStep from './setup-wizard/BasicInfoStep';
 import ProductsServicesStep from './setup-wizard/ProductsServicesStep';
 import IntegrationsStep from './setup-wizard/IntegrationsStep';
 import PersonalityStep from './setup-wizard/PersonalityStep';
+import LanguageStep from './setup-wizard/LanguageStep';
 import CompleteStep from './setup-wizard/CompleteStep';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 9;
 
 const STEP_TITLES = [
   'مرحباً بك!',
@@ -27,6 +28,7 @@ const STEP_TITLES = [
   'المنتجات والخدمات',
   'التكاملات',
   'شخصية ساري',
+  'اختر اللغة',
   'جاهز للانطلاق!',
 ];
 
@@ -181,6 +183,8 @@ export default function SetupWizard() {
       case 7:
         return <PersonalityStep {...stepProps} />;
       case 8:
+        return <LanguageStep data={wizardData} onUpdate={updateWizardData} />;
+      case 9:
         return <CompleteStep {...stepProps} completeSetup={completeSetup} isLoading={isLoading} />;
       default:
         return null;

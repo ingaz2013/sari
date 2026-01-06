@@ -1,4 +1,5 @@
 import { Link } from 'wouter';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Navbar from '@/components/Navbar';
@@ -30,6 +31,8 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
+  const { t } = useTranslation();
+  
   const features = [
     {
       icon: Mic,
