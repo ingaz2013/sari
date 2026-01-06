@@ -617,6 +617,262 @@ ${lineItems.map((item: any, index: number) => `${index + 1}. ${item.name} × ${i
         });
       }
     }),
+
+  // ==================== Analytics ====================
+
+  getSalesStats: protectedProcedure
+    .input(z.object({
+      period: z.enum(['daily', 'weekly', 'monthly']).default('daily'),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const orders = await db.getWooCommerceOrdersByMerchant(ctx.user.merchantId);
+      
+      // Filter by date range if provided
+      let filteredOrders = orders;
+      if (input.startDate && input.endDate) {
+        filteredOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate >= new Date(input.startDate!) && orderDate <= new Date(input.endDate!);
+        });
+      }
+
+      // Calculate stats
+      const totalRevenue = filteredOrders.reduce((sum, order) => sum + parseFloat(order.totalAmount || '0'), 0);
+      const totalOrders = filteredOrders.length;
+      const completedOrders = filteredOrders.filter(o => o.status === 'completed').length;
+      const pendingOrders = filteredOrders.filter(o => o.status === 'pending').length;
+      const processingOrders = filteredOrders.filter(o => o.status === 'processing').length;
+      const cancelledOrders = filteredOrders.filter(o => o.status === 'cancelled').length;
+      const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+      // Group by period for chart data
+      const chartData: { date: string; revenue: number; orders: number }[] = [];
+      const groupedByDate = new Map<string, { revenue: number; orders: number }>();
+
+      filteredOrders.forEach(order => {
+        const date = new Date(order.orderDate);
+        let key = '';
+        
+        if (input.period === 'daily') {
+          key = date.toISOString().split('T')[0];
+        } else if (input.period === 'weekly') {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = weekStart.toISOString().split('T')[0];
+        } else if (input.period === 'monthly') {
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        const existing = groupedByDate.get(key) || { revenue: 0, orders: 0 };
+        existing.revenue += parseFloat(order.totalAmount || '0');
+        existing.orders += 1;
+        groupedByDate.set(key, existing);
+      });
+
+      groupedByDate.forEach((value, key) => {
+        chartData.push({ date: key, revenue: value.revenue, orders: value.orders });
+      });
+
+      chartData.sort((a, b) => a.date.localeCompare(b.date));
+
+      return {
+        totalRevenue,
+        totalOrders,
+        completedOrders,
+        pendingOrders,
+        processingOrders,
+        cancelledOrders,
+        averageOrderValue,
+        chartData,
+      };
+    }),
+
+  getTopProducts: protectedProcedure
+    .input(z.object({
+      limit: z.number().default(10),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const orders = await db.getWooCommerceOrdersByMerchant(ctx.user.merchantId);
+      
+      // Filter by date range if provided
+      let filteredOrders = orders;
+      if (input.startDate && input.endDate) {
+        filteredOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate >= new Date(input.startDate!) && orderDate <= new Date(input.endDate!);
+        });
+      }
+
+      // Count product sales
+      const productSales = new Map<string, { name: string; quantity: number; revenue: number }>();
+
+      filteredOrders.forEach(order => {
+        try {
+          const items = JSON.parse(order.items || '[]');
+          items.forEach((item: any) => {
+            const productKey = item.product_id || item.name;
+            const existing = productSales.get(productKey) || { name: item.name, quantity: 0, revenue: 0 };
+            existing.quantity += item.quantity || 1;
+            existing.revenue += parseFloat(item.total || '0');
+            productSales.set(productKey, existing);
+          });
+        } catch (e) {
+          // Skip invalid JSON
+        }
+      });
+
+      // Convert to array and sort by quantity
+      const topProducts = Array.from(productSales.values())
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, input.limit);
+
+      return topProducts;
+    }),
+
+  getConversionRate: protectedProcedure
+    .input(z.object({
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      // Get WooCommerce orders
+      const orders = await db.getWooCommerceOrdersByMerchant(ctx.user.merchantId);
+      
+      // Filter by date range if provided
+      let filteredOrders = orders;
+      if (input.startDate && input.endDate) {
+        filteredOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate >= new Date(input.startDate!) && orderDate <= new Date(input.endDate!);
+        });
+      }
+
+      // Get WhatsApp conversations for the same period
+      const conversations = await db.getConversationsByMerchant(ctx.user.merchantId);
+      let filteredConversations = conversations;
+      if (input.startDate && input.endDate) {
+        filteredConversations = conversations.filter(conv => {
+          const convDate = new Date(conv.createdAt);
+          return convDate >= new Date(input.startDate!) && convDate <= new Date(input.endDate!);
+        });
+      }
+
+      const totalConversations = filteredConversations.length;
+      const totalOrders = filteredOrders.length;
+      const completedOrders = filteredOrders.filter(o => o.status === 'completed').length;
+
+      // Calculate conversion rates
+      const conversionRate = totalConversations > 0 ? (totalOrders / totalConversations) * 100 : 0;
+      const completionRate = totalOrders > 0 ? (completedOrders / totalOrders) * 100 : 0;
+
+      // Calculate revenue from WhatsApp-originated orders
+      const whatsappOrders = filteredOrders.filter(order => {
+        // Check if order has WhatsApp customer phone
+        return order.customerPhone && order.customerPhone.length > 0;
+      });
+      const whatsappRevenue = whatsappOrders.reduce((sum, order) => sum + parseFloat(order.totalAmount || '0'), 0);
+
+      return {
+        totalConversations,
+        totalOrders,
+        completedOrders,
+        conversionRate: Math.round(conversionRate * 100) / 100,
+        completionRate: Math.round(completionRate * 100) / 100,
+        whatsappOrders: whatsappOrders.length,
+        whatsappRevenue,
+      };
+    }),
+
+  getCustomerStats: protectedProcedure
+    .input(z.object({
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const orders = await db.getWooCommerceOrdersByMerchant(ctx.user.merchantId);
+      
+      // Filter by date range if provided
+      let filteredOrders = orders;
+      if (input.startDate && input.endDate) {
+        filteredOrders = orders.filter(order => {
+          const orderDate = new Date(order.orderDate);
+          return orderDate >= new Date(input.startDate!) && orderDate <= new Date(input.endDate!);
+        });
+      }
+
+      // Count unique customers
+      const uniqueCustomers = new Set<string>();
+      const customerOrderCount = new Map<string, number>();
+
+      filteredOrders.forEach(order => {
+        const customerId = order.customerEmail || order.customerPhone || 'unknown';
+        uniqueCustomers.add(customerId);
+        customerOrderCount.set(customerId, (customerOrderCount.get(customerId) || 0) + 1);
+      });
+
+      // Calculate new vs returning customers
+      const newCustomers = Array.from(customerOrderCount.values()).filter(count => count === 1).length;
+      const returningCustomers = uniqueCustomers.size - newCustomers;
+
+      return {
+        totalCustomers: uniqueCustomers.size,
+        newCustomers,
+        returningCustomers,
+        repeatCustomerRate: uniqueCustomers.size > 0 ? (returningCustomers / uniqueCustomers.size) * 100 : 0,
+      };
+    }),
+
+  getRevenueChart: protectedProcedure
+    .input(z.object({
+      period: z.enum(['daily', 'weekly', 'monthly']).default('daily'),
+      startDate: z.string(),
+      endDate: z.string(),
+    }))
+    .query(async ({ ctx, input }) => {
+      const orders = await db.getWooCommerceOrdersByMerchant(ctx.user.merchantId);
+      
+      // Filter by date range
+      const filteredOrders = orders.filter(order => {
+        const orderDate = new Date(order.orderDate);
+        return orderDate >= new Date(input.startDate) && orderDate <= new Date(input.endDate);
+      });
+
+      // Group by period
+      const chartData: { date: string; revenue: number; orders: number }[] = [];
+      const groupedByDate = new Map<string, { revenue: number; orders: number }>();
+
+      filteredOrders.forEach(order => {
+        const date = new Date(order.orderDate);
+        let key = '';
+        
+        if (input.period === 'daily') {
+          key = date.toISOString().split('T')[0];
+        } else if (input.period === 'weekly') {
+          const weekStart = new Date(date);
+          weekStart.setDate(date.getDate() - date.getDay());
+          key = weekStart.toISOString().split('T')[0];
+        } else if (input.period === 'monthly') {
+          key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        const existing = groupedByDate.get(key) || { revenue: 0, orders: 0 };
+        existing.revenue += parseFloat(order.totalAmount || '0');
+        existing.orders += 1;
+        groupedByDate.set(key, existing);
+      });
+
+      groupedByDate.forEach((value, key) => {
+        chartData.push({ date: key, revenue: value.revenue, orders: value.orders });
+      });
+
+      chartData.sort((a, b) => a.date.localeCompare(b.date));
+
+      return chartData;
+    }),
 });
 
 

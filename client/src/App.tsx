@@ -79,9 +79,10 @@ import ZidSettings from "./pages/ZidSettings";
 import ZidCallback from "./pages/ZidCallback";
 import ZidProducts from "./pages/ZidProducts";
 import ZidSyncLogs from "./pages/ZidSyncLogs";
-import WooCommerceSettings from "./pages/WooCommerceSettings";
+import WooCommerceSettings from "./pages/merchant/WooCommerceSettings";
 import WooCommerceProducts from "./pages/WooCommerceProducts";
 import WooCommerceOrders from "./pages/WooCommerceOrders";
+import WooCommerceAnalytics from "./pages/merchant/WooCommerceAnalytics";
 import CalendlyIntegration from "./pages/merchant/CalendlyIntegration";
 import SetupWizard from "./pages/SetupWizard";
 import CalendarSettings from "./pages/CalendarSettings";
@@ -266,6 +267,12 @@ function Router() {
       <Route path="/merchant/woocommerce/orders">
         <DashboardLayout>
           <WooCommerceOrders />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/woocommerce/analytics">
+        <DashboardLayout>
+          <WooCommerceAnalytics />
         </DashboardLayout>
       </Route>
       

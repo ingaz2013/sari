@@ -172,6 +172,8 @@ const getMerchantMenuItems = (t: any): MenuItem[] => [
   { icon: Plug, label: 'لوحة التكاملات', path: "/merchant/integrations-dashboard", group: 'integrations' },
   { icon: Store, label: t('sidebar.merchant.salla'), path: "/merchant/salla", group: 'integrations' },
   { icon: Store, label: 'تكامل زد', path: "/merchant/integrations/zid", group: 'integrations' },
+  { icon: ShoppingCart, label: 'إعدادات WooCommerce', path: "/merchant/woocommerce/settings", group: 'integrations' },
+  { icon: BarChart3, label: 'تحليلات WooCommerce', path: "/merchant/woocommerce/analytics", group: 'integrations' },
   { icon: Calendar, label: 'تكامل Calendly', path: "/merchant/integrations/calendly", group: 'integrations' },
   { icon: FileSpreadsheet, label: 'إعدادات Google Sheets', path: "/merchant/sheets/settings", group: 'integrations' },
   { icon: Download, label: 'تصدير البيانات', path: "/merchant/sheets/export", group: 'integrations' },
