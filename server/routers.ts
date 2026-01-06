@@ -12,6 +12,15 @@ import { zidRouter } from "./integrations/zid";
 import { calendlyRouter } from "./integrations/calendly";
 import { websiteAnalysisRouter } from "./routers-website-analysis";
 import { analysisRouter } from "./routers/analysis";
+import {
+  subscriptionPlansRouter,
+  subscriptionAddonsRouter,
+  merchantSubscriptionRouter,
+  merchantAddonsRouter,
+  paymentRouter,
+  tapSettingsRouter,
+  adminSubscriptionsRouter,
+} from "./routers/subscriptions";
 import { notificationsRouter } from "./routers-notifications";
 import { notificationManagementRouter } from "./routers-notification-management";
 import { syncGreenAPIData } from "./data-sync/green-api-sync";
@@ -8266,5 +8275,14 @@ export const appRouter = router({
         return templatesWithStatus;
       }),
   }),
+
+  // Subscription Management
+  subscriptionPlans: subscriptionPlansRouter,
+  subscriptionAddons: subscriptionAddonsRouter,
+  merchantSubscription: merchantSubscriptionRouter,
+  merchantAddons: merchantAddonsRouter,
+  payment: paymentRouter,
+  tapSettings: tapSettingsRouter,
+  adminSubscriptions: adminSubscriptionsRouter,
 });
 export type AppRouter = typeof appRouter;

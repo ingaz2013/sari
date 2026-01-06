@@ -232,6 +232,13 @@ export const merchants = mysqlTable("merchants", {
 	platformType: mysqlEnum("platform_type", ['salla', 'zid', 'shopify', 'woocommerce', 'custom', 'unknown']),
 	lastAnalysisDate: timestamp("last_analysis_date", { mode: 'string' }),
 	analysisStatus: mysqlEnum("analysis_status", ['pending', 'analyzing', 'completed', 'failed']).default('pending'),
+	// Subscription fields
+	currentSubscriptionId: int("current_subscription_id"),
+	subscriptionStatus: mysqlEnum("subscription_status", ['none', 'trial', 'active', 'expired']).default('none'),
+	trialStartedAt: timestamp("trial_started_at", { mode: 'string' }),
+	trialEndsAt: timestamp("trial_ends_at", { mode: 'string' }),
+	maxCustomersAllowed: int("max_customers_allowed").default(0),
+	currentCustomersCount: int("current_customers_count").default(0),
 });
 
 export const messages = mysqlTable("messages", {
@@ -2375,3 +2382,4 @@ export type NewEmailTemplate = InferInsertModel<typeof emailTemplates>;
 export * from "./schema_smtp";
 export * from "./schema_push";
 export * from "./schema_notifications";
+export * from "./schema_subscriptions";

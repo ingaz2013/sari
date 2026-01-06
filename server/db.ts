@@ -224,6 +224,24 @@ import {
   NewWooCommerceOrder,
   NewWooCommerceSyncLog,
   NewWooCommerceWebhook,
+  subscriptionPlans,
+  SubscriptionPlan,
+  NewSubscriptionPlan,
+  subscriptionAddons,
+  SubscriptionAddon,
+  NewSubscriptionAddon,
+  merchantSubscriptions,
+  MerchantSubscription,
+  NewMerchantSubscription,
+  merchantAddons,
+  MerchantAddon,
+  NewMerchantAddon,
+  paymentTransactions,
+  PaymentTransaction,
+  NewPaymentTransaction,
+  tapSettings,
+  TapSettings,
+  NewTapSettings,
 } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -8742,4 +8760,464 @@ export async function getBusinessTemplateByIdWithTranslations(id: number, langua
     ...template,
     translations
   };
+}
+
+
+// ============================================
+// Subscription Plans Functions
+// ============================================
+
+export async function getAllSubscriptionPlans() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(subscriptionPlans).orderBy(subscriptionPlans.sortOrder);
+}
+
+export async function getActiveSubscriptionPlans() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(subscriptionPlans)
+    .where(eq(subscriptionPlans.isActive, 1))
+    .orderBy(subscriptionPlans.sortOrder);
+}
+
+export async function getSubscriptionPlanById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+  return results[0];
+}
+
+export async function createSubscriptionPlan(data: NewSubscriptionPlan) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(subscriptionPlans).values(data);
+  return result.insertId;
+}
+
+export async function updateSubscriptionPlan(id: number, data: Partial<NewSubscriptionPlan>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(subscriptionPlans).set(data).where(eq(subscriptionPlans.id, id));
+}
+
+export async function deleteSubscriptionPlan(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(subscriptionPlans).where(eq(subscriptionPlans.id, id));
+}
+
+export async function reorderSubscriptionPlans(planIds: number[]) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  for (let i = 0; i < planIds.length; i++) {
+    await db.update(subscriptionPlans)
+      .set({ sortOrder: i })
+      .where(eq(subscriptionPlans.id, planIds[i]));
+  }
+}
+
+// ============================================
+// Subscription Addons Functions
+// ============================================
+
+export async function getAllSubscriptionAddons() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(subscriptionAddons);
+}
+
+export async function getActiveSubscriptionAddons() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(subscriptionAddons).where(eq(subscriptionAddons.isActive, 1));
+}
+
+export async function getSubscriptionAddonById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(subscriptionAddons).where(eq(subscriptionAddons.id, id));
+  return results[0];
+}
+
+export async function createSubscriptionAddon(data: NewSubscriptionAddon) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(subscriptionAddons).values(data);
+  return result.insertId;
+}
+
+export async function updateSubscriptionAddon(id: number, data: Partial<NewSubscriptionAddon>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(subscriptionAddons).set(data).where(eq(subscriptionAddons.id, id));
+}
+
+export async function deleteSubscriptionAddon(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(subscriptionAddons).where(eq(subscriptionAddons.id, id));
+}
+
+// ============================================
+// Merchant Subscriptions Functions
+// ============================================
+
+export async function getMerchantCurrentSubscription(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(merchantSubscriptions)
+    .where(and(
+      eq(merchantSubscriptions.merchantId, merchantId),
+      or(
+        eq(merchantSubscriptions.status, 'trial'),
+        eq(merchantSubscriptions.status, 'active')
+      )
+    ))
+    .orderBy(desc(merchantSubscriptions.createdAt))
+    .limit(1);
+  return results[0];
+}
+
+export async function getMerchantSubscriptionById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(merchantSubscriptions).where(eq(merchantSubscriptions.id, id));
+  return results[0];
+}
+
+export async function getAllMerchantSubscriptions(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(merchantSubscriptions)
+    .where(eq(merchantSubscriptions.merchantId, merchantId))
+    .orderBy(desc(merchantSubscriptions.createdAt));
+}
+
+export async function createMerchantSubscription(data: NewMerchantSubscription) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(merchantSubscriptions).values(data);
+  return result.insertId;
+}
+
+export async function updateMerchantSubscription(id: number, data: Partial<NewMerchantSubscription>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchantSubscriptions).set(data).where(eq(merchantSubscriptions.id, id));
+}
+
+export async function cancelMerchantSubscription(id: number, reason?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchantSubscriptions)
+    .set({
+      status: 'cancelled',
+      cancelledAt: new Date().toISOString(),
+      cancellationReason: reason,
+    })
+    .where(eq(merchantSubscriptions.id, id));
+}
+
+export async function extendMerchantSubscription(id: number, days: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const subscription = await getMerchantSubscriptionById(id);
+  if (!subscription) throw new Error("Subscription not found");
+  
+  const currentEndDate = new Date(subscription.endDate);
+  const newEndDate = new Date(currentEndDate.getTime() + days * 24 * 60 * 60 * 1000);
+  
+  await db.update(merchantSubscriptions)
+    .set({ endDate: newEndDate.toISOString() })
+    .where(eq(merchantSubscriptions.id, id));
+}
+
+export async function getExpiredSubscriptions() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const now = new Date().toISOString();
+  return await db.select().from(merchantSubscriptions)
+    .where(and(
+      or(
+        eq(merchantSubscriptions.status, 'trial'),
+        eq(merchantSubscriptions.status, 'active')
+      ),
+      lt(merchantSubscriptions.endDate, now)
+    ));
+}
+
+export async function getExpiringSubscriptions(daysBeforeExpiry: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const now = new Date();
+  const targetDate = new Date(now.getTime() + daysBeforeExpiry * 24 * 60 * 60 * 1000);
+  
+  return await db.select().from(merchantSubscriptions)
+    .where(and(
+      or(
+        eq(merchantSubscriptions.status, 'trial'),
+        eq(merchantSubscriptions.status, 'active')
+      ),
+      gte(merchantSubscriptions.endDate, now.toISOString()),
+      lte(merchantSubscriptions.endDate, targetDate.toISOString())
+    ));
+}
+
+export async function getMerchantSubscriptionStats() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const totalSubscriptions = await db.select({ count: sql<number>`count(*)` })
+    .from(merchantSubscriptions);
+  
+  const activeSubscriptions = await db.select({ count: sql<number>`count(*)` })
+    .from(merchantSubscriptions)
+    .where(eq(merchantSubscriptions.status, 'active'));
+  
+  const trialSubscriptions = await db.select({ count: sql<number>`count(*)` })
+    .from(merchantSubscriptions)
+    .where(eq(merchantSubscriptions.status, 'trial'));
+  
+  const expiredSubscriptions = await db.select({ count: sql<number>`count(*)` })
+    .from(merchantSubscriptions)
+    .where(eq(merchantSubscriptions.status, 'expired'));
+  
+  return {
+    total: totalSubscriptions[0]?.count || 0,
+    active: activeSubscriptions[0]?.count || 0,
+    trial: trialSubscriptions[0]?.count || 0,
+    expired: expiredSubscriptions[0]?.count || 0,
+  };
+}
+
+export async function checkMerchantSubscriptionStatus(merchantId: number): Promise<boolean> {
+  const subscription = await getMerchantCurrentSubscription(merchantId);
+  if (!subscription) return false;
+  
+  const now = new Date();
+  const endDate = new Date(subscription.endDate);
+  
+  return now <= endDate;
+}
+
+export async function getMerchantDaysRemaining(merchantId: number): Promise<number> {
+  const subscription = await getMerchantCurrentSubscription(merchantId);
+  if (!subscription) return 0;
+  
+  const now = new Date();
+  const endDate = new Date(subscription.endDate);
+  const diff = endDate.getTime() - now.getTime();
+  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  
+  return Math.max(0, days);
+}
+
+// ============================================
+// Merchant Addons Functions
+// ============================================
+
+export async function getMerchantAddons(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(merchantAddons)
+    .where(eq(merchantAddons.merchantId, merchantId))
+    .orderBy(desc(merchantAddons.createdAt));
+}
+
+export async function getMerchantAddonById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(merchantAddons).where(eq(merchantAddons.id, id));
+  return results[0];
+}
+
+export async function createMerchantAddon(data: NewMerchantAddon) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(merchantAddons).values(data);
+  return result.insertId;
+}
+
+export async function updateMerchantAddon(id: number, data: Partial<NewMerchantAddon>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchantAddons).set(data).where(eq(merchantAddons.id, id));
+}
+
+export async function cancelMerchantAddon(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchantAddons)
+    .set({ isActive: 0 })
+    .where(eq(merchantAddons.id, id));
+}
+
+export async function getMerchantActiveAddons(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(merchantAddons)
+    .where(and(
+      eq(merchantAddons.merchantId, merchantId),
+      eq(merchantAddons.isActive, 1)
+    ));
+}
+
+// ============================================
+// Payment Transactions Functions
+// ============================================
+
+export async function getAllPaymentTransactions() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(paymentTransactions).orderBy(desc(paymentTransactions.createdAt));
+}
+
+export async function getPaymentTransactionById(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(paymentTransactions).where(eq(paymentTransactions.id, id));
+  return results[0];
+}
+
+export async function getMerchantPaymentTransactions(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(paymentTransactions)
+    .where(eq(paymentTransactions.merchantId, merchantId))
+    .orderBy(desc(paymentTransactions.createdAt));
+}
+
+export async function createPaymentTransaction(data: NewPaymentTransaction) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(paymentTransactions).values(data);
+  return result.insertId;
+}
+
+export async function updatePaymentTransaction(id: number, data: Partial<NewPaymentTransaction>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(paymentTransactions).set(data).where(eq(paymentTransactions.id, id));
+}
+
+export async function getPaymentTransactionByTapChargeId(tapChargeId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(paymentTransactions)
+    .where(eq(paymentTransactions.tapChargeId, tapChargeId));
+  return results[0];
+}
+
+export async function getPaymentStats() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const totalTransactions = await db.select({ count: sql<number>`count(*)` })
+    .from(paymentTransactions);
+  
+  const completedTransactions = await db.select({ count: sql<number>`count(*)` })
+    .from(paymentTransactions)
+    .where(eq(paymentTransactions.status, 'completed'));
+  
+  const failedTransactions = await db.select({ count: sql<number>`count(*)` })
+    .from(paymentTransactions)
+    .where(eq(paymentTransactions.status, 'failed'));
+  
+  const totalRevenue = await db.select({ sum: sql<number>`sum(amount)` })
+    .from(paymentTransactions)
+    .where(eq(paymentTransactions.status, 'completed'));
+  
+  return {
+    total: totalTransactions[0]?.count || 0,
+    completed: completedTransactions[0]?.count || 0,
+    failed: failedTransactions[0]?.count || 0,
+    revenue: totalRevenue[0]?.sum || 0,
+  };
+}
+
+export async function getRevenueStats(startDate?: string, endDate?: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  let query = db.select({
+    date: sql<string>`DATE(created_at)`,
+    revenue: sql<number>`sum(amount)`,
+    count: sql<number>`count(*)`
+  })
+    .from(paymentTransactions)
+    .where(eq(paymentTransactions.status, 'completed'));
+  
+  if (startDate && endDate) {
+    query = query.where(and(
+      gte(paymentTransactions.createdAt, startDate),
+      lte(paymentTransactions.createdAt, endDate)
+    ));
+  }
+  
+  return await query.groupBy(sql`DATE(created_at)`).orderBy(sql`DATE(created_at)`);
+}
+
+// ============================================
+// Tap Settings Functions
+// ============================================
+
+export async function getTapSettings() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(tapSettings).limit(1);
+  return results[0];
+}
+
+export async function createTapSettings(data: NewTapSettings) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(tapSettings).values(data);
+  return result.insertId;
+}
+
+export async function updateTapSettings(id: number, data: Partial<NewTapSettings>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(tapSettings).set(data).where(eq(tapSettings.id, id));
+}
+
+export async function deleteTapSettings(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(tapSettings).where(eq(tapSettings.id, id));
+}
+
+// ============================================
+// Merchant Subscription Status Updates
+// ============================================
+
+export async function updateMerchantSubscriptionStatus(
+  merchantId: number,
+  status: 'none' | 'trial' | 'active' | 'expired'
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchants)
+    .set({ subscriptionStatus: status })
+    .where(eq(merchants.id, merchantId));
+}
+
+export async function updateMerchantCustomerLimit(merchantId: number, maxCustomers: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchants)
+    .set({ maxCustomersAllowed: maxCustomers })
+    .where(eq(merchants.id, merchantId));
+}
+
+export async function incrementMerchantCustomerCount(merchantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(merchants)
+    .set({ currentCustomersCount: sql`current_customers_count + 1` })
+    .where(eq(merchants.id, merchantId));
 }
