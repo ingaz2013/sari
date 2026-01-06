@@ -1010,8 +1010,25 @@ export const businessTemplates = mysqlTable("business_templates", {
 	suitable_for: text("suitable_for"),
 	is_active: tinyint("is_active").default(1).notNull(),
 	usage_count: int("usage_count").default(0).notNull(),
+	default_language: mysqlEnum('default_language', ['ar', 'en']).default('ar').notNull(),
 	created_at: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 });
+
+export const templateTranslations = mysqlTable("template_translations", {
+	id: int().autoincrement().notNull().primaryKey(),
+	template_id: int("template_id").notNull().references(() => businessTemplates.id, { onDelete: "cascade" }),
+	language: mysqlEnum(['ar', 'en']).notNull(),
+	template_name: varchar("template_name", { length: 255 }).notNull(),
+	description: text(),
+	suitable_for: text("suitable_for"),
+	bot_personality: text("bot_personality"), // JSON object
+	created_at: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updated_at: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
+},
+(table) => [
+	index("template_translations_template_id_idx").on(table.template_id),
+	index("template_translations_language_idx").on(table.language),
+]);
 
 export const services = mysqlTable("services", {
 	id: int().autoincrement().notNull().primaryKey(),
@@ -1395,6 +1412,8 @@ export type GoogleOAuthSettings = InferSelectModel<typeof googleOAuthSettings>;
 export type InsertGoogleOAuthSettings = InferInsertModel<typeof googleOAuthSettings>;
 export type BusinessTemplate = InferSelectModel<typeof businessTemplates>;
 export type InsertBusinessTemplate = InferInsertModel<typeof businessTemplates>;
+export type TemplateTranslation = InferSelectModel<typeof templateTranslations>;
+export type InsertTemplateTranslation = InferInsertModel<typeof templateTranslations>;
 export type Service = InferSelectModel<typeof services>;
 export type InsertService = InferInsertModel<typeof services>;
 export type ServicePackage = InferSelectModel<typeof servicePackages>;

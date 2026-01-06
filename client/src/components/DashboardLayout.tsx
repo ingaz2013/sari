@@ -81,7 +81,8 @@ import {
   Activity,
   Gauge,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  Languages
 } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
@@ -207,6 +208,7 @@ const getAdminMenuItems = (t: any) => [
   { icon: Settings, label: t('sidebar.admin.settings'), path: "/admin/settings" },
   { icon: MessageSquare, label: 'إعدادات SMTP', path: "/admin/smtp-settings" },
   { icon: FileText, label: 'قوالب الإيميلات', path: "/admin/email-templates" },
+  { icon: Languages, label: 'ترجمات القوالب', path: "/admin/template-translations" },
   { icon: Zap, label: 'إعدادات Google OAuth', path: "/admin/google-oauth" },
   { icon: Database, label: 'مزامنة البيانات', path: "/admin/data-sync" },
   { icon: BarChart3, label: 'إدارة SEO', path: "/admin/seo" },

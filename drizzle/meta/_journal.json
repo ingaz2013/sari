@@ -134,6 +134,13 @@
       "when": 1767698096619,
       "tag": "0018_round_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "5",
+      "when": 1767699246140,
+      "tag": "0019_true_wraith",
+      "breakpoints": true
     }
   ]
 }

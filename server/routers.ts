@@ -5431,12 +5431,10 @@ export const appRouter = router({
     getTemplates: publicProcedure
       .input(z.object({
         businessType: z.enum(['store', 'services', 'both']).optional(),
+        language: z.enum(['ar', 'en']).optional(),
       }))
       .query(async ({ input }) => {
-        if (input.businessType) {
-          return await db.getBusinessTemplatesByType(input.businessType);
-        }
-        return await db.getAllBusinessTemplates();
+        return await db.getBusinessTemplatesWithTranslations(input.language);
       }),
     
     // Apply template
@@ -8172,6 +8170,88 @@ export const appRouter = router({
         await sendEmail(input.email, `[تجريبي] ${subject}`, fullHtml);
         
         return { success: true };
+      }),
+  }),
+
+  // Template Translations Router
+  templateTranslations: router({
+    // Create translation
+    create: adminProcedure
+      .input(z.object({
+        templateId: z.number(),
+        language: z.enum(['ar', 'en']),
+        templateName: z.string(),
+        description: z.string().optional(),
+        suitableFor: z.string().optional(),
+        botPersonality: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        // Check if translation already exists
+        const existing = await db.getTemplateTranslation(input.templateId, input.language);
+        if (existing) {
+          throw new TRPCError({ code: 'BAD_REQUEST', message: 'Translation already exists for this language' });
+        }
+        
+        const id = await db.createTemplateTranslation({
+          templateId: input.templateId,
+          language: input.language,
+          templateName: input.templateName,
+          description: input.description,
+          suitableFor: input.suitableFor,
+          botPersonality: input.botPersonality,
+        });
+        
+        return { id, success: true };
+      }),
+
+    // Update translation
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        templateName: z.string().optional(),
+        description: z.string().optional(),
+        suitableFor: z.string().optional(),
+        botPersonality: z.string().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await db.updateTemplateTranslation(id, data);
+        return { success: true };
+      }),
+
+    // Delete translation
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteTemplateTranslation(input.id);
+        return { success: true };
+      }),
+
+    // Get translations by template
+    getByTemplate: adminProcedure
+      .input(z.object({ templateId: z.number() }))
+      .query(async ({ input }) => {
+        return await db.getTemplateTranslationsByTemplateId(input.templateId);
+      }),
+
+    // Get all templates with translation status
+    getAllWithStatus: adminProcedure
+      .query(async () => {
+        const templates = await db.getAllBusinessTemplates();
+        
+        const templatesWithStatus = await Promise.all(
+          templates.map(async (template) => {
+            const translations = await db.getTemplateTranslationsByTemplateId(template.id);
+            return {
+              ...template,
+              hasArabic: translations.some(t => t.language === 'ar'),
+              hasEnglish: translations.some(t => t.language === 'en'),
+              translations,
+            };
+          })
+        );
+        
+        return templatesWithStatus;
       }),
   }),
 });

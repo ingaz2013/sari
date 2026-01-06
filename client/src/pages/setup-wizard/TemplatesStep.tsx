@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Check, Sparkles, Loader2 } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowRight, Check, Sparkles, Loader2, Languages } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 
@@ -24,9 +25,11 @@ export default function TemplatesStep({
     wizardData.templateId || null
   );
   const [isApplying, setIsApplying] = useState(false);
+  const [language, setLanguage] = useState<'ar' | 'en'>('ar');
 
   const { data: templates, isLoading } = trpc.setupWizard.getTemplates.useQuery({
     businessType: wizardData.businessType,
+    language,
   });
 
   const applyTemplateMutation = trpc.setupWizard.applyTemplate.useMutation();
@@ -77,6 +80,17 @@ export default function TemplatesStep({
         <p className="text-gray-600">
           وفر الوقت! اختر قالباً جاهزاً يناسب نشاطك وسنملأ كل شيء تلقائياً
         </p>
+      </div>
+
+      {/* Language Switcher */}
+      <div className="flex items-center justify-center gap-3 mb-4">
+        <Languages className="h-5 w-5 text-muted-foreground" />
+        <Tabs value={language} onValueChange={(value) => setLanguage(value as 'ar' | 'en')}>
+          <TabsList>
+            <TabsTrigger value="ar">🇸🇦 العربية</TabsTrigger>
+            <TabsTrigger value="en">🇬🇧 English</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Templates Grid */}

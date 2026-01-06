@@ -140,6 +140,7 @@ import AdminABTestDashboard from "./pages/AdminABTestDashboard";
 import PlatformIntegrations from "./pages/PlatformIntegrations";
 import NotificationDashboard from "./pages/super-admin/NotificationDashboard";
 import EmailTemplates from "./pages/admin/EmailTemplates";
+import TemplateTranslations from "./pages/admin/TemplateTranslations";
 
 function Router() {
   return (
@@ -725,6 +726,12 @@ function Router() {
       <Route path="/admin/email-templates">
         <DashboardLayout>
           <EmailTemplates />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/template-translations">
+        <DashboardLayout>
+          <TemplateTranslations />
         </DashboardLayout>
       </Route>
       

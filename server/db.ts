@@ -8638,3 +8638,108 @@ export async function getPendingWooCommerceWebhooks(merchantId: number, limit: n
 
 // Export db instance for direct access
 export { _db as db };
+
+// ============================================
+// Template Translations Functions
+// ============================================
+
+export async function createTemplateTranslation(data: InsertTemplateTranslation) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const [result] = await db.insert(templateTranslations).values(data);
+  return result.insertId;
+}
+
+export async function updateTemplateTranslation(id: number, data: Partial<InsertTemplateTranslation>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(templateTranslations).set(data).where(eq(templateTranslations.id, id));
+}
+
+export async function deleteTemplateTranslation(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.delete(templateTranslations).where(eq(templateTranslations.id, id));
+}
+
+export async function getTemplateTranslationsByTemplateId(templateId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return await db.select().from(templateTranslations).where(eq(templateTranslations.templateId, templateId));
+}
+
+export async function getTemplateTranslation(templateId: number, language: 'ar' | 'en') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const results = await db.select().from(templateTranslations)
+    .where(and(
+      eq(templateTranslations.templateId, templateId),
+      eq(templateTranslations.language, language)
+    ));
+  return results[0];
+}
+
+export async function getBusinessTemplatesWithTranslations(language?: 'ar' | 'en') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const templates = await db.select().from(businessTemplates).where(eq(businessTemplates.isActive, 1));
+  
+  const templatesWithTranslations = await Promise.all(
+    templates.map(async (template) => {
+      const translations = await getTemplateTranslationsByTemplateId(template.id);
+      
+      // إذا كانت هناك لغة محددة، نستخدم الترجمة المناسبة
+      if (language) {
+        const translation = translations.find(t => t.language === language);
+        if (translation) {
+          return {
+            ...template,
+            templateName: translation.templateName,
+            description: translation.description,
+            suitableFor: translation.suitableFor,
+            botPersonality: translation.botPersonality,
+            translations
+          };
+        }
+      }
+      
+      return {
+        ...template,
+        translations
+      };
+    })
+  );
+  
+  return templatesWithTranslations;
+}
+
+export async function getBusinessTemplateByIdWithTranslations(id: number, language?: 'ar' | 'en') {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const template = await getBusinessTemplateById(id);
+  if (!template) return null;
+  
+  const translations = await getTemplateTranslationsByTemplateId(id);
+  
+  // إذا كانت هناك لغة محددة، نستخدم الترجمة المناسبة
+  if (language) {
+    const translation = translations.find(t => t.language === language);
+    if (translation) {
+      return {
+        ...template,
+        templateName: translation.templateName,
+        description: translation.description,
+        suitableFor: translation.suitableFor,
+        botPersonality: translation.botPersonality,
+        translations
+      };
+    }
+  }
+  
+  return {
+    ...template,
+    translations
+  };
+}
