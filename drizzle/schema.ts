@@ -72,7 +72,7 @@ export const botSettings = mysqlTable("bot_settings", {
 	responseDelay: int("response_delay").default(2),
 	maxResponseLength: int("max_response_length").default(200),
 	tone: mysqlEnum(['friendly','professional','casual']).default('friendly').notNull(),
-	language: mysqlEnum(['ar','en','both']).default('ar').notNull(),
+	language: mysqlEnum(['ar','en','fr','tr','es','it','both']).default('ar').notNull(),
 	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
 	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().onUpdateNow().notNull(),
 },

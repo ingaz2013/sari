@@ -5,6 +5,7 @@
 
 import { callGPT4, ChatMessage } from './openai';
 import * as db from '../db';
+import { formatCurrency, type Currency } from '../../shared/currency';
 import { analyzeSentiment, adjustResponseForSentiment } from './sentiment-analysis';
 import type { SariPersonalitySetting } from '../../drizzle/schema';
 import { getCustomerLoyaltyInfo, getAvailableRewardsInfo } from '../loyalty-integration';
@@ -324,12 +325,13 @@ async function searchRelevantProducts(
 /**
  * Generate enhanced context-aware prompt
  */
-function buildEnhancedContextPrompt(context: {
+async function buildEnhancedContextPrompt(context: {
   customerName?: string;
   merchantName?: string;
+  merchantId?: number;
   availableProducts?: Array<any>;
   isFirstMessage?: boolean;
-}): string {
+}): Promise<string> {
   let contextPrompt = '\n\n## السياق الحالي:\n';
 
   if (context.merchantName) {
@@ -346,14 +348,22 @@ function buildEnhancedContextPrompt(context: {
 
   if (context.availableProducts && context.availableProducts.length > 0) {
     contextPrompt += `\n## المنتجات المتاحة حالياً:\n`;
-    context.availableProducts.forEach((product, index) => {
+    
+    // Get merchant currency once
+    const merchant = context.merchantId ? await db.getMerchantById(context.merchantId) : null;
+    const currency = (merchant?.currency as Currency) || 'SAR';
+    
+    for (let index = 0; index < context.availableProducts.length; index++) {
+      const product = context.availableProducts[index];
       contextPrompt += `${index + 1}. **${product.name}**`;
-      if (product.price) contextPrompt += ` - ${product.price} ريال`;
+      if (product.price) {
+        contextPrompt += ` - ${formatCurrency(product.price, currency, 'ar-SA')}`;
+      }
       if (product.stock !== undefined) contextPrompt += ` (متوفر: ${product.stock})`;
       if (product.description) contextPrompt += `\n   الوصف: ${product.description.substring(0, 100)}`;
       if (product.category) contextPrompt += `\n   الفئة: ${product.category}`;
       contextPrompt += `\n`;
-    });
+    }
     
     contextPrompt += `\n⚠️ استخدم فقط المنتجات المذكورة أعلاه. لا تخترع منتجات أخرى!\n`;
   } else {
@@ -456,8 +466,11 @@ export async function chatWithSari(params: {
           
           if (orderItems.length > 0) {
             // إنشاء رسالة تأكيد الطلب
+            const merchant = await db.getMerchantById(params.merchantId);
+            const currency = (merchant?.currency as Currency) || 'SAR';
+            
             const itemsList = orderItems.map(item => 
-              `• ${item.name} × ${item.quantity} = ${item.price * item.quantity} ريال`
+              `• ${item.name} × ${item.quantity} = ${formatCurrency(item.price * item.quantity, currency, 'ar-SA')}`
             ).join('\n');
             
             return `تمام! فهمت طلبك 📝
@@ -465,7 +478,7 @@ export async function chatWithSari(params: {
 *المنتجات:*
 ${itemsList}
 
-💰 *الإجمالي:* ${totalAmount} ريال
+💰 *الإجمالي:* ${formatCurrency(totalAmount, currency, 'ar-SA')}
 
 هل تبغى أكمل الطلب؟ رد ب~"نعم" للتأكيد أو "لا" للإلغاء 😊`;
           }
@@ -493,10 +506,13 @@ ${itemsList}
                 );
                 
                 if (result.success && result.orderUrl) {
+                  const merchant = await db.getMerchantById(params.merchantId);
+                  const currency = (merchant?.currency as Currency) || 'SAR';
+                  
                   return `✅ *تم إنشاء طلبك بنجاح!*
 
 📦 *رقم الطلب:* ${result.orderCode}
-💰 *الإجمالي:* ${result.totalAmount} ريال
+💰 *الإجمالي:* ${formatCurrency(result.totalAmount, currency, 'ar-SA')}
 
 🔗 *لإتمام الدفع:*
 ${result.orderUrl}
@@ -553,8 +569,9 @@ ${result.message}
       : allProducts.slice(0, 5);
 
     // Build enhanced context
-    const contextPrompt = buildEnhancedContextPrompt({
+    const contextPrompt = await buildEnhancedContextPrompt({
       merchantName: merchant.businessName,
+      merchantId: params.merchantId,
       customerName: params.customerName,
       availableProducts: productsToShow,
       isFirstMessage,

@@ -29,13 +29,15 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { toast } from 'sonner';
-
+import { formatCurrency, type Currency } from '@shared/currency';
 import { useTranslation } from 'react-i18next';
 export default function ChatOrders() {
   const { t } = useTranslation();
 
   const [selectedMerchantId] = useState(1); // TODO: Get from context
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const { data: merchant } = trpc.merchant.get.useQuery();
+  const merchantCurrency = (merchant?.currency as Currency) || 'SAR';
 
   const { data: orders, isLoading, refetch } = trpc.orders.listByMerchant.useQuery({
     merchantId: selectedMerchantId
@@ -194,7 +196,7 @@ export default function ChatOrders() {
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {order.totalAmount.toFixed(2)} ريال
+                      {formatCurrency(order.totalAmount, merchantCurrency, 'ar-SA')}
                     </TableCell>
                     <TableCell>
                       {getStatusBadge(order.status)}

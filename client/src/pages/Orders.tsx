@@ -43,9 +43,12 @@ import {
   Package,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency, type Currency } from "@shared/currency";
 
 export default function Orders() {
   const { toast } = useToast();
+  const { data: merchant } = trpc.merchant.get.useQuery();
+  const merchantCurrency = (merchant?.currency as Currency) || 'SAR';
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -102,10 +105,7 @@ export default function Orders() {
   };
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("ar-SA", {
-      style: "currency",
-      currency: "SAR",
-    }).format(price);
+    return formatCurrency(price, merchantCurrency, 'ar-SA');
   };
 
   return (

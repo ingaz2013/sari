@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Package, Search, Send, RefreshCw, ShoppingCart, DollarSign, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { formatCurrency, type Currency } from "@shared/currency";
 
 interface Order {
   id: number;
@@ -39,6 +40,8 @@ interface Order {
 
 export default function WooCommerceOrders() {
   const { toast } = useToast();
+  const { data: merchant } = trpc.merchant.get.useQuery();
+  const merchantCurrency = (merchant?.currency as Currency) || 'SAR';
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -343,7 +346,7 @@ export default function WooCommerceOrders() {
                           </div>
                           <div>
                             <span className="text-muted-foreground">المبلغ: </span>
-                            <span className="font-bold text-lg">{order.total} {order.currency}</span>
+                            <span className="font-bold text-lg">{formatCurrency(parseFloat(order.total), order.currency as Currency, 'ar-SA')}</span>
                           </div>
                         </div>
 
@@ -423,7 +426,7 @@ export default function WooCommerceOrders() {
                   {JSON.parse(selectedOrder.lineItems || '[]').map((item: any, index: number) => (
                     <div key={index} className="flex justify-between border-b pb-2">
                       <span>{item.name} × {item.quantity}</span>
-                      <span className="font-medium">{item.total} {selectedOrder.currency}</span>
+                      <span className="font-medium">{formatCurrency(parseFloat(item.total), selectedOrder.currency as Currency, 'ar-SA')}</span>
                     </div>
                   ))}
                 </div>
@@ -450,7 +453,7 @@ export default function WooCommerceOrders() {
 
               <div>
                 <Label>المجموع الإجمالي</Label>
-                <p className="text-2xl font-bold">{selectedOrder.total} {selectedOrder.currency}</p>
+                <p className="text-2xl font-bold">{formatCurrency(parseFloat(selectedOrder.total), selectedOrder.currency as Currency, 'ar-SA')}</p>
               </div>
 
               {selectedOrder.paymentMethodTitle && (
