@@ -2225,6 +2225,17 @@ export const appRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN', message: 'Access denied' });
         }
 
+        // Check for existing platform connections
+        const { validateNewPlatformConnection } = await import('./integrations/platform-checker');
+        try {
+          await validateNewPlatformConnection(input.merchantId, 'سلة');
+        } catch (error: any) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: error.message 
+          });
+        }
+
         // Test connection first
         const { SallaIntegration } = await import('./integrations/salla');
         const salla = new SallaIntegration(input.merchantId, input.accessToken);
@@ -7275,6 +7286,17 @@ export const appRouter = router({
       }))
       .mutation(async ({ ctx, input }) => {
         try {
+          // Check for existing platform connections
+          const { validateNewPlatformConnection } = await import('./integrations/platform-checker');
+          try {
+            await validateNewPlatformConnection(ctx.user.id, 'زد');
+          } catch (error: any) {
+            throw new TRPCError({ 
+              code: 'BAD_REQUEST', 
+              message: error.message 
+            });
+          }
+
           const { ZidClient } = await import('./integrations/zid/zidClient');
           const dbZid = await import('./db_zid');
 
@@ -7587,6 +7609,23 @@ export const appRouter = router({
           topTopics: [],
         };
       }),
+  }),
+
+  // Platform Integrations Management
+  integrations: router({
+    // Get current connected platform
+    getCurrentPlatform: protectedProcedure.query(async ({ ctx }) => {
+      const { getCurrentPlatform } = await import('./integrations/platform-checker');
+      const merchantId = ctx.user.merchantId || ctx.user.id;
+      return await getCurrentPlatform(merchantId);
+    }),
+
+    // Get all connected platforms (for debugging)
+    getAllConnectedPlatforms: protectedProcedure.query(async ({ ctx }) => {
+      const { getAllConnectedPlatforms } = await import('./integrations/platform-checker');
+      const merchantId = ctx.user.merchantId || ctx.user.id;
+      return await getAllConnectedPlatforms(merchantId);
+    }),
   }),
 });
 export type AppRouter = typeof appRouter;

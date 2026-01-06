@@ -50,6 +50,19 @@ export const woocommerceRouter = router({
 
       // Check if settings exist
       const existingSettings = await db.getWooCommerceSettings(ctx.user.merchantId);
+      
+      // Only check for other platforms if creating new connection
+      if (!existingSettings) {
+        const { validateNewPlatformConnection } = await import('./integrations/platform-checker');
+        try {
+          await validateNewPlatformConnection(ctx.user.merchantId, 'ووكومرس');
+        } catch (error: any) {
+          throw new TRPCError({ 
+            code: 'BAD_REQUEST', 
+            message: error.message 
+          });
+        }
+      }
 
       if (existingSettings) {
         // Update existing settings

@@ -136,6 +136,7 @@ import AdminDataSync from "./pages/AdminDataSync";
 import GlobalSeoSettings from "./pages/admin/GlobalSeoSettings";
 import GoogleOAuthSettings from "./pages/admin/GoogleOAuthSettings";
 import AdminABTestDashboard from "./pages/AdminABTestDashboard";
+import PlatformIntegrations from "./pages/PlatformIntegrations";
 
 function Router() {
   return (
@@ -579,6 +580,10 @@ function Router() {
       
       <Route path="/merchant/integrations-dashboard">
         <DashboardLayout><IntegrationsDashboard /></DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/platform-integrations">
+        <DashboardLayout><PlatformIntegrations /></DashboardLayout>
       </Route>
       
       <Route path="/merchant/notification-settings">
