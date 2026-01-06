@@ -11,6 +11,7 @@ import { aiSuggestionsRouter } from "./routers-ai-suggestions";
 import { zidRouter } from "./integrations/zid";
 import { calendlyRouter } from "./integrations/calendly";
 import { websiteAnalysisRouter } from "./routers-website-analysis";
+import { analysisRouter } from "./routers/analysis";
 import { notificationsRouter } from "./routers-notifications";
 import { syncGreenAPIData } from "./data-sync/green-api-sync";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
@@ -7119,7 +7120,7 @@ export const appRouter = router({
   websiteAnalysis: websiteAnalysisRouter,
 
   // Smart Website Analysis
-  analysis: require('./routers/analysis').analysisRouter,
+  analysis: analysisRouter,
 
   // Zid Integration
   zid: router({

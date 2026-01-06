@@ -25,6 +25,7 @@ import Contact from "./pages/company/Contact";
 import Terms from "./pages/company/Terms";
 import Privacy from "./pages/company/Privacy";
 import TrySari from "./pages/TrySari";
+import TrySariEnhanced from "./pages/TrySariEnhanced";
 
 // Merchant pages
 import MerchantDashboard from "./pages/merchant/Dashboard";
@@ -129,6 +130,7 @@ import AdminGoogleOAuth from "./pages/AdminGoogleOAuth";
 import AdminDataSync from "./pages/AdminDataSync";
 import GlobalSeoSettings from "./pages/admin/GlobalSeoSettings";
 import GoogleOAuthSettings from "./pages/admin/GoogleOAuthSettings";
+import AdminABTestDashboard from "./pages/AdminABTestDashboard";
 
 function Router() {
   return (
@@ -153,6 +155,7 @@ function Router() {
       <Route path="/company/terms" component={Terms} />
       <Route path="/company/privacy" component={Privacy} />
       <Route path="/try-sari" component={TrySari} />
+      <Route path="/try-sari-enhanced" component={TrySariEnhanced} />
       <Route path="/setup-wizard" component={SetupWizard} />
       
       {/* Merchant Routes */}
@@ -711,6 +714,12 @@ function Router() {
       <Route path="/admin/seo/global-settings">
         <DashboardLayout>
           <GlobalSeoSettings />
+        </DashboardLayout>
+      </Route>
+
+      <Route path="/admin/ab-test-dashboard">
+        <DashboardLayout>
+          <AdminABTestDashboard />
         </DashboardLayout>
       </Route>
       
