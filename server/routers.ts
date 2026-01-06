@@ -1454,6 +1454,15 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Merchant not found' });
         }
 
+        // Check if merchant has an active subscription
+        const subscription = await db.getActiveSubscriptionByMerchantId(merchant.id);
+        if (!subscription) {
+          throw new TRPCError({ 
+            code: 'FORBIDDEN', 
+            message: 'يجب اختيار باقة اشتراك أولاً لربط رقم الواتساب' 
+          });
+        }
+
         // Check if there's already a pending request
         const existingRequest = await db.getWhatsAppConnectionRequestByMerchantId(merchant.id);
         if (existingRequest && existingRequest.status === 'pending') {
