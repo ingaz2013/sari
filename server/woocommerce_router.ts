@@ -473,4 +473,164 @@ export const woocommerceRouter = router({
       const log = await db.getLatestWooCommerceSyncLog(ctx.user.merchantId, input.syncType);
       return log;
     }),
+
+  // ==================== Order Management ====================
+
+  updateOrderStatus: protectedProcedure
+    .input(z.object({
+      orderId: z.number(),
+      status: z.enum(['pending', 'processing', 'on-hold', 'completed', 'cancelled', 'refunded', 'failed']),
+      note: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get order from local database
+        const order = await db.getWooCommerceOrderById(input.orderId);
+        
+        if (!order || order.merchantId !== ctx.user.merchantId) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        // Get WooCommerce settings
+        const settings = await db.getWooCommerceSettings(ctx.user.merchantId);
+        
+        if (!settings) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'لم يتم العثور على إعدادات WooCommerce',
+          });
+        }
+
+        // Update order status in WooCommerce
+        const client = createWooCommerceClient(settings);
+        await client.updateOrder(order.wooOrderId, {
+          status: input.status,
+          ...(input.note && {
+            customer_note: input.note,
+          }),
+        });
+
+        // Update local database
+        await db.updateWooCommerceOrder(input.orderId, {
+          status: input.status,
+          ...(input.note && {
+            orderNotes: input.note,
+          }),
+        });
+
+        return { 
+          success: true, 
+          message: 'تم تحديث حالة الطلب بنجاح',
+          order: {
+            ...order,
+            status: input.status,
+          },
+        };
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message || 'فشل تحديث حالة الطلب',
+        });
+      }
+    }),
+
+  sendOrderNotification: protectedProcedure
+    .input(z.object({
+      orderId: z.number(),
+      message: z.string().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        // Get order from local database
+        const order = await db.getWooCommerceOrderById(input.orderId);
+        
+        if (!order || order.merchantId !== ctx.user.merchantId) {
+          throw new TRPCError({
+            code: 'NOT_FOUND',
+            message: 'الطلب غير موجود',
+          });
+        }
+
+        if (!order.customerPhone) {
+          throw new TRPCError({
+            code: 'BAD_REQUEST',
+            message: 'رقم هاتف العميل غير متوفر',
+          });
+        }
+
+        // Get merchant's WhatsApp connection
+        const whatsappConnection = await db.getWhatsAppConnectionByMerchantId(ctx.user.merchantId);
+        
+        if (!whatsappConnection || !whatsappConnection.isActive) {
+          throw new TRPCError({
+            code: 'PRECONDITION_FAILED',
+            message: 'لم يتم ربط حساب واتساب',
+          });
+        }
+
+        // Parse line items
+        const lineItems = JSON.parse(order.lineItems || '[]');
+        
+        // Prepare notification message
+        const defaultMessage = `
+مرحباً ${order.customerName}! 👋
+
+نود إعلامك بتحديث حالة طلبك #${order.orderNumber}
+
+📦 حالة الطلب: ${getOrderStatusArabic(order.status)}
+💰 المبلغ الإجمالي: ${order.total} ${order.currency}
+
+المنتجات:
+${lineItems.map((item: any, index: number) => `${index + 1}. ${item.name} × ${item.quantity}`).join('\n')}
+
+شكراً لثقتك بنا! 🙏
+        `.trim();
+
+        const messageToSend = input.message || defaultMessage;
+
+        // Send WhatsApp message using Green API
+        const { sendWhatsAppMessage } = await import('./whatsapp');
+        await sendWhatsAppMessage(
+          whatsappConnection.instanceId,
+          whatsappConnection.apiToken,
+          order.customerPhone,
+          messageToSend
+        );
+
+        // Update notification status
+        await db.updateWooCommerceOrder(input.orderId, {
+          notificationSent: 1,
+          notificationSentAt: new Date().toISOString(),
+        });
+
+        return { 
+          success: true, 
+          message: 'تم إرسال الإشعار بنجاح',
+        };
+      } catch (error: any) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: error.message || 'فشل إرسال الإشعار',
+        });
+      }
+    }),
 });
+
+
+// Helper function to get order status in Arabic
+function getOrderStatusArabic(status: string): string {
+  const statusMap: Record<string, string> = {
+    'pending': 'قيد الانتظار',
+    'processing': 'قيد المعالجة',
+    'on-hold': 'معلق',
+    'completed': 'مكتمل',
+    'cancelled': 'ملغي',
+    'refunded': 'مسترجع',
+    'failed': 'فاشل',
+  };
+  
+  return statusMap[status] || status;
+}

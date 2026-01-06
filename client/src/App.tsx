@@ -81,6 +81,7 @@ import ZidProducts from "./pages/ZidProducts";
 import ZidSyncLogs from "./pages/ZidSyncLogs";
 import WooCommerceSettings from "./pages/WooCommerceSettings";
 import WooCommerceProducts from "./pages/WooCommerceProducts";
+import WooCommerceOrders from "./pages/WooCommerceOrders";
 import CalendlyIntegration from "./pages/merchant/CalendlyIntegration";
 import SetupWizard from "./pages/SetupWizard";
 import CalendarSettings from "./pages/CalendarSettings";
@@ -259,6 +260,12 @@ function Router() {
       <Route path="/merchant/woocommerce/products">
         <DashboardLayout>
           <WooCommerceProducts />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/woocommerce/orders">
+        <DashboardLayout>
+          <WooCommerceOrders />
         </DashboardLayout>
       </Route>
       

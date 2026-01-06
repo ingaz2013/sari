@@ -9,6 +9,7 @@
 
 import { Request, Response } from 'express';
 import { handleGreenAPIWebhook } from './webhooks/greenapi';
+import { handleWooCommerceWebhook } from './woocommerce_webhook';
 
 /**
  * Express route handler for WhatsApp webhook
@@ -46,6 +47,9 @@ export function setupWebhookRoutes(app: any) {
   // WhatsApp webhook endpoint
   app.post('/api/webhook/whatsapp', handleWhatsAppWebhook);
   
+  // WooCommerce webhook endpoint
+  app.post('/api/webhooks/woocommerce/:merchantId', handleWooCommerceWebhook);
+  
   // Health check endpoint
   app.get('/api/webhook/health', (req: Request, res: Response) => {
     res.status(200).json({ 
@@ -57,5 +61,6 @@ export function setupWebhookRoutes(app: any) {
   
   console.log('[Webhook] Routes registered:');
   console.log('  POST /api/webhook/whatsapp');
+  console.log('  POST /api/webhooks/woocommerce/:merchantId');
   console.log('  GET  /api/webhook/health');
 }

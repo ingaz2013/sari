@@ -229,6 +229,29 @@ async function searchProducts(merchantId: number, query: string): Promise<Produc
 }
 
 /**
+ * البحث في منتجات WooCommerce
+ */
+async function searchWooCommerceProducts(merchantId: number, query: string): Promise<ProductInfo[]> {
+  try {
+    const wooProducts = await db.searchWooCommerceProducts(merchantId, query, 5);
+    
+    return wooProducts.map((wp: any) => ({
+      id: wp.id,
+      name: wp.name,
+      description: wp.shortDescription || wp.description,
+      price: Math.round(parseFloat(wp.price) * 100), // Convert to cents
+      stock: wp.stockQuantity,
+      category: wp.categories ? JSON.parse(wp.categories)[0]?.name : null,
+      imageUrl: wp.images ? JSON.parse(wp.images)[0]?.src : null,
+      source: 'woocommerce',
+    }));
+  } catch (error) {
+    console.error('[AI] Error searching WooCommerce products:', error);
+    return [];
+  }
+}
+
+/**
  * تنسيق معلومات المنتجات للعرض في الرسالة
  */
 function formatProductsInfo(products: ProductInfo[]): string {
@@ -256,8 +279,9 @@ export async function generateAIResponse(
     // الحصول على معلومات التاجر
     const merchantInfo = await getMerchantInfo(merchantId);
     
-    // البحث عن منتجات ذات صلة
+    // البحث عن منتجات ذات صلة (من المنتجات المحلية و WooCommerce)
     const relevantProducts = await searchProducts(merchantId, customerMessage);
+    const wooProducts = await searchWooCommerceProducts(merchantId, customerMessage);
     
     // البحث عن طلبات العميل إذا كان رقم الهاتف متوفر
     let customerOrders: OrderInfo[] = [];
@@ -267,8 +291,9 @@ export async function generateAIResponse(
     
     // إعداد معلومات المنتجات
     let productsContext = '';
-    if (relevantProducts.length > 0) {
-      productsContext = `\n\nالمنتجات المتاحة ذات الصلة:\n${formatProductsInfo(relevantProducts)}`;
+    const allProducts = [...relevantProducts, ...wooProducts];
+    if (allProducts.length > 0) {
+      productsContext = `\n\nالمنتجات المتاحة ذات الصلة:\n${formatProductsInfo(allProducts)}`;
     }
     
     // إعداد معلومات الطلبات
