@@ -169,135 +169,208 @@
   "home": {
     "hero": {
       "badge": "AI-Powered",
-      "title": "Sari",
-      "subtitle": "AI Sales Assistant on WhatsApp",
-      "description": "Automate your customer service and boost your sales using AI. Sari responds to your customers in Saudi dialect 24/7.",
-      "cta": "Try Free Now",
-      "watchPrices": "View Pricing"
+      "title": "Sary",
+      "subtitle": "Smart Sales Assistant on WhatsApp",
+      "description": "Manage your sales with voice messages: just record your order, address, product, and quantity, and leave the rest to Sary. Understands Saudi dialect and converts voice to complete order automatically.",
+      "ctaTrySari": "Try Sary Now",
+      "ctaStartFree": "Start Free Now",
+      "ctaPricing": "View Pricing"
+    },
+    "stats": {
+      "merchants": "Active Merchants",
+      "conversations": "Monthly Conversations",
+      "satisfaction": "Customer Satisfaction",
+      "support": "24/7 Support"
     },
     "chat": {
-      "title": "Sari",
-      "subtitle": "AI Sales Assistant",
-      "placeholder": "Hello! I'm Sari, your smart assistant. How can I help you today?",
-      "askPlaceholder": "Do you have iPhones?"
+      "title": "Sary",
+      "subtitle": "Smart Sales Assistant",
+      "greeting": "Hello! I'm Sary, your smart assistant. How can I help you today? 😊",
+      "customerQuestion": "Do you have iPhone 15 Pro?",
+      "botResponse1": "Welcome! Yes, we have iPhone 15 Pro 🎉",
+      "botResponse2": "Available in three colors: Black Titanium, Blue Titanium, and Natural Titanium",
+      "botResponse3": "Price: 4,999 SAR",
+      "botResponse4": "Would you like to order it? 😊",
+      "customerReply": "Yes, I want one in black",
+      "botConfirm": "Perfect! Got it 👍"
     },
     "features": {
-      "title": "Why Sari?",
+      "title": "Why Sary?",
       "subtitle": "Everything you need to manage your WhatsApp sales",
-      "ai": {
-        "title": "Advanced AI",
-        "description": "Understands customer inquiries and responds naturally in Saudi dialect"
+      "voiceOrder": {
+        "title": "Voice Message Orders",
+        "description": "Your customers order by voice only: product, quantity, and address - Sary handles the rest"
       },
-      "products": {
-        "title": "Product Management",
-        "description": "Add your products and Sari will showcase them to customers automatically"
+      "smartReply": {
+        "title": "Smart Auto-Reply",
+        "description": "Sary responds to your customers' inquiries in Saudi dialect 24/7"
       },
-      "orders": {
+      "autoOrders": {
+        "title": "Automatic Orders",
+        "description": "Convert conversations to complete orders with payment link automatically"
+      },
+      "abandonedCarts": {
+        "title": "Abandoned Carts",
+        "description": "Automatic reminders for customers who didn't complete their orders to increase conversion rate"
+      },
+      "invoices": {
+        "title": "WhatsApp Invoices",
+        "description": "Send professional invoices directly via WhatsApp with payment link"
+      },
+      "tracking": {
         "title": "Order Tracking",
-        "description": "Complete order management with automatic customer notifications"
+        "description": "Automatic updates for customers about their order status from confirmation to delivery"
       },
-      "analytics": {
-        "title": "Smart Analytics",
-        "description": "Detailed reports on sales and conversations"
+      "gifts": {
+        "title": "Gifts & Greetings",
+        "description": "Automatic messages to customers on occasions and holidays with special offers"
       },
-      "campaigns": {
-        "title": "Marketing Campaigns",
-        "description": "Send bulk messages and special offers to your customers"
+      "notifications": {
+        "title": "Smart Notifications",
+        "description": "Instant alerts for merchant when new orders or important inquiries arrive"
       },
-      "support": {
-        "title": "24/7 Support",
-        "description": "Support team always available to help you"
+      "reports": {
+        "title": "Reports & Analytics",
+        "description": "Detailed reports on sales and conversations to improve your store performance"
+      },
+      "sales": {
+        "title": "Increase Sales",
+        "description": "Convert inquiries to sales with higher conversion rate"
+      },
+      "available": {
+        "title": "Available 24/7",
+        "description": "Serve your customers anytime even outside business hours"
+      },
+      "secure": {
+        "title": "Safe & Reliable",
+        "description": "Complete protection for your customers' data and conversations"
+      }
+    },
+    "steps": {
+      "title": "How to Start with Sary?",
+      "subtitle": "Four simple steps to get started",
+      "step1": {
+        "title": "Register Your Account",
+        "description": "Create a free account in less than a minute"
+      },
+      "step2": {
+        "title": "Connect WhatsApp",
+        "description": "Connect your store's WhatsApp number easily via QR Code"
+      },
+      "step3": {
+        "title": "Add Your Products",
+        "description": "Add your products and prices for Sary to recognize"
+      },
+      "step4": {
+        "title": "Start Selling",
+        "description": "Let Sary handle your customers and increase your sales"
+      }
+    },
+    "testimonials": {
+      "title": "What Our Customers Say",
+      "subtitle": "Real experiences from merchants using Sary",
+      "testimonial1": {
+        "name": "Ahmed Al-Malki",
+        "role": "Electronics Store Owner",
+        "content": "Sary changed the way I deal with customers. Now I can focus on developing the store while Sary handles inquiries."
+      },
+      "testimonial2": {
+        "name": "Fatima Al-Otaibi",
+        "role": "Fashion Store Owner",
+        "content": "My sales increased 40% after using Sary. Customers love the fast and professional response."
+      },
+      "testimonial3": {
+        "name": "Mohammed Al-Qahtani",
+        "role": "Perfume Store Owner",
+        "content": "Best investment I made for my store. Sary speaks natural Saudi dialect and understands customer needs."
       }
     },
     "pricing": {
       "title": "Pricing Plans",
       "subtitle": "Choose the right plan for your business",
-      "monthly": "Monthly",
-      "yearly": "Yearly",
-      "save": "Save 20%",
-      "starter": {
-        "name": "Starter",
-        "price": "Free",
-        "description": "Perfect for trying out",
-        "features": [
-          "100 conversations/month",
-          "Unlimited products",
-          "Basic support",
-          "Simple analytics"
-        ],
+      "free": {
+        "name": "Free",
+        "price": "0",
+        "period": "Monthly",
+        "description": "For trial and start",
+        "feature1": "100 conversations monthly",
+        "feature2": "Smart auto-reply",
+        "feature3": "Basic dashboard",
+        "feature4": "Email support",
         "cta": "Start Free"
       },
-      "professional": {
+      "pro": {
         "name": "Professional",
         "price": "299",
-        "period": "SAR/month",
-        "description": "For medium businesses",
-        "features": [
-          "1000 conversations/month",
-          "Unlimited products",
-          "Marketing campaigns",
-          "Advanced analytics",
-          "Priority support"
-        ],
-        "cta": "Get Started",
-        "popular": "Most Popular"
+        "period": "Monthly",
+        "description": "For medium stores",
+        "popular": "Most Popular",
+        "feature1": "1,000 conversations monthly",
+        "feature2": "Smart auto-reply",
+        "feature3": "Automatic orders",
+        "feature4": "Reports & analytics",
+        "feature5": "Payment integration",
+        "feature6": "Priority support",
+        "cta": "Subscribe Now"
       },
-      "enterprise": {
-        "name": "Enterprise",
-        "price": "Contact Us",
-        "description": "For large companies",
-        "features": [
-          "Unlimited conversations",
-          "Unlimited products",
-          "Advanced campaigns",
-          "Custom analytics",
-          "Dedicated account manager"
-        ],
-        "cta": "Contact Us"
+      "advanced": {
+        "name": "Advanced",
+        "price": "599",
+        "period": "Monthly",
+        "description": "For large stores",
+        "feature1": "Unlimited conversations",
+        "feature2": "All professional features",
+        "feature3": "Marketing campaigns",
+        "feature4": "Google Sheets integration",
+        "feature5": "Google Calendar integration",
+        "feature6": "Dedicated 24/7 support",
+        "cta": "Subscribe Now"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "subtitle": "Answers to the most common questions",
+      "q1": {
+        "question": "What is Sary?",
+        "answer": "Sary is a smart sales assistant that works on WhatsApp, automatically responds to your customers' inquiries and converts conversations to complete orders."
+      },
+      "q2": {
+        "question": "How does Sary work?",
+        "answer": "After connecting your store's WhatsApp number, Sary receives messages and responds automatically using artificial intelligence, and can create orders and send payment links."
+      },
+      "q3": {
+        "question": "Does Sary support Arabic?",
+        "answer": "Yes, Sary is specifically designed for the Saudi market and speaks natural Saudi dialect."
+      },
+      "q4": {
+        "question": "Can I try Sary for free?",
+        "answer": "Yes, we offer a free plan that allows 100 conversations monthly to try the service."
+      },
+      "q5": {
+        "question": "How is payment made?",
+        "answer": "You can pay monthly or annually via credit cards, Apple Pay, or Mada."
+      },
+      "q6": {
+        "question": "Can I cancel subscription anytime?",
+        "answer": "Yes, you can cancel subscription anytime without any additional fees."
       }
     },
     "cta": {
-      "title": "Ready to Get Started?",
-      "description": "Join hundreds of merchants using Sari to boost their sales",
-      "button": "Try Free Now"
+      "title": "Ready to Start?",
+      "subtitle": "Join thousands of merchants using Sary to increase their sales",
+      "button": "Start Free Now"
     }
   },
   "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome, {{name}}",
-    "overview": "Overview",
-    "statistics": "Statistics",
-    "recentActivity": "Recent Activity",
-    "quickActions": "Quick Actions",
-    "totalConversations": "Total Conversations",
-    "activeCustomers": "Active Customers",
     "totalOrders": "Total Orders",
     "totalRevenue": "Total Revenue",
-    "pendingOrders": "Pending Orders",
+    "averageOrderValue": "Average Order Value",
     "completedOrders": "Completed Orders",
-    "todayConversations": "Today's Conversations",
-    "todayOrders": "Today's Orders",
-    "todayRevenue": "Today's Revenue",
-    "thisWeek": "This Week",
-    "thisMonth": "This Month",
-    "lastMonth": "Last Month",
-    "growth": "Growth",
-    "decline": "Decline",
-    "noChange": "No Change",
-    "stats": {
-      "totalOrders": "Total Orders",
-      "totalRevenue": "Total Revenue",
-      "activeConversations": "Active Conversations",
-      "products": "Products"
-    },
-    "charts": {
-      "ordersTitle": "Orders Trend (Last 30 Days)",
-      "revenueTitle": "Revenue Trend (Last 30 Days)",
-      "topProducts": "Top Selling Products"
-    },
-    "comparison": {
-      "vs30Days": "vs. Previous 30 Days"
-    }
+    "averageRating": "Average Rating",
+    "last30Days": "Last 30 Days",
+    "averageOrder": "Average Order",
+    "successfulOrders": "Successful Orders",
+    "reviews": "review"
   },
   "conversations": {
     "title": "Conversations",
@@ -1019,16 +1092,5 @@
     "orderDetails": "Order #{{orderId}} - {{status}}{{tracking}}\nAmount: {{amount}} - Date: {{date}}",
     "productDetails": "• {{name}} - {{price}} {{stock}}{{description}}",
     "storeInfo": "Store Information:\nStore Name: {{businessName}}\nContact: {{phone}}"
-  },
-  "dashboard": {
-    "totalOrders": "Total Orders",
-    "totalRevenue": "Total Revenue",
-    "averageOrderValue": "Average Order Value",
-    "completedOrders": "Completed Orders",
-    "averageRating": "Average Rating",
-    "last30Days": "Last 30 Days",
-    "averageOrder": "Average Order",
-    "successfulOrders": "Successful Orders",
-    "reviews": "review"
   }
 }

@@ -36,190 +36,190 @@ export default function Home() {
   const features = [
     {
       icon: Mic,
-      title: 'طلب بالرسالة الصوتية',
-      description: 'عملاؤك يطلبون بصوتهم فقط: المنتج، العدد، والعنوان - وساري يتولى الباقي',
+      title: t('home.features.voiceOrder.title'),
+      description: t('home.features.voiceOrder.description'),
     },
     {
       icon: Bot,
-      title: 'رد آلي ذكي',
-      description: 'يرد "ساري" على استفسارات عملائك باللهجة السعودية على مدار الساعة',
+      title: t('home.features.smartReply.title'),
+      description: t('home.features.smartReply.description'),
     },
     {
       icon: ShoppingCart,
-      title: 'طلبات تلقائية',
-      description: 'تحويل المحادثات إلى طلبات مكتملة مع رابط الدفع تلقائياً',
+      title: t('home.features.autoOrders.title'),
+      description: t('home.features.autoOrders.description'),
     },
     {
       icon: ShoppingBag,
-      title: 'السلال المهجورة',
-      description: 'تذكير تلقائي للعملاء الذين لم يكملوا طلباتهم لزيادة نسبة التحويل',
+      title: t('home.features.abandonedCarts.title'),
+      description: t('home.features.abandonedCarts.description'),
     },
     {
       icon: FileText,
-      title: 'الفواتير بالواتساب',
-      description: 'إرسال فواتير احترافية مباشرة عبر الواتساب مع رابط الدفع',
+      title: t('home.features.invoices.title'),
+      description: t('home.features.invoices.description'),
     },
     {
       icon: Package,
-      title: 'تتبع الطلبات',
-      description: 'تحديثات تلقائية للعملاء عن حالة طلباتهم من التأكيد حتى التوصيل',
+      title: t('home.features.tracking.title'),
+      description: t('home.features.tracking.description'),
     },
     {
       icon: Gift,
-      title: 'الهدايا والتهنئة',
-      description: 'رسائل تلقائية للعملاء في المناسبات والأعياد مع عروض خاصة',
+      title: t('home.features.gifts.title'),
+      description: t('home.features.gifts.description'),
     },
     {
       icon: Bell,
-      title: 'إشعارات ذكية',
-      description: 'تنبيهات فورية للتاجر عند وصول طلبات جديدة أو استفسارات مهمة',
+      title: t('home.features.notifications.title'),
+      description: t('home.features.notifications.description'),
     },
     {
       icon: BarChart3,
-      title: 'تقارير وتحليلات',
-      description: 'تقارير تفصيلية عن المبيعات والمحادثات لتحسين أداء متجرك',
+      title: t('home.features.reports.title'),
+      description: t('home.features.reports.description'),
     },
     {
       icon: TrendingUp,
-      title: 'زيادة المبيعات',
-      description: 'حول الاستفسارات إلى مبيعات بنسبة تحويل أعلى',
+      title: t('home.features.sales.title'),
+      description: t('home.features.sales.description'),
     },
     {
       icon: Clock,
-      title: 'متاح 24/7',
-      description: 'خدمة عملائك في أي وقت حتى خارج ساعات العمل',
+      title: t('home.features.available.title'),
+      description: t('home.features.available.description'),
     },
     {
       icon: Shield,
-      title: 'آمن وموثوق',
-      description: 'حماية كاملة لبيانات عملائك ومحادثاتهم',
+      title: t('home.features.secure.title'),
+      description: t('home.features.secure.description'),
     },
   ];
 
   const steps = [
     {
       number: '1',
-      title: 'سجل حسابك',
-      description: 'أنشئ حساباً مجانياً في أقل من دقيقة',
+      title: t('home.steps.step1.title'),
+      description: t('home.steps.step1.description'),
     },
     {
       number: '2',
-      title: 'اربط الواتساب',
-      description: 'اربط رقم واتساب متجرك بسهولة عبر QR Code',
+      title: t('home.steps.step2.title'),
+      description: t('home.steps.step2.description'),
     },
     {
       number: '3',
-      title: 'أضف منتجاتك',
-      description: 'أضف منتجاتك وأسعارك ليتعرف عليها "ساري"',
+      title: t('home.steps.step3.title'),
+      description: t('home.steps.step3.description'),
     },
     {
       number: '4',
-      title: 'ابدأ البيع',
-      description: 'دع "ساري" يتعامل مع عملائك ويزيد مبيعاتك',
+      title: t('home.steps.step4.title'),
+      description: t('home.steps.step4.description'),
     },
   ];
 
   const testimonials = [
     {
-      name: 'أحمد المالكي',
-      role: 'صاحب متجر إلكترونيات',
-      content: 'ساري غيّر طريقة تعاملي مع العملاء. الآن أستطيع التركيز على تطوير المتجر بينما ساري يتعامل مع الاستفسارات.',
+      name: t('home.testimonials.testimonial1.name'),
+      role: t('home.testimonials.testimonial1.role'),
+      content: t('home.testimonials.testimonial1.content'),
       rating: 5,
     },
     {
-      name: 'فاطمة العتيبي',
-      role: 'صاحبة متجر أزياء',
-      content: 'زادت مبيعاتي 40% بعد استخدام ساري. العملاء يحبون الرد السريع والمحترف.',
+      name: t('home.testimonials.testimonial2.name'),
+      role: t('home.testimonials.testimonial2.role'),
+      content: t('home.testimonials.testimonial2.content'),
       rating: 5,
     },
     {
-      name: 'محمد القحطاني',
-      role: 'صاحب متجر عطور',
-      content: 'أفضل استثمار قمت به لمتجري. ساري يتحدث بلهجة سعودية طبيعية ويفهم احتياجات العملاء.',
+      name: t('home.testimonials.testimonial3.name'),
+      role: t('home.testimonials.testimonial3.role'),
+      content: t('home.testimonials.testimonial3.content'),
       rating: 5,
     },
   ];
 
   const stats = [
-    { value: '10,000+', label: 'تاجر نشط' },
-    { value: '500,000+', label: 'محادثة شهرياً' },
-    { value: '95%', label: 'رضا العملاء' },
-    { value: '24/7', label: 'دعم متواصل' },
+    { value: '10,000+', label: t('home.stats.merchants') },
+    { value: '500,000+', label: t('home.stats.conversations') },
+    { value: '95%', label: t('home.stats.satisfaction') },
+    { value: '24/7', label: t('home.stats.support') },
   ];
 
   const pricingPlans = [
     {
-      name: 'المجاني',
-      price: '0',
-      period: 'شهرياً',
-      description: 'للتجربة والبدء',
+      name: t('home.pricing.free.name'),
+      price: t('home.pricing.free.price'),
+      period: t('home.pricing.free.period'),
+      description: t('home.pricing.free.description'),
       features: [
-        '100 محادثة شهرياً',
-        'رد آلي ذكي',
-        'لوحة تحكم أساسية',
-        'دعم فني عبر البريد',
+        t('home.pricing.free.feature1'),
+        t('home.pricing.free.feature2'),
+        t('home.pricing.free.feature3'),
+        t('home.pricing.free.feature4'),
       ],
-      cta: 'ابدأ مجاناً',
+      cta: t('home.pricing.free.cta'),
       popular: false,
     },
     {
-      name: 'الاحترافي',
-      price: '299',
-      period: 'شهرياً',
-      description: 'للمتاجر المتوسطة',
+      name: t('home.pricing.pro.name'),
+      price: t('home.pricing.pro.price'),
+      period: t('home.pricing.pro.period'),
+      description: t('home.pricing.pro.description'),
       features: [
-        '1,000 محادثة شهرياً',
-        'رد آلي ذكي',
-        'طلبات تلقائية',
-        'تقارير وتحليلات',
-        'تكامل مع الدفع',
-        'دعم فني أولوية',
+        t('home.pricing.pro.feature1'),
+        t('home.pricing.pro.feature2'),
+        t('home.pricing.pro.feature3'),
+        t('home.pricing.pro.feature4'),
+        t('home.pricing.pro.feature5'),
+        t('home.pricing.pro.feature6'),
       ],
-      cta: 'اشترك الآن',
+      cta: t('home.pricing.pro.cta'),
       popular: true,
     },
     {
-      name: 'المتقدم',
-      price: '599',
-      period: 'شهرياً',
-      description: 'للمتاجر الكبيرة',
+      name: t('home.pricing.advanced.name'),
+      price: t('home.pricing.advanced.price'),
+      period: t('home.pricing.advanced.period'),
+      description: t('home.pricing.advanced.description'),
       features: [
-        'محادثات غير محدودة',
-        'جميع ميزات الاحترافي',
-        'حملات تسويقية',
-        'تكامل مع Google Sheets',
-        'تكامل مع Google Calendar',
-        'دعم فني مخصص 24/7',
+        t('home.pricing.advanced.feature1'),
+        t('home.pricing.advanced.feature2'),
+        t('home.pricing.advanced.feature3'),
+        t('home.pricing.advanced.feature4'),
+        t('home.pricing.advanced.feature5'),
+        t('home.pricing.advanced.feature6'),
       ],
-      cta: 'اشترك الآن',
+      cta: t('home.pricing.advanced.cta'),
       popular: false,
     },
   ];
 
   const faqs = [
     {
-      question: 'ما هو ساري؟',
-      answer: 'ساري هو مساعد مبيعات ذكي يعمل على واتساب، يرد على استفسارات عملائك تلقائياً ويحول المحادثات إلى طلبات مكتملة.',
+      question: t('home.faq.q1.question'),
+      answer: t('home.faq.q1.answer'),
     },
     {
-      question: 'كيف يعمل ساري؟',
-      answer: 'بعد ربط رقم واتساب متجرك، يستقبل ساري الرسائل ويرد عليها تلقائياً باستخدام الذكاء الاصطناعي، ويمكنه إنشاء طلبات وإرسال روابط الدفع.',
+      question: t('home.faq.q2.question'),
+      answer: t('home.faq.q2.answer'),
     },
     {
-      question: 'هل يدعم ساري اللغة العربية؟',
-      answer: 'نعم، ساري مصمم خصيصاً للسوق السعودي ويتحدث باللهجة السعودية بشكل طبيعي.',
+      question: t('home.faq.q3.question'),
+      answer: t('home.faq.q3.answer'),
     },
     {
-      question: 'هل يمكنني تجربة ساري مجاناً؟',
-      answer: 'نعم، نوفر خطة مجانية تتيح لك 100 محادثة شهرياً لتجربة الخدمة.',
+      question: t('home.faq.q4.question'),
+      answer: t('home.faq.q4.answer'),
     },
     {
-      question: 'كيف يتم الدفع؟',
-      answer: 'يمكنك الدفع شهرياً أو سنوياً عبر بطاقات الائتمان أو Apple Pay أو مدى.',
+      question: t('home.faq.q5.question'),
+      answer: t('home.faq.q5.answer'),
     },
     {
-      question: 'هل يمكنني إلغاء الاشتراك في أي وقت؟',
-      answer: 'نعم، يمكنك إلغاء الاشتراك في أي وقت دون أي رسوم إضافية.',
+      question: t('home.faq.q6.question'),
+      answer: t('home.faq.q6.answer'),
     },
   ];
 
@@ -235,28 +235,26 @@ export default function Home() {
             <div className="space-y-8 animate-fade-in">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-sm font-medium">
                 <Sparkles className="w-4 h-4" />
-                <span>مدعوم بالذكاء الاصطناعي</span>
+                <span>{t('home.hero.badge')}</span>
               </div>
               
               <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                 <span className="text-primary">
-                  ساري
+                  {t('home.hero.title')}
                 </span>
                 <br />
-                مساعد المبيعات الذكي
-                <br />
-                على الواتساب
+                {t('home.hero.subtitle')}
               </h1>
               
               <p className="text-xl text-muted-foreground leading-relaxed">
-                أدر مبيعاتك بالمحادثات الصوتية: فقط سجل بصوتك طلبك والعنوان والمنتج والعدد واترك الباقي على ساري. يفهم اللهجة السعودية ويحول الصوت لطلب كامل تلقائياً.
+                {t('home.hero.description')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/try-sari">
                   <a>
                     <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-lg h-14 px-8 shadow-lg hover:shadow-xl transition-all">
-                      جرب ساري الآن
+                      {t('home.hero.ctaTrySari')}
                       <Sparkles className="mr-2 w-5 h-5" />
                     </Button>
                   </a>
@@ -264,7 +262,7 @@ export default function Home() {
                 <Link href="/login">
                   <a>
                     <Button size="lg" className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-lg h-14 px-8 shadow-lg hover:shadow-xl transition-all">
-                      ابدأ الآن مجاناً
+                      {t('home.hero.ctaStartFree')}
                       <ArrowRight className="mr-2 w-5 h-5" />
                     </Button>
                   </a>
@@ -272,7 +270,7 @@ export default function Home() {
                 <Link href="/pricing">
                   <a>
                     <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg h-14 px-8">
-                      شاهد الأسعار
+                      {t('home.hero.ctaPricing')}
                     </Button>
                   </a>
                 </Link>
@@ -296,8 +294,8 @@ export default function Home() {
                     <Bot className="w-7 h-7 text-white" />
                   </div>
                   <div>
-                    <div className="font-semibold text-white">ساري</div>
-                    <div className="text-sm text-white/80">مساعد المبيعات الذكي</div>
+                    <div className="font-semibold text-white">{t('home.chat.title')}</div>
+                    <div className="text-sm text-white/80">{t('home.chat.subtitle')}</div>
                   </div>
                 </div>
                 <div className="p-6 space-y-4">
@@ -306,12 +304,42 @@ export default function Home() {
                       <Bot className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 bg-muted p-4 rounded-2xl rounded-tl-none">
-                      <p className="text-sm">مرحباً! أنا ساري، مساعدك الذكي. كيف أقدر أساعدك اليوم؟ 😊</p>
+                      <p className="text-sm">{t('home.chat.greeting')}</p>
                     </div>
                   </div>
                   <div className="flex gap-3 justify-end">
-                    <div className="bg-primary text-white p-4 rounded-2xl rounded-tr-none max-w-[80%]">
-                      <p className="text-sm">عندكم جوالات آيفون؟</p>
+                    <div className="flex-1 bg-primary text-white p-4 rounded-2xl rounded-tr-none max-w-[80%]">
+                      <p className="text-sm">{t('home.chat.customerQuestion')}</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Users className="w-6 h-6 text-primary" />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                      <Bot className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 space-y-2">
+                      <div className="bg-muted p-4 rounded-2xl rounded-tl-none">
+                        <p className="text-sm">{t('home.chat.botResponse1')}</p>
+                      </div>
+                      <div className="bg-muted p-4 rounded-2xl rounded-tl-none">
+                        <p className="text-sm">{t('home.chat.botResponse2')}</p>
+                      </div>
+                      <div className="bg-muted p-4 rounded-2xl rounded-tl-none">
+                        <p className="text-sm font-semibold text-primary">{t('home.chat.botResponse3')}</p>
+                      </div>
+                      <div className="bg-muted p-4 rounded-2xl rounded-tl-none">
+                        <p className="text-sm">{t('home.chat.botResponse4')}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 justify-end">
+                    <div className="flex-1 bg-primary text-white p-4 rounded-2xl rounded-tr-none max-w-[80%]">
+                      <p className="text-sm">{t('home.chat.customerReply')}</p>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                      <Users className="w-6 h-6 text-primary" />
                     </div>
                   </div>
                   <div className="flex gap-3">
@@ -319,42 +347,34 @@ export default function Home() {
                       <Bot className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 bg-muted p-4 rounded-2xl rounded-tl-none">
-                      <p className="text-sm">أهلاً وسهلاً! نعم عندنا مجموعة رائعة من أجهزة آيفون. عندنا آيفون 15 برو ماكس بسعر 4,999 ريال، وآيفون 15 بسعر 3,799 ريال. أي موديل يهمك؟</p>
+                      <p className="text-sm">{t('home.chat.botConfirm')}</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="absolute -z-10 top-10 -right-10 w-72 h-72 bg-primary/30 rounded-full blur-3xl" />
-              <div className="absolute -z-10 -bottom-10 -left-10 w-72 h-72 bg-blue-400/30 rounded-full blur-3xl" />
+              <div className="absolute -z-10 top-8 left-8 w-full h-full bg-primary/10 rounded-2xl" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-muted/30">
+      <section className="py-20 bg-white dark:bg-background">
         <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              لماذا تختار ساري؟
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              ساري يوفر لك كل ما تحتاجه لتحسين خدمة العملاء وزيادة مبيعاتك
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('home.features.title')}</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              {t('home.features.subtitle')}
             </p>
           </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card 
-                key={feature.title} 
-                className="border-2 hover:border-primary/50 dark:hover:border-primary/50 transition-all hover:shadow-lg group"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <CardContent className="p-6 space-y-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <feature.icon className="w-6 h-6 text-white" />
+              <Card key={index} className="border-2 hover:border-primary transition-all hover:shadow-lg">
+                <CardContent className="p-6">
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <feature.icon className="w-6 h-6 text-primary" />
                   </div>
-                  <h3 className="text-xl font-semibold">{feature.title}</h3>
+                  <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
                   <p className="text-muted-foreground">{feature.description}</p>
                 </CardContent>
               </Card>
@@ -363,147 +383,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20">
+      {/* How it Works Section */}
+      <section className="py-20 bg-muted/50">
         <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              كيف يعمل ساري؟
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              ابدأ مع ساري في 4 خطوات بسيطة
-            </p>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('home.steps.title')}</h2>
+            <p className="text-xl text-muted-foreground">{t('home.steps.subtitle')}</p>
           </div>
-
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {steps.map((step, index) => (
-              <div key={step.number} className="relative">
-                <div className="text-center space-y-4">
-                  <div className="relative inline-flex">
-                    <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl font-bold text-white shadow-lg">
-                      {step.number}
-                    </div>
-                    {index < steps.length - 1 && (
-                      <div className="hidden lg:block absolute top-1/2 right-full w-full h-0.5 bg-primary/30 -translate-y-1/2" style={{ width: 'calc(100% + 2rem)' }} />
-                    )}
+              <div key={index} className="relative">
+                <div className="flex flex-col items-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-bold mb-4">
+                    {step.number}
                   </div>
-                  <h3 className="text-xl font-semibold">{step.title}</h3>
+                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
                   <p className="text-muted-foreground">{step.description}</p>
                 </div>
+                {index < steps.length - 1 && (
+                  <div className="hidden lg:block absolute top-8 left-[60%] w-[80%] h-0.5 bg-primary/20" />
+                )}
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Live Stats Section */}
-      <section className="py-16 bg-gradient-to-b from-white to-primary/5 dark:from-background dark:to-primary/5">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              في الوقت الفعلي
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              شاهد نشاط ساري مباشرة - محادثات وطلبات تتم الآن
-            </p>
-          </div>
-          <div className="max-w-2xl mx-auto">
-            <LiveStats targetConversations={12847} targetOrders={8956} duration={2500} />
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              خطط الأسعار
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              اختر الخطة المناسبة لحجم متجرك
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {pricingPlans.map((plan) => (
-              <Card 
-                key={plan.name} 
-                className={`relative border-2 ${
-                  plan.popular 
-                    ? 'border-primary shadow-xl scale-105' 
-                    : 'border-border hover:border-primary/30'
-                } transition-all`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-semibold">
-                    الأكثر شعبية
-                  </div>
-                )}
-                <CardContent className="p-6 space-y-6">
-                  <div>
-                    <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                    <p className="text-muted-foreground text-sm">{plan.description}</p>
-                  </div>
-                  
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">ريال</span>
-                    <span className="text-muted-foreground text-sm">/ {plan.period}</span>
-                  </div>
-
-                  <ul className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href="/login">
-                    <a>
-                      <Button 
-                        className={`w-full ${
-                          plan.popular 
-                            ? 'bg-primary hover:bg-primary/90' 
-                            : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground'
-                        }`}
-                        size="lg"
-                      >
-                        {plan.cta}
-                      </Button>
-                    </a>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials Section */}
-      <section className="py-20">
+      <section className="py-20 bg-white dark:bg-background">
         <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              ماذا يقول عملاؤنا؟
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              آراء التجار الذين استخدموا ساري
-            </p>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('home.testimonials.title')}</h2>
+            <p className="text-xl text-muted-foreground">{t('home.testimonials.subtitle')}</p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((testimonial) => (
-              <Card key={testimonial.name} className="border-2 hover:shadow-lg transition-shadow">
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex gap-1">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="border-2">
+                <CardContent className="p-6">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
                       <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <p className="text-muted-foreground">{testimonial.content}</p>
+                  <p className="text-muted-foreground mb-4">{testimonial.content}</p>
                   <div>
                     <div className="font-semibold">{testimonial.name}</div>
                     <div className="text-sm text-muted-foreground">{testimonial.role}</div>
@@ -515,97 +437,67 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Voice Order Feature Section */}
-      <section className="py-20 bg-gradient-to-br from-primary/10 to-blue-50 dark:from-primary/5 dark:to-background">
+      {/* Pricing Section */}
+      <section className="py-20 bg-muted/50">
         <div className="container">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <LiveChatDemo />
-            </div>
-
-            <div className="order-1 lg:order-2 space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/20 dark:bg-primary/30 text-primary dark:text-primary text-sm font-medium">
-                <Sparkles className="w-4 h-4" />
-                <span>ميزة جديدة</span>
-              </div>
-              
-              <h2 className="text-3xl md:text-5xl font-bold leading-tight">
-                محادثة ذكية تتحول
-                <br />
-                <span className="text-primary">إلى طلب مكتمل</span>
-              </h2>
-              
-              <p className="text-xl text-muted-foreground leading-relaxed">
-                شاهد كيف يتحدث ساري مع عملائك بشكل طبيعي، يفهم احتياجاتهم، يعرض المنتجات المناسبة، ويحول المحادثة إلى طلب مكتمل مع رابط الدفع تلقائياً!
-              </p>
-
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <MessageSquare className="w-5 h-5 text-primary" />
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('home.pricing.title')}</h2>
+            <p className="text-xl text-muted-foreground">{t('home.pricing.subtitle')}</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {pricingPlans.map((plan, index) => (
+              <Card key={index} className={`relative border-2 ${plan.popular ? 'border-primary shadow-xl scale-105' : ''}`}>
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-white px-4 py-1 rounded-full text-sm font-medium">
+                    {t('home.pricing.pro.popular')}
                   </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">محادثة طبيعية</h3>
-                    <p className="text-muted-foreground">يتحدث باللهجة السعودية ويفهم السياق بذكاء</p>
+                )}
+                <CardContent className="p-8">
+                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                  <p className="text-muted-foreground mb-4">{plan.description}</p>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold">{plan.price}</span>
+                    {plan.price !== '0' && plan.price !== t('home.pricing.advanced.price') && (
+                      <span className="text-muted-foreground"> {plan.period}</span>
+                    )}
                   </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <ShoppingCart className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">عرض منتجات مخصص</h3>
-                    <p className="text-muted-foreground">يقترح المنتجات المناسبة مع الأسعار والتفاصيل</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-1">إتمام الطلب تلقائياً</h3>
-                    <p className="text-muted-foreground">يجمع التفاصيل ويرسل رابط الدفع فوراً</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <Link href="/login">
-                  <a>
-                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-lg h-14 px-8 shadow-lg">
-                      جرب الميزة الآن
-                      <ArrowRight className="mr-2 w-5 h-5" />
-                    </Button>
-                  </a>
-                </Link>
-              </div>
-            </div>
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/login">
+                    <a>
+                      <Button className="w-full" variant={plan.popular ? 'default' : 'outline'}>
+                        {plan.cta}
+                      </Button>
+                    </a>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="py-20 bg-muted/30">
-        <div className="container">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              الأسئلة الشائعة
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              إجابات على أكثر الأسئلة شيوعاً
-            </p>
+      <section className="py-20 bg-white dark:bg-background">
+        <div className="container max-w-4xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('home.faq.title')}</h2>
+            <p className="text-xl text-muted-foreground">{t('home.faq.subtitle')}</p>
           </div>
-
-          <div className="max-w-3xl mx-auto space-y-4">
+          <div className="space-y-6">
             {faqs.map((faq, index) => (
               <Card key={index} className="border-2">
                 <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                      <HelpCircle className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg mb-2">{faq.question}</h3>
+                  <div className="flex gap-4">
+                    <HelpCircle className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                    <div>
+                      <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
                       <p className="text-muted-foreground">{faq.answer}</p>
                     </div>
                   </div>
@@ -618,30 +510,17 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-20 bg-primary text-white">
-        <div className="container text-center space-y-8">
-          <h2 className="text-3xl md:text-5xl font-bold">
-            جاهز لزيادة مبيعاتك؟
-          </h2>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto">
-            انضم إلى آلاف التجار الذين يستخدمون ساري لتحسين خدمة العملاء وزيادة المبيعات
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/login">
-              <a>
-                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-lg h-14 px-8 shadow-lg hover:shadow-xl">
-                  ابدأ الآن مجاناً
-                  <ArrowRight className="mr-2 w-5 h-5" />
-                </Button>
-              </a>
-            </Link>
-            <Link href="/support">
-              <a>
-                <Button size="lg" variant="outline" className="w-full sm:w-auto text-lg h-14 px-8 bg-transparent border-white text-white hover:bg-white/10">
-                  تواصل معنا
-                </Button>
-              </a>
-            </Link>
-          </div>
+        <div className="container text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-4">{t('home.cta.title')}</h2>
+          <p className="text-xl mb-8 opacity-90">{t('home.cta.subtitle')}</p>
+          <Link href="/login">
+            <a>
+              <Button size="lg" variant="secondary" className="text-lg h-14 px-8">
+                {t('home.cta.button')}
+                <ArrowRight className="mr-2 w-5 h-5" />
+              </Button>
+            </a>
+          </Link>
         </div>
       </section>
 
