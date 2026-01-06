@@ -339,6 +339,25 @@ export async function createOrderFromChat(
       // نستمر حتى لو فشل إنشاء رابط Tap، سنستخدم رابط Salla
     }
 
+    // Notify admin about new order
+    try {
+      const { notifyNewOrder } = await import('../_core/emailNotifications');
+      const merchant = await db.getMerchantById(merchantId);
+      const user = merchant ? await db.getUserById(merchant.userId) : null;
+      await notifyNewOrder({
+        merchantName: user?.name || merchant?.businessName || 'Unknown',
+        businessName: merchant?.businessName || 'Unknown',
+        orderNumber: order.orderNumber || 'N/A',
+        customerName: customerName,
+        customerPhone: customerPhone,
+        totalAmount: finalAmount / 100, // Convert from halalas to SAR
+        itemsCount: items.length,
+        orderDate: new Date(),
+      });
+    } catch (error) {
+      console.error('Failed to send new order notification:', error);
+    }
+
     return {
       orderId: order.id,
       paymentUrl: tapPaymentUrl || sallaOrder.paymentUrl || null,

@@ -636,6 +636,21 @@ export const appRouter = router({
 
           // Notify owner about new subscription
           const { notifyOwner } = await import('./_core/notification');
+          const { notifyNewSubscription } = await import('./_core/emailNotifications');
+          const plan = await db.getPlanById(input.planId);
+          const user = await db.getUserById(merchant.userId);
+          try {
+            await notifyNewSubscription({
+              merchantName: user?.name || merchant.businessName,
+              businessName: merchant.businessName,
+              planName: plan?.name || 'Unknown Plan',
+              planPrice: plan?.price || 0,
+              billingCycle: plan?.billingCycle || 'monthly',
+              subscribedAt: new Date(),
+            });
+          } catch (error) {
+            console.error('Failed to send new subscription notification:', error);
+          }
           await notifyOwner({
             title: 'اشتراك جديد',
             content: `التاجر ${merchant.businessName} اشترك في الباقة ${plan.nameAr}`,
@@ -1048,6 +1063,23 @@ export const appRouter = router({
           });
 
           console.log(`Campaign ${input.id} completed: ${successCount}/${recipients.length} sent`);
+
+          // Notify admin about campaign completion
+          try {
+            const { notifyMarketingCampaign } = await import('./_core/emailNotifications');
+            const user = await db.getUserById(merchant.userId);
+            await notifyMarketingCampaign({
+              merchantName: user?.name || merchant.businessName,
+              businessName: merchant.businessName,
+              campaignName: campaign.name,
+              targetAudience: campaign.targetAudience || 'All Customers',
+              recipientsCount: recipients.length,
+              sentAt: new Date(),
+              status: 'sent',
+            });
+          } catch (error) {
+            console.error('Failed to send campaign notification:', error);
+          }
         }).catch(async (error) => {
           console.error('Error sending campaign:', error);
           await db.updateCampaign(input.id, { status: 'failed' });
@@ -2769,14 +2801,30 @@ export const appRouter = router({
           description: `خصم 10% على الاشتراك القادم لإحالة ${referredMerchant.businessName}`,
         });
 
-        // Notify referrer
+        // Notify referrer and admin
         const { notifyOwner } = await import('./_core/notification');
+        const { notifyNewReferral } = await import('./_core/emailNotifications');
         const referrer = await db.getMerchantById(referralCode.merchantId);
         if (referrer) {
           await notifyOwner({
             title: 'إحالة جديدة!',
             content: `${referrer.businessName} حصل على إحالة جديدة من ${referredMerchant.businessName}`,
           });
+          
+          // Email notification to admin
+          try {
+            const referredUser = await db.getUserById(referredMerchant.userId);
+            await notifyNewReferral({
+              referrerName: referrer.businessName,
+              referrerBusiness: referrer.businessName,
+              newMerchantName: referredMerchant.businessName,
+              newMerchantEmail: referredUser?.email || '',
+              referralCode: input.code,
+              referredAt: new Date(),
+            });
+          } catch (error) {
+            console.error('Failed to send referral notification:', error);
+          }
         }
 
         return { success: true, message: 'تم تطبيق كود الإحالة بنجاح' };
@@ -3451,6 +3499,21 @@ export const appRouter = router({
           businessName: input.businessName || merchant.businessName,
           status: 'pending',
         });
+
+        // Notify admin about new WhatsApp connection request
+        try {
+          const { notifyWhatsAppConnectionRequest } = await import('./_core/emailNotifications');
+          const user = await db.getUserById(merchant.userId);
+          await notifyWhatsAppConnectionRequest({
+            merchantName: user?.name || merchant.businessName,
+            merchantEmail: user?.email || '',
+            businessName: merchant.businessName,
+            phoneNumber: input.phoneNumber || '',
+            requestedAt: new Date(),
+          });
+        } catch (error) {
+          console.error('Failed to send WhatsApp connection request notification:', error);
+        }
 
         return request;
       }),
