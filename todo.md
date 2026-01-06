@@ -3516,4 +3516,4 @@
 - [x] إنشاء ملف trial.test.ts شامل
 
 ### Checkpoint
-- [ ] حفظ checkpoint بعد إكمال الميزات الجديدة
+- [x] حفظ checkpoint بعد إكمال الميزات الجديدة
