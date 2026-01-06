@@ -26,6 +26,8 @@ import Terms from "./pages/company/Terms";
 import Privacy from "./pages/company/Privacy";
 import TrySari from "./pages/TrySari";
 import TrySariEnhanced from "./pages/TrySariEnhanced";
+import SubscribePage from "./pages/SubscribePage";
+import PaymentCallback from "./pages/PaymentCallback";
 
 // Merchant pages
 import MerchantDashboard from "./pages/merchant/Dashboard";
@@ -163,6 +165,9 @@ function Router() {
       <Route path="/reset-password/:token" component={ResetPassword} />
       <Route path="/products" component={ProductsPage} />
       <Route path="/pricing" component={PricingPage} />
+      <Route path="/subscribe" component={SubscribePage} />
+      <Route path="/subscribe/:planId" component={SubscribePage} />
+      <Route path="/payment/callback" component={PaymentCallback} />
       <Route path="/support" component={SupportPage} />
       <Route path="/solutions/sales" component={SolutionsSales} />
       <Route path="/solutions/marketing" component={SolutionsMarketing} />

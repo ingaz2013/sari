@@ -143,7 +143,7 @@ export default function Pricing() {
                           ))}
                         </ul>
 
-                        <Link href="/login">
+                        <Link href={`/subscribe/${plan.id}`}>
                           <a className="block">
                             <Button
                               className={`w-full ${
@@ -154,7 +154,7 @@ export default function Pricing() {
                               variant={isPopular ? 'default' : 'outline'}
                               size="lg"
                             >
-                              ابدأ الآن
+                              اشترك الآن
                               <ArrowRight className="mr-2 w-4 h-4" />
                             </Button>
                           </a>
@@ -216,10 +216,10 @@ export default function Pricing() {
           <p className="text-xl text-white/90 max-w-2xl mx-auto">
             ابدأ فترتك التجريبية المجانية الآن ولا تحتاج لبطاقة ائتمانية
           </p>
-          <Link href="/login">
+          <Link href="/subscribe">
             <a>
               <Button size="lg" variant="secondary" className="text-lg h-14 px-8">
-                ابدأ الآن مجاناً
+                اشترك الآن
                 <ArrowRight className="mr-2 w-5 h-5" />
               </Button>
             </a>

@@ -21,6 +21,7 @@ import {
   tapSettingsRouter,
   adminSubscriptionsRouter,
 } from "./routers/subscriptions";
+import { subscriptionSignupRouter } from "./routers/subscription-signup";
 import { notificationsRouter } from "./routers-notifications";
 import { notificationManagementRouter } from "./routers-notification-management";
 import { smartNotificationsRouter } from "./routers-smart-notifications";
@@ -8299,6 +8300,7 @@ export const appRouter = router({
   payment: paymentRouter,
   tapSettings: tapSettingsRouter,
   adminSubscriptions: adminSubscriptionsRouter,
+  subscriptionSignup: subscriptionSignupRouter,
   
   // Discount Coupons
   coupons: router({
