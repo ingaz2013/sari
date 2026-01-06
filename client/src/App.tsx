@@ -136,6 +136,11 @@ import AdminRecommendations from "./pages/admin/AdminRecommendations";
 import RecommendationsAnalytics from "./pages/admin/RecommendationsAnalytics";
 import AdminGoogleOAuth from "./pages/AdminGoogleOAuth";
 import AdminDataSync from "./pages/AdminDataSync";
+import SubscriptionPlansAdmin from "./pages/admin/SubscriptionPlans";
+import SubscriptionAddonsAdmin from "./pages/admin/SubscriptionAddons";
+import TapSettings from "./pages/admin/TapSettings";
+import SubscriptionPlansMerchant from "./pages/merchant/SubscriptionPlans";
+import MySubscription from "./pages/merchant/MySubscription";
 import GlobalSeoSettings from "./pages/admin/GlobalSeoSettings";
 import GoogleOAuthSettings from "./pages/admin/GoogleOAuthSettings";
 import AdminABTestDashboard from "./pages/AdminABTestDashboard";
@@ -635,6 +640,18 @@ function Router() {
           <Usage />
         </DashboardLayout>
       </Route>
+      
+      <Route path="/merchant/subscription/plans">
+        <DashboardLayout>
+          <SubscriptionPlansMerchant />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/subscription">
+        <DashboardLayout>
+          <MySubscription />
+        </DashboardLayout>
+      </Route>
 
       <Route path="/merchant/checkout">
         <DashboardLayout>
@@ -787,6 +804,24 @@ function Router() {
       <Route path="/admin/ab-test-dashboard">
         <DashboardLayout>
           <AdminABTestDashboard />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/subscription-plans">
+        <DashboardLayout>
+          <SubscriptionPlansAdmin />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/subscription-addons">
+        <DashboardLayout>
+          <SubscriptionAddonsAdmin />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/admin/tap-settings">
+        <DashboardLayout>
+          <TapSettings />
         </DashboardLayout>
       </Route>
       

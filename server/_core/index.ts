@@ -22,6 +22,7 @@ import { startAllPolling } from "../polling";
 import { startCronJobs } from "../cronJobs";
 import { startAllSheetsCronJobs } from "../sheetsCronJobs";
 import { initWeeklyReportCron } from "../weeklyReportCron";
+import { startSubscriptionJobs } from "../cron/subscription-jobs";
 import cron from "node-cron";
 
 function isPortAvailable(port: number): Promise<boolean> {
@@ -168,6 +169,9 @@ async function startServer() {
     
     // Initialize Weekly Report cron job (runs every Sunday at 9:00 AM)
     initWeeklyReportCron();
+    
+    // Initialize Subscription Management cron jobs
+    startSubscriptionJobs();
     
     // Initialize Occasion Campaigns cron job (runs daily at 9:00 AM)
     cron.schedule('0 9 * * *', async () => {

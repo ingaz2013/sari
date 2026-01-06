@@ -91,6 +91,7 @@ import { Button } from "./ui/button";
 import { NotificationBell } from "./NotificationBell";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { SubscriptionBadge } from "./SubscriptionBadge";
 import { useTranslation } from 'react-i18next';
 
 // Menu item type with optional group
@@ -554,6 +555,7 @@ function DashboardLayoutContent({
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <SubscriptionBadge />
               <ThemeSwitcher variant="compact" />
               <LanguageSwitcher variant="compact" />
               <NotificationBell />
@@ -572,6 +574,7 @@ function DashboardLayoutContent({
         {!isMobile && (
           <div className="flex border-b h-14 items-center justify-end bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40">
             <div className="flex items-center gap-3">
+              <SubscriptionBadge />
               <ThemeSwitcher variant="compact" />
               <LanguageSwitcher variant="compact" />
               <NotificationBell />
