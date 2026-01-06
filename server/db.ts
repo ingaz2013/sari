@@ -683,6 +683,10 @@ export async function createConversation(conversation: InsertConversation): Prom
   if (!existingConversation) {
     const { checkCustomerLimit } = await import('./helpers/subscriptionGuard');
     await checkCustomerLimit(conversation.merchantId, conversation.customerPhone);
+    
+    // Check and notify if approaching limit (80%)
+    const { checkAndNotifyLimits } = await import('./helpers/notificationHelper');
+    await checkAndNotifyLimits(conversation.merchantId);
   }
 
   const result = await db.insert(conversations).values(conversation);
@@ -9232,4 +9236,63 @@ export async function incrementMerchantCustomerCount(merchantId: number) {
   await db.update(merchants)
     .set({ currentCustomersCount: sql`current_customers_count + 1` })
     .where(eq(merchants.id, merchantId));
+}
+
+// ============================================
+// Notification Records Functions
+// ============================================
+
+/**
+ * Get notification record by key
+ */
+export async function getNotificationByKey(notificationKey: string) {
+  const result = await db
+    .select()
+    .from(schema.notificationRecords)
+    .where(eq(schema.notificationRecords.notificationKey, notificationKey))
+    .limit(1);
+  return result[0] || null;
+}
+
+/**
+ * Create notification record
+ */
+export async function createNotificationRecord(data: {
+  merchantId: number;
+  notificationKey: string;
+  type: string;
+  message: string;
+  sentAt: Date;
+}) {
+  const result = await db.insert(schema.notificationRecords).values({
+    merchantId: data.merchantId,
+    notificationKey: data.notificationKey,
+    type: data.type,
+    message: data.message,
+    sentAt: data.sentAt.toISOString(),
+  });
+  return result[0].insertId;
+}
+
+/**
+ * Get all notification records for a merchant
+ */
+export async function getNotificationRecordsByMerchant(merchantId: number) {
+  return await db
+    .select()
+    .from(schema.notificationRecords)
+    .where(eq(schema.notificationRecords.merchantId, merchantId))
+    .orderBy(desc(schema.notificationRecords.sentAt));
+}
+
+/**
+ * Delete old notification records (cleanup)
+ */
+export async function deleteOldNotificationRecords(daysOld: number = 30) {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - daysOld);
+  
+  await db
+    .delete(schema.notificationRecords)
+    .where(lt(schema.notificationRecords.sentAt, cutoffDate.toISOString()));
 }

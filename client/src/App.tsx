@@ -141,6 +141,7 @@ import SubscriptionAddonsAdmin from "./pages/admin/SubscriptionAddons";
 import TapSettings from "./pages/admin/TapSettings";
 import SubscriptionPlansMerchant from "./pages/merchant/SubscriptionPlans";
 import MySubscription from "./pages/merchant/MySubscription";
+import ComparePlans from "./pages/ComparePlans";
 import GlobalSeoSettings from "./pages/admin/GlobalSeoSettings";
 import GoogleOAuthSettings from "./pages/admin/GoogleOAuthSettings";
 import AdminABTestDashboard from "./pages/AdminABTestDashboard";
@@ -644,6 +645,12 @@ function Router() {
       <Route path="/merchant/subscription/plans">
         <DashboardLayout>
           <SubscriptionPlansMerchant />
+        </DashboardLayout>
+      </Route>
+      
+      <Route path="/merchant/subscription/compare">
+        <DashboardLayout>
+          <ComparePlans />
         </DashboardLayout>
       </Route>
       

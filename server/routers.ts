@@ -1936,6 +1936,12 @@ export const appRouter = router({
 
         // Check if instance already exists
         const existing = await db.getWhatsAppInstanceByInstanceId(input.instanceId);
+        
+        // If creating new instance, check WhatsApp number limit
+        if (!existing) {
+          const { checkWhatsAppNumberLimit } = await import('./helpers/subscriptionGuard');
+          await checkWhatsAppNumberLimit(merchant.id);
+        }
         if (existing && existing.merchantId !== merchant.id) {
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Instance ID already in use' });
         }
@@ -3305,6 +3311,10 @@ export const appRouter = router({
           throw new TRPCError({ code: 'BAD_REQUEST', message: 'Instance ID already exists' });
         }
 
+        // Check WhatsApp number limit
+        const { checkWhatsAppNumberLimit } = await import('./helpers/subscriptionGuard');
+        await checkWhatsAppNumberLimit(input.merchantId);
+
         const instance = await db.createWhatsAppInstance({
           merchantId: input.merchantId,
           instanceId: input.instanceId,
@@ -3722,6 +3732,10 @@ export const appRouter = router({
           if (response.ok && data.stateInstance === 'authorized') {
             // Connection successful - create WhatsApp instance
             if (request.status === 'approved') {
+              // Check WhatsApp number limit before creating instance
+              const { checkWhatsAppNumberLimit } = await import('./helpers/subscriptionGuard');
+              await checkWhatsAppNumberLimit(request.merchantId);
+              
               await db.createWhatsAppInstance({
                 merchantId: request.merchantId,
                 instanceId: request.instanceId,

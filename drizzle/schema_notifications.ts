@@ -111,3 +111,30 @@ export const notificationSettings = mysqlTable("notification_settings", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow().onUpdateNow(),
 });
+
+/**
+ * سجل الإشعارات المرسلة للتجار (لتجنب التكرار)
+ * يستخدم لتتبع الإشعارات التي تم إرسالها بالفعل
+ */
+export const notificationRecords = mysqlTable("notification_records", {
+  id: int("id").primaryKey().autoincrement(),
+  merchantId: int("merchant_id").notNull().references(() => merchants.id, { onDelete: "cascade" }),
+  
+  // مفتاح فريد للإشعار (لتجنب التكرار)
+  notificationKey: varchar("notification_key", { length: 255 }).notNull(),
+  
+  // نوع الإشعار
+  type: varchar("type", { length: 100 }).notNull(),
+  
+  // محتوى الإشعار
+  message: text("message").notNull(),
+  
+  // التوقيت
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+},
+(table) => [
+  index("notification_records_merchant_id_idx").on(table.merchantId),
+  index("notification_records_key_idx").on(table.notificationKey),
+  index("notification_records_type_idx").on(table.type),
+]);

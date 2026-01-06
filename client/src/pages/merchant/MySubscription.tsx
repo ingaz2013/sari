@@ -180,6 +180,13 @@ export default function MySubscription() {
               <TrendingUp className="ml-2 h-4 w-4" />
               ترقية الباقة
             </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setLocation('/merchant/subscription/compare')}
+              className="flex-1"
+            >
+              مقارنة الباقات
+            </Button>
             {subscription.status === 'active' && (
               <Button
                 variant="outline"
