@@ -24,6 +24,34 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Code splitting and optimization
+    rollupOptions: {
+      output: {
+        // Manual chunk splitting for better caching
+        manualChunks: {
+          // React and core libraries
+          'vendor-react': ['react', 'react-dom'],
+          // UI Components
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-tabs', '@radix-ui/react-select', '@radix-ui/react-popover'],
+          // Charts and visualization
+          'vendor-charts': ['recharts'],
+          // Date utilities
+          'vendor-date': ['date-fns'],
+          // Form handling
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+        },
+        // Chunk file naming
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash].[ext]',
+      },
+    },
+    // Reduce chunk size warning threshold
+    chunkSizeWarningLimit: 500,
+    // Enable minification with esbuild (faster than terser)
+    minify: 'esbuild',
+    // Generate source maps for debugging
+    sourcemap: false,
   },
   server: {
     host: true,
