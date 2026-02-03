@@ -3,8 +3,7 @@
  * Configures security headers and CORS
  */
 import helmet from 'helmet';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const cors = require('cors');
+import cors from 'cors';
 import type { Express, Request, Response, NextFunction } from 'express';
 
 /**

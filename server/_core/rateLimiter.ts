@@ -6,15 +6,6 @@ import rateLimit from 'express-rate-limit';
 import type { Request, Response } from 'express';
 
 /**
- * Custom key generator that uses IP + user agent
- * For more accurate rate limiting
- */
-const keyGenerator = (req: Request): string => {
-    const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    return ip;
-};
-
-/**
  * Custom error handler for rate limit exceeded
  */
 const rateLimitHandler = (req: Request, res: Response) => {
@@ -37,7 +28,6 @@ export const authLimiter = rateLimit({
     message: 'Too many authentication attempts. Please try again in 15 minutes.',
     standardHeaders: true, // Return rate limit info in headers
     legacyHeaders: false, // Disable X-RateLimit-* headers
-    keyGenerator,
     handler: rateLimitHandler,
     skip: (req: Request) => {
         // Skip rate limiting for logout (it's not a security risk)
@@ -56,7 +46,6 @@ export const apiLimiter = rateLimit({
     message: 'Too many API requests. Please slow down.',
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator,
     handler: rateLimitHandler,
 });
 
@@ -72,7 +61,6 @@ export const webhookLimiter = rateLimit({
     message: 'Too many webhook requests.',
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator,
 });
 
 /**
@@ -86,7 +74,6 @@ export const strictLimiter = rateLimit({
     message: 'Too many attempts. Please wait before trying again.',
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator,
     handler: rateLimitHandler,
 });
 
@@ -101,7 +88,6 @@ export const aiLimiter = rateLimit({
     message: 'Too many AI requests. Please slow down.',
     standardHeaders: true,
     legacyHeaders: false,
-    keyGenerator,
     handler: rateLimitHandler,
 });
 
