@@ -45,7 +45,21 @@ export default function Login() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        // التحقق من نوع المحتوى قبل محاولة تحويله إلى JSON
+        const contentType = response.headers.get('content-type');
+        let errorData: any = {};
+
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            errorData = await response.json();
+          } catch (parseError) {
+            console.error('🔴 Failed to parse error response as JSON:', parseError);
+          }
+        } else {
+          // الخادم أرسل HTML بدلاً من JSON (مشكلة في الخادم أو proxy)
+          console.error('🔴 Server returned non-JSON response:', contentType);
+        }
+
         // رسائل خطأ أكثر تفصيلاً
         let errorMessage = 'فشل تسجيل الدخول';
         if (response.status === 401) {
@@ -54,10 +68,12 @@ export default function Login() {
           errorMessage = 'الحساب غير موجود. يرجى التحقق من البريد الإلكتروني أو إنشاء حساب جديد.';
         } else if (response.status === 429) {
           errorMessage = 'تم تجاوز عدد محاولات تسجيل الدخول. يرجى المحاولة بعد قليل.';
-        } else if (response.status === 500) {
+        } else if (response.status === 500 || response.status === 502 || response.status === 503 || response.status === 504) {
           errorMessage = 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً أو التواصل مع الدعم الفني.';
         } else if (errorData.error) {
           errorMessage = errorData.error;
+        } else if (errorData.errorAr) {
+          errorMessage = errorData.errorAr;
         }
         throw new Error(errorMessage);
       }
@@ -73,7 +89,7 @@ export default function Login() {
         localStorage.removeItem('sari_remember_email');
         console.log('🟢 Remember me data cleared');
       }
-      
+
       // تأكد من عدم حفظ كلمة المرور أبداً
       localStorage.removeItem('sari_remember_password');
 
@@ -116,92 +132,92 @@ export default function Login() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-blue-50 to-white p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-4 text-center">
-          <div className="flex justify-center">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-              <MessageSquare className="w-8 h-8 text-primary" />
-            </div>
-          </div>
-          <div>
-            <CardTitle className="text-3xl font-bold">ساري</CardTitle>
-            <CardDescription className="text-base mt-2">
-              وكيل المبيعات الذكي على الواتساب
-            </CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">البريد الإلكتروني</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-                dir="ltr"
-                className="text-left"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">كلمة المرور</Label>
-                <a href="/forgot-password" className="text-sm text-primary hover:underline">
-                  نسيت كلمة المرور؟
-                </a>
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-4 text-center">
+            <div className="flex justify-center">
+              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+                <MessageSquare className="w-8 h-8 text-primary" />
               </div>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={isLoading}
-              />
             </div>
-            <div className="flex items-center space-x-2 space-x-reverse">
-              <Checkbox
-                id="remember"
-                checked={rememberMe}
-                onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                disabled={isLoading}
-              />
-              <Label
-                htmlFor="remember"
-                className="text-sm font-normal cursor-pointer"
-              >
-                تذكرني على هذا الجهاز
-              </Label>
+            <div>
+              <CardTitle className="text-3xl font-bold">ساري</CardTitle>
+              <CardDescription className="text-base mt-2">
+                وكيل المبيعات الذكي على الواتساب
+              </CardDescription>
             </div>
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading}
-            >
-              {isLoading && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
               )}
-              تسجيل الدخول
-            </Button>
-          </form>
-          <div className="mt-4 text-center text-sm">
-            <span className="text-muted-foreground">لا تملك حساباً؟ </span>
-            <a href="/register" className="text-primary hover:underline font-medium">
-              سجل الآن
-            </a>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="email">البريد الإلكتروني</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isLoading}
+                  dir="ltr"
+                  className="text-left"
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">كلمة المرور</Label>
+                  <a href="/forgot-password" className="text-sm text-primary hover:underline">
+                    نسيت كلمة المرور؟
+                  </a>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                  disabled={isLoading}
+                />
+                <Label
+                  htmlFor="remember"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  تذكرني على هذا الجهاز
+                </Label>
+              </div>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading}
+              >
+                {isLoading && (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                )}
+                تسجيل الدخول
+              </Button>
+            </form>
+            <div className="mt-4 text-center text-sm">
+              <span className="text-muted-foreground">لا تملك حساباً؟ </span>
+              <a href="/register" className="text-primary hover:underline font-medium">
+                سجل الآن
+              </a>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       <Footer />
     </div>
