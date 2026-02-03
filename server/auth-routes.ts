@@ -18,7 +18,10 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(400).json({
+        error: 'Email and password are required',
+        errorAr: 'البريد الإلكتروني وكلمة المرور مطلوبان'
+      });
     }
 
     console.log('🔵 [AUTH] Login attempt:', email);
@@ -27,24 +30,41 @@ router.post('/login', async (req, res) => {
     let user;
     try {
       user = await db.getUserByEmail(email);
-    } catch (dbError) {
+    } catch (dbError: any) {
       console.error('🔴 [AUTH] Database error:', dbError);
       return res.status(503).json({
         error: 'Database connection error. Please try again later.',
+        errorAr: 'خطأ في الاتصال بقاعدة البيانات. يرجى المحاولة لاحقاً.',
         code: 'DB_CONNECTION_ERROR'
       });
     }
 
-    console.log('🔵 [AUTH] User found:', user?.email);
+    console.log('🔵 [AUTH] User found:', user?.email || 'NOT FOUND');
 
     if (!user || !user.password) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({
+        error: 'Invalid email or password',
+        errorAr: 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+      });
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    let isValidPassword = false;
+    try {
+      isValidPassword = await bcrypt.compare(password, user.password);
+    } catch (bcryptError: any) {
+      console.error('🔴 [AUTH] bcrypt error:', bcryptError);
+      return res.status(500).json({
+        error: 'Password verification failed',
+        errorAr: 'فشل التحقق من كلمة المرور',
+        code: 'BCRYPT_ERROR'
+      });
+    }
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
+      return res.status(401).json({
+        error: 'Invalid email or password',
+        errorAr: 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+      });
     }
 
     // Update last signed in
@@ -56,11 +76,21 @@ router.post('/login', async (req, res) => {
     }
 
     // Create session token using custom auth
-    const sessionToken = await createSessionToken(String(user.id), {
-      name: user.name || '',
-      email: user.email || '',
-      expiresInMs: ONE_YEAR_MS,
-    });
+    let sessionToken;
+    try {
+      sessionToken = await createSessionToken(String(user.id), {
+        name: user.name || '',
+        email: user.email || '',
+        expiresInMs: ONE_YEAR_MS,
+      });
+    } catch (tokenError: any) {
+      console.error('🔴 [AUTH] Token creation error:', tokenError);
+      return res.status(500).json({
+        error: 'Failed to create session',
+        errorAr: 'فشل إنشاء الجلسة',
+        code: 'TOKEN_ERROR'
+      });
+    }
 
     // Set cookie
     const cookieOptions = getSessionCookieOptions(req);
@@ -82,6 +112,8 @@ router.post('/login', async (req, res) => {
     console.error('🔴 [AUTH] Login error:', error);
     return res.status(500).json({
       error: 'Internal server error',
+      errorAr: 'حدث خطأ داخلي في الخادم',
+      code: 'INTERNAL_ERROR',
       message: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
