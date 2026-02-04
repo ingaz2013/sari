@@ -15879,8 +15879,8 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "payment_transactions_subscription_id_merchant_subscriptions_id_fk": {
-          "name": "payment_transactions_subscription_id_merchant_subscriptions_id_fk",
+        "payment_transactions_sub_id_fk": {
+          "name": "payment_transactions_sub_id_fk",
           "tableFrom": "payment_transactions",
           "tableTo": "merchant_subscriptions",
           "columnsFrom": [
